@@ -1,3 +1,6 @@
+_dev/
+.sass-cache/
+
 HELP.md
 .gradle
 build/

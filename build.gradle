@@ -34,6 +34,9 @@ dependencies {
 	// Annotations
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	implementation 'org.jetbrains:annotations:23.0.0'
+	// Parsing
+	implementation 'com.google.code.gson:gson'
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'

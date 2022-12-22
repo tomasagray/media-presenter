@@ -1,0 +1,20 @@
+@import "base";
+@import "videos";
+
+.Page-container {
+  .Page-navigation-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem;
+
+    .Page-navigation-button {
+      padding: 1rem;
+      opacity: .5;
+
+      &:hover {
+        opacity: .9;
+      }
+    }
+  }
+}
