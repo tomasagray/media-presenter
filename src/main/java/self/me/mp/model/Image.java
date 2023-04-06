@@ -1,16 +1,19 @@
 package self.me.mp.model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import java.net.URI;
-import java.util.UUID;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
+
+import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -19,16 +22,15 @@ import org.hibernate.annotations.GenericGenerator;
 @Entity
 public class Image {
 
-  @Id
-  @GeneratedValue(generator = "uuid2")
-  @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Column(columnDefinition = "BINARY(16)")
-  private UUID id;
-
-  private String title;
-  private int height;
-  private int width;
-  private long filesize;
-
-  private URI uri;
+	@OneToMany
+	private final Set<Tag> tags = new HashSet<>();
+	@Id
+	@GeneratedValue(generator = "uuid2")
+	@GenericGenerator(name = "uuid2", strategy = "uuid2")
+	private UUID id;
+	private String title;
+	private int height;
+	private int width;
+	private long filesize;
+	private URI uri;
 }
