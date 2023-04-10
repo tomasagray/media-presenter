@@ -30,14 +30,15 @@ class RecursiveWatcherServiceTest {
 
 
 	private static final Logger logger = LogManager.getLogger(RecursiveWatcherServiceTest.class);
-	private static final Path watchDir = Path.of("/projectdata/mp/test/rws");
 	private static final List<Path> cleanupFiles = new ArrayList<>();
-
 	private final RecursiveWatcherService watcherService;
+	private final Path watchDir;
 
 	@Autowired
 	RecursiveWatcherServiceTest(RecursiveWatcherService watcherService) {
 		this.watcherService = watcherService;
+
+		this.watchDir = Path.of(System.getProperty("watching"));
 	}
 
 	@AfterAll
@@ -57,12 +58,14 @@ class RecursiveWatcherServiceTest {
 	void watch() throws IOException {
 
 		logger.info("Watching directory: {}", watchDir);
-		watcherService.watch(watchDir, (path, kind) ->
-				logger.info("Watched event {} occurred at: {}", kind, path)
+		watcherService.watch(watchDir,
+				file -> logger.info("Found file: {}", file),
+				(path, kind) -> logger.info("Watched event {} occurred at: {}", kind, path)
 		);
 		List<Path> roots = watcherService.getWatchRoots();
 		logger.info("WatchRoots are now: {}", roots);
-		Path testFile = createTestFile(watchDir.resolve("comics/Batman"));
+		Path subDir = watchDir.resolve("xY4gHT3s").resolve("3jKuYT9c");
+		Path testFile = createTestFile(subDir);
 		logger.info("Created file at: {}", testFile);
 	}
 
@@ -85,17 +88,21 @@ class RecursiveWatcherServiceTest {
 	@DisplayName("Ensure ignored paths are actually ignored")
 	void ignore() throws IOException {
 
-		Path ignoreDir = watchDir.resolve("comics").resolve("Scooby Doo");
+		Path ignoreDir = watchDir.resolve("xY4gHT3s").resolve("e45t8Ynm");
 		logger.info("Ignoring: {}", ignoreDir);
 
-		watcherService.watch(watchDir, (path, kind) -> {
-			logger.error("Ignored directory: {} triggered WatchEvent: {}", path, kind);
-			throw new RuntimeException("This should not have been thrown!");
-		});
+		watcherService.watch(watchDir,
+				(path, kind) -> {
+					logger.error("Ignored directory: {} triggered WatchEvent: {}", path, kind);
+					throw new RuntimeException("This should not have been thrown!");
+				});
 		watcherService.ignore(ignoreDir);
 
 		Path testFile = createTestFile(ignoreDir);
 		logger.info("Created test file in ignored directory: {}", testFile);
 
+		// reset for other tests
+		watcherService.unwatch(watchDir);
+		watcherService.unignore(ignoreDir);
 	}
 }

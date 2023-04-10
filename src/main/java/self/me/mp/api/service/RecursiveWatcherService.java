@@ -3,6 +3,7 @@ package self.me.mp.api.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -28,19 +30,28 @@ public class RecursiveWatcherService {
 		this.watchService = FileSystems.getDefault().newWatchService();
 	}
 
-	public void watch(@NotNull Path path, BiConsumer<Path, WatchEvent.Kind<?>> handler)
-			throws IOException {
+	public void watch(
+			@NotNull Path path,
+			@NotNull BiConsumer<Path, WatchEvent.Kind<?>> eventHandler) throws IOException {
+		watch(path, null, eventHandler);
+	}
+
+	public void watch(
+			@NotNull Path path,
+			@Nullable Consumer<Path> onScanFile,
+			@NotNull BiConsumer<Path, WatchEvent.Kind<?>> eventHandler) throws IOException {
 
 		File file = path.toFile();
 		if (!(file.exists()) || !(file.isDirectory())) {
 			throw new IOException("Cannot watch non-existent directory: " + path);
 		}
 		watchRoots.add(path);
-		walkTreeAndSetWatches(path, handler);
+		walkTreeAndSetWatches(path, onScanFile, eventHandler);
 	}
 
 	private synchronized void walkTreeAndSetWatches(
 			@NotNull Path path,
+			@Nullable Consumer<Path> onScanFile,
 			@NotNull BiConsumer<Path, WatchEvent.Kind<?>> handler) {
 
 		try {
@@ -59,6 +70,9 @@ public class RecursiveWatcherService {
 
 						@Override
 						public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+							if (onScanFile != null) {
+								onScanFile.accept(file);
+							}
 							return FileVisitResult.CONTINUE;
 						}
 
@@ -72,8 +86,29 @@ public class RecursiveWatcherService {
 							return FileVisitResult.CONTINUE;
 						}
 					});
-		} catch (IOException e) {
+		} catch (IOException ignore) {
 			// Don't care
+		}
+	}
+
+	public void unwatch(@NotNull Path path) {
+		watchRoots.remove(path);
+		walkTreeAndUnsetWatches(path);
+	}
+
+	private synchronized void walkTreeAndUnsetWatches(@NotNull Path path) {
+		try {
+			Files.walkFileTree(
+					path,
+					new SimpleFileVisitor<>() {
+						@Override
+						public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attr) {
+							unregisterWatch(path);
+							return FileVisitResult.CONTINUE;
+						}
+					}
+			);
+		} catch (IOException ignore) {
 		}
 	}
 
@@ -98,6 +133,10 @@ public class RecursiveWatcherService {
 		}
 		ignorePaths.add(path);
 		unregisterStaleWatches();
+	}
+
+	public void unignore(@NotNull Path path) {
+		ignorePaths.remove(path);
 	}
 
 	@Async("watcher")
