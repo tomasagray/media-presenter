@@ -1,31 +1,13 @@
-/*
- * Copyright (c) 2022.
- *
- * This file is part of Matchday.
- *
- * Matchday is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Matchday is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Matchday.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package self.me.mp.plugin.ffmpeg;
+
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.concurrent.ConcurrentSkipListMap;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
-import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
 
 @Component
 public class FFmpegPlugin {
@@ -110,35 +92,39 @@ public class FFmpegPlugin {
    * @throws IOException I/O problem
    */
   public FFmpegMetadata readFileMetadata(@NotNull final URI uri) throws IOException {
-    return ffprobe.getFileMetadata(uri);
+	  return ffprobe.getFileMetadata(uri);
   }
 
-  public String getTitle() {
-    return pluginProperties.getTitle();
-  }
+	public String getTitle() {
+		return pluginProperties.getTitle();
+	}
 
-  public String getDescription() {
-    return pluginProperties.getDescription();
-  }
+	public String getDescription() {
+		return pluginProperties.getDescription();
+	}
 
-  /**
-   * Determines if there is a task streaming to the given directory
-   *
-   * @param absolutePath The path of the streaming task
-   */
-  private void checkTaskAlreadyExecuting(@NotNull final Path absolutePath) {
+	public String getVersion() throws IOException {
+		return ffmpeg.getVersion();
+	}
 
-    // Check if a task is already working in path
-    FFmpegStreamTask prevTask = streamingTasks.get(absolutePath);
-    if (prevTask != null) {
-      if (!prevTask.isAlive()) {
-        // Kill zombie task & proceed
-        prevTask.kill();
-        streamingTasks.remove(absolutePath);
-      } else {
-        throw new IllegalThreadStateException(
-            "FFmpeg has already started streaming to path: " + absolutePath);
-      }
-    }
+	/**
+	 * Determines if there is a task streaming to the given directory
+	 *
+	 * @param absolutePath The path of the streaming task
+	 */
+	private void checkTaskAlreadyExecuting(@NotNull final Path absolutePath) {
+
+		// Check if a task is already working in path
+		FFmpegStreamTask prevTask = streamingTasks.get(absolutePath);
+		if (prevTask != null) {
+			if (!prevTask.isAlive()) {
+				// Kill zombie task & proceed
+				prevTask.kill();
+				streamingTasks.remove(absolutePath);
+			} else {
+				throw new IllegalThreadStateException(
+						"FFmpeg has already started streaming to path: " + absolutePath);
+			}
+		}
   }
 }

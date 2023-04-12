@@ -37,7 +37,6 @@ class RecursiveWatcherServiceTest {
 	@Autowired
 	RecursiveWatcherServiceTest(RecursiveWatcherService watcherService) {
 		this.watcherService = watcherService;
-
 		this.watchDir = Path.of(System.getProperty("watching"));
 	}
 

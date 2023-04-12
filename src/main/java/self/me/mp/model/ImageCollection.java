@@ -1,16 +1,13 @@
 package self.me.mp.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.List;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,12 +22,20 @@ public class ImageCollection {
 
   @OneToMany(cascade = CascadeType.ALL)
   @ToString.Exclude
-  private List<Image> images;
+  private final List<Image> images;
 
   private String title;
+
+  public ImageCollection() {
+    this.images = new ArrayList<>();
+  }
 
   public ImageCollection(List<Image> images, String title) {
     this.images = images;
     this.title = title;
+  }
+
+  public void addImage(Image image) {
+    this.images.add(image);
   }
 }

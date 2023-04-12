@@ -1,27 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Video Card</title>
+    <meta charset="UTF-8">
+    <title>Video Card</title>
 </head>
 <body>
 <div class="Video-card" data-th-fragment="video-card" data-th-id="${video.id}">
-  <div class="Video-card-title" data-th-text="${video.title}">Title</div>
-  <div data-th-each="thumb : ${video.thumbnails.images}">
-    <img alt="${thumb}.title"
-         data-th-src="${thumb.uri}" src="/img/video_placeholder.png"/>
-  </div>
-  <script data-th-inline="javascript" type="module">
-    import {showVideoPlayer} from "/js/mp.js";
-    // attach event handlers
-    $(() => {
-      let id = [[${video.id}]]
-      let url = [[${video.uri}]]
-      let element = document.getElementById(`${id}`)
-      element.onclick = showVideoPlayer(url)
-    });
-  </script>
-</div>
+    <div class="Video-card-title" data-th-text="${video.title}">Title</div>
+    <!--  <div data-th-each="thumb : ${video.thumbnails.images}">-->
+    <!--    <img alt="${thumb}.title"-->
+    <!--         data-th-src="${thumb.uri}" src="/img/video_placeholder.png"/>-->
+    <!--  </div>-->
+    <script data-th-inline="javascript" type="module">
+        import {showVideoPlayer} from "/js/mp.js";
 
+        const getVideoLink = (links) => links?.find(link => link.rel === 'data')?.href
+        // attach event handlers
+        $(() => {
+            let {id, links} = [[${video}]]
+            let url = getVideoLink(links)
+            let element = document.getElementById(`${id}`)
+            element.onclick = showVideoPlayer(url)
+        });
+    </script>
+</div>
 </body>
 </html>
