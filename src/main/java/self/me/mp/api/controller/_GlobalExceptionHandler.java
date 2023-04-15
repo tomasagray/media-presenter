@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.net.MalformedURLException;
+import java.util.NoSuchElementException;
 
 @ControllerAdvice
 public class _GlobalExceptionHandler {
@@ -16,6 +17,13 @@ public class _GlobalExceptionHandler {
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public String handleNotFound(@NotNull IllegalArgumentException e) {
+		return e.getMessage();
+	}
+
+	@ExceptionHandler(NoSuchElementException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	@ResponseBody
+	public String handleNoElement(@NotNull NoSuchElementException e) {
 		return e.getMessage();
 	}
 

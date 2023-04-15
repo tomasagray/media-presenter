@@ -8,10 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import self.me.mp.api.resource.VideoResource;
 import self.me.mp.api.service.VideoService;
 
@@ -20,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Controller
+@RequestMapping("/videos")
 public class VideoController {
 
 	private final VideoService videoService;
@@ -42,7 +40,7 @@ public class VideoController {
 		}
 	}
 
-	@GetMapping("/videos/latest")
+	@GetMapping("/latest")
 	public String getLatestVideos(
 			@RequestParam(name = "page", defaultValue = "0") int page,
 			@RequestParam(name = "pageSize", defaultValue = "16") int pageSize,
@@ -53,14 +51,14 @@ public class VideoController {
 		return "video_list";
 	}
 
-	@GetMapping(value = "/videos/video/{videoId}")
+	@GetMapping("/video/{videoId}")
 	public VideoResource getVideo(@PathVariable("videoId") UUID videoId) {
 		return videoService.fetchById(videoId)
 				.map(modeller::toModel)
 				.orElseThrow(() -> new IllegalArgumentException("No video with ID: " + videoId));
 	}
 
-	@GetMapping("/videos/video/{videoId}/data")
+	@GetMapping("/video/{videoId}/data")
 	public ResponseEntity<ResourceRegion> getVideoData(
 			@PathVariable("videoId") UUID videoId,
 			@RequestHeader HttpHeaders headers
@@ -95,5 +93,13 @@ public class VideoController {
 
 	private long calculateRange(long contentLength) {
 		return Math.min(1024 * 1024, contentLength);
+	}
+
+	@GetMapping(value = "/video/{videoId}/thumb/{thumbId}", produces = MediaType.IMAGE_JPEG_VALUE)
+	public ResponseEntity<UrlResource> getThumbnail(
+			@PathVariable("videoId") UUID videoId, @PathVariable("thumbId") UUID thumbId) {
+
+		UrlResource thumb = videoService.getVideoThumb(videoId, thumbId);
+		return ResponseEntity.ok(thumb);
 	}
 }

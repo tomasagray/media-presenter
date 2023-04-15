@@ -46,16 +46,25 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 		@Override
 		public @NotNull VideoResource toModel(@NotNull Video entity) {
 			VideoResource model = instantiateModel(entity);
-			model.setId(entity.getId());
+			UUID videoId = entity.getId();
+			model.setId(videoId);
 			model.setTitle(entity.getTitle());
 			model.setTimestamp(entity.getAdded());
 			model.setTags(entity.getTags());
 			model.setMetadata(entity.getMetadata());
 			model.add(
 					linkTo(methodOn(VideoController.class)
-							.getVideoData(entity.getId(), new HttpHeaders()))
+							.getVideoData(videoId, new HttpHeaders()))
 							.withRel("data"));
-			// TODO: add link to thumbs
+
+			// add thumb links
+			entity.getThumbnails()
+					.getImages()
+					.forEach(img -> model.add(
+							linkTo(methodOn(VideoController.class)
+									.getThumbnail(videoId, img.getId()))
+									.withRel("thumbnail")));
+
 			return model;
 		}
 	}

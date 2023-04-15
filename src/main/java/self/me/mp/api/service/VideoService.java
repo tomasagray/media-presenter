@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import self.me.mp.db.VideoRepository;
+import self.me.mp.model.Image;
 import self.me.mp.model.Video;
 import self.me.mp.plugin.ffmpeg.FFmpegPlugin;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
@@ -18,12 +19,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -36,6 +35,7 @@ public class VideoService {
 	private final VideoRepository videoRepository;
 	private final FFmpegPlugin ffmpegPlugin;
 	private final RecursiveWatcherService watcherService;
+	private final ThumbnailService thumbnailService;
 
 	@Value("${videos.location}")
 	private Path videoLocation;
@@ -43,10 +43,12 @@ public class VideoService {
 	public VideoService(
 			VideoRepository videoRepository,
 			FFmpegPlugin ffmpegPlugin,
-			RecursiveWatcherService watcherService) {
+			RecursiveWatcherService watcherService,
+			ThumbnailService thumbnailService) {
 		this.videoRepository = videoRepository;
 		this.ffmpegPlugin = ffmpegPlugin;
 		this.watcherService = watcherService;
+		this.thumbnailService = thumbnailService;
 	}
 
 	public void init() throws IOException {
@@ -64,6 +66,15 @@ public class VideoService {
 		);
 	}
 
+	@NotNull
+	private static URL toUrl(@NotNull URI uri) {
+		try {
+			return uri.toURL();
+		} catch (MalformedURLException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
 	private void scanVideoFile(@NotNull Path file, @NotNull Collection<Path> existing) {
 
 		try {
@@ -72,21 +83,12 @@ public class VideoService {
 				logger.info("Adding new video: {}", name);
 				Video video = new Video(name, file);
 				updateVideoMetadata(video);
-				// TODO: generate video thumbnail here
-				saveVideo(video);
+				saveVideo(video);   // ensure ID set
+				thumbnailService.generateVideoThumbnails(video);
+				saveVideo(video);   // save thumbs
 			}
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
-		}
-	}
-
-	private void handleVideoFileEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
-		if (kind.equals(ENTRY_CREATE)) {
-			logger.info("Adding new video: {}", path);
-		} else if (kind.equals(ENTRY_MODIFY)) {
-			logger.info("Updating video: {}", path);
-		} else if (kind.equals(ENTRY_DELETE)) {
-			logger.info("Deleting Video: {}", path);
 		}
 	}
 
@@ -129,5 +131,26 @@ public class VideoService {
 		final FFmpegMetadata metadata = ffmpegPlugin.readFileMetadata(videoUri);
 		video.setMetadata(metadata);
 		return video;
+	}
+
+	private void handleVideoFileEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
+		if (kind.equals(ENTRY_CREATE)) {
+			logger.info("Adding new video: {}", path);
+			scanVideoFile(path, new ArrayList<>());
+		} else if (kind.equals(ENTRY_MODIFY)) {
+			logger.info("Updating video: {}", path);
+		} else if (kind.equals(ENTRY_DELETE)) {
+			logger.info("Deleting Video: {}", path);
+		}
+	}
+
+	public UrlResource getVideoThumb(@NotNull UUID videoId, @NotNull UUID thumbId) {
+		return fetchById(videoId)
+				.map(Video::getThumbnails)
+				.map(thumbs -> thumbs.getImage(thumbId))
+				.map(Image::getUri)
+				.map(VideoService::toUrl)
+				.map(UrlResource::new)
+				.orElseThrow();
 	}
 }

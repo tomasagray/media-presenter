@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.file.Path;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -107,5 +108,35 @@ public class FFmpeg {
 		final String segments = String.format("\"%s\"", segmentPattern);
 		transcodeArgs.add(segments);
 		return transcodeArgs;
+	}
+
+	public Path createThumbnail(
+			@NotNull Path video,
+			@NotNull Path thumb,
+			@NotNull LocalTime time,
+			int w, int h) throws IOException {
+
+		ArrayList<String> args = marshallThumbArgs(video, thumb, time, w, h);
+		Process process = Runtime.getRuntime().exec(Strings.join(args, ' '));
+		try (InputStreamReader in = new InputStreamReader(process.getErrorStream());
+		     BufferedReader reader = new BufferedReader(in)
+		) {
+			reader.lines().forEach(System.out::println);
+		}
+		return thumb;
+	}
+
+	@NotNull
+	private ArrayList<String> marshallThumbArgs(
+			@NotNull Path video, @NotNull Path thumb, @NotNull LocalTime time, int w, int h) {
+
+		ArrayList<String> args = new ArrayList<>(baseArgs);
+		args.add("-loglevel error");
+		args.add("-ss " + time);
+		args.add("-i " + video);
+		args.add(String.format("-vf scale=%d:%d", w, h));
+		args.add("-vframes 1");
+		args.add(thumb.toString());
+		return args;
 	}
 }

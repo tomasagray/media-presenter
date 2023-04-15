@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
+import self.me.mp.db.converter.FFmpegMetadataConverter;
 import self.me.mp.db.converter.PathConverter;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
 
@@ -28,18 +29,19 @@ public class Video {
 	@GenericGenerator(name = "uuid2", strategy = "uuid2")
 	private UUID id;
 	private final String title;
+	private final Timestamp added = Timestamp.from(Instant.now());
 
 	@OneToMany
 	private final Set<Tag> tags = new HashSet<>();
 
 	@Convert(converter = PathConverter.class)
 	private final Path file;
-	private final Timestamp added = Timestamp.from(Instant.now());
 
 	@OneToOne(cascade = CascadeType.ALL)
-	private final ImageCollection thumbnails = new ImageCollection();
+	private final ImageSet thumbnails = new ImageSet();
 
-	@OneToOne(cascade = CascadeType.ALL)
+	@Convert(converter = FFmpegMetadataConverter.class)
+	@Column(columnDefinition = "LONGTEXT")
 	private FFmpegMetadata metadata;
 
 	public Video() {
