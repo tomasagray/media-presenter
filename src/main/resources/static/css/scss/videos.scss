@@ -5,26 +5,50 @@
   align-items: center;
 
   .Video-card {
-    margin: 1rem;
-    padding: 2rem;
-    border-radius: 15px;
-    border: 1px solid rgba(176, 0, 139, .6);
-    max-width: 16vw;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    margin: .2rem;
+    padding: 1rem;
 
     &:hover {
       border-color: rgba(176, 0, 139, .9);
       cursor: pointer;
     }
 
-    .Video-card-title {
-      font-weight: bold;
-      margin-bottom: 1em;
+    .Video-thumbnail-container {
+      $thumb_h: 180px;
+      $thumb_w: 280px;
+
+      height: $thumb_h;
+      width: $thumb_w;
+
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: .25rem;
+
+      .Video-thumbnail {
+        display: none;
+
+        &.current {
+          display: block;
+        }
+
+        img {
+          height: $thumb_h;
+          width: $thumb_w;
+        }
+      }
     }
 
-    img {
-      max-width: 100%;
+    .Video-card-title {
+      font-weight: bold;
+      margin-bottom: .25em;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .Video-metadata {
+      font-size: small;
+      color: #888;
     }
   }
 }
