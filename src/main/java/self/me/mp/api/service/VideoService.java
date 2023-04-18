@@ -20,6 +20,7 @@ import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.*;
@@ -54,16 +55,20 @@ public class VideoService {
 	public void init() throws IOException {
 		logger.info("Initializing videos in: {}", videoLocation);
 
-		Set<Path> existing =
-				videoRepository.findAll()
-						.stream()
-						.map(Video::getFile)
-						.collect(Collectors.toSet());
+		Set<Path> existing = getExistingVideos();
 		watcherService.watch(
 				videoLocation,
 				file -> scanVideoFile(file, existing),
 				this::handleVideoFileEvent
 		);
+	}
+
+	@NotNull
+	private Set<Path> getExistingVideos() {
+		return videoRepository.findAll()
+				.stream()
+				.map(Video::getFile)
+				.collect(Collectors.toSet());
 	}
 
 	@NotNull
@@ -89,6 +94,36 @@ public class VideoService {
 			}
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
+		}
+	}
+
+	private void handleVideoFileEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
+		if (kind.equals(ENTRY_CREATE)) {
+			if (Files.isDirectory(path)) {
+				watcherService.walkTreeAndSetWatches(
+						path,
+						file -> scanVideoFile(file, getExistingVideos()),
+						this::handleVideoFileEvent
+				);
+			} else {
+				logger.info("Adding new video: {}", path);
+				scanVideoFile(path, new ArrayList<>());
+			}
+		} else if (kind.equals(ENTRY_MODIFY)) {
+			logger.info("Video was modified: {}", path);
+			// TODO: handle modify video
+		} else if (kind.equals(ENTRY_DELETE)) {
+			if (Files.isRegularFile(path)) {
+				logger.info("Deleting Video: {}", path);
+				fetchVideoByPath(path)
+						.ifPresentOrElse(
+								this::deleteVideo,
+								() -> {
+									String msg = "Deleted video not found in DB! " + path;
+									throw new IllegalStateException(msg);
+								}
+						);
+			}
 		}
 	}
 
@@ -118,6 +153,13 @@ public class VideoService {
 		throw new IllegalArgumentException("Video not found: " + videoId);
 	}
 
+	public Optional<Video> fetchVideoByPath(@NotNull Path path) {
+		return videoRepository.findAll()
+				.stream()
+				.filter(video -> video.getFile().equals(path))
+				.findFirst();
+	}
+
 	public Video updateVideo(@NotNull Video video) {
 		return videoRepository.save(video);
 	}
@@ -131,17 +173,6 @@ public class VideoService {
 		final FFmpegMetadata metadata = ffmpegPlugin.readFileMetadata(videoUri);
 		video.setMetadata(metadata);
 		return video;
-	}
-
-	private void handleVideoFileEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
-		if (kind.equals(ENTRY_CREATE)) {
-			logger.info("Adding new video: {}", path);
-			scanVideoFile(path, new ArrayList<>());
-		} else if (kind.equals(ENTRY_MODIFY)) {
-			logger.info("Updating video: {}", path);
-		} else if (kind.equals(ENTRY_DELETE)) {
-			logger.info("Deleting Video: {}", path);
-		}
 	}
 
 	public UrlResource getVideoThumb(@NotNull UUID videoId, @NotNull UUID thumbId) {

@@ -1,15 +1,34 @@
 package self.me.mp.util;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
+
+import java.nio.file.Path;
 
 /**
  * JSON parsing wrapper
  */
 public final class JsonParser {
 
-	private static final Gson gson = new GsonBuilder().create();
+	private static final Gson gson =
+			new GsonBuilder()
+					.registerTypeHierarchyAdapter(
+							Path.class,
+							(JsonDeserializer<Path>)
+									(json, type, context) -> {
+										final String data = json.getAsJsonPrimitive().getAsString();
+										return Path.of(data);
+									})
+					.registerTypeHierarchyAdapter(
+							Path.class,
+							(JsonSerializer<Path>)
+									(path, type, context) -> {
+										if (path == null) {
+											return null;
+										}
+										return new JsonPrimitive(path.toString());
+									})
+					.create();
 
 	public static <T> T fromJson(@NotNull String json, @NotNull Class<T> clazz) {
 		return gson.fromJson(json, clazz);

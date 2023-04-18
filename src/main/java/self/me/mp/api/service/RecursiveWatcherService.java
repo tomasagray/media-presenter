@@ -49,12 +49,13 @@ public class RecursiveWatcherService {
 		walkTreeAndSetWatches(path, onScanFile, eventHandler);
 	}
 
-	private synchronized void walkTreeAndSetWatches(
+	public synchronized void walkTreeAndSetWatches(
 			@NotNull Path path,
 			@Nullable Consumer<Path> onScanFile,
 			@NotNull BiConsumer<Path, WatchEvent.Kind<?>> handler) {
 
 		try {
+			logger.info("Now watching recursively: {}", path);
 			Files.walkFileTree(
 					path,
 					new FileVisitor<>() {
@@ -114,13 +115,13 @@ public class RecursiveWatcherService {
 
 	private synchronized void registerWatch(Path path, BiConsumer<Path, WatchEvent.Kind<?>> handler) {
 
+		logger.info("Now watching: {}", path);
 		Optional<Map.Entry<WatchKey, WatchHandler>> watchOptional = getWatchForPath(path);
 		if (watchOptional.isEmpty()) {
 			try {
 				WatchEvent.Kind<?>[] kinds = {ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY, OVERFLOW};
 				WatchKey watchKey = path.register(watchService, kinds);
 				watches.put(watchKey, new WatchHandler(path, handler));
-				logger.info("Now watching: " + path);
 			} catch (IOException e) {
 				// Don't care!
 			}
@@ -166,7 +167,6 @@ public class RecursiveWatcherService {
 		}
 	}
 
-	@Async
 	public synchronized void unregisterStaleWatches() {
 		List<Path> stalePaths = watches.values()
 				.stream()

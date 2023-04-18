@@ -17,5 +17,13 @@ public class Tag {
 	@GenericGenerator(name = "uuid2", strategy = "uuid2")
 	private UUID id;
 
-	private String name;
+	private final String name;
+
+	public Tag() {
+		this.name = null;
+	}
+
+	public Tag(String name) {
+		this.name = name;
+	}
 }

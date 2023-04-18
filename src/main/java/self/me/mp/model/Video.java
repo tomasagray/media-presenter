@@ -31,7 +31,7 @@ public class Video {
 	private final String title;
 	private final Timestamp added = Timestamp.from(Instant.now());
 
-	@OneToMany
+	@ManyToMany
 	private final Set<Tag> tags = new HashSet<>();
 
 	@Convert(converter = PathConverter.class)
