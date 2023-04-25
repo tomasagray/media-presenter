@@ -31,7 +31,7 @@ public class PictureController {
 		this.modeller = modeller;
 	}
 
-	@GetMapping("/latest")
+	@GetMapping({"", "/", "/latest"})
 	public String getLatestPictures(
 			@RequestParam(name = "page", defaultValue = "0") int page,
 			@RequestParam(name = "size", defaultValue = "16") int size,

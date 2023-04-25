@@ -40,7 +40,7 @@ public class VideoController {
 		}
 	}
 
-	@GetMapping("/latest")
+	@GetMapping({"", "/", "/latest"})
 	public String getLatestVideos(
 			@RequestParam(name = "page", defaultValue = "0") int page,
 			@RequestParam(name = "pageSize", defaultValue = "16") int pageSize,
