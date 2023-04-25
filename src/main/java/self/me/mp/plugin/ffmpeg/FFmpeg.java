@@ -21,6 +21,8 @@ public class FFmpeg {
 	private static final String SEGMENT_PATTERN = "segment_%05d.ts";
 
 	private final List<String> baseArgs;
+
+
 	@Getter
 	@Setter
 	boolean loggingEnabled = true;

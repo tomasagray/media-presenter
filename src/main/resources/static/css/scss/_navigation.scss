@@ -1,0 +1,53 @@
+@import "mixins";
+@import "variables";
+
+
+.Page-container {
+  width: 90%;
+  margin-bottom: 2rem;
+
+  .Page-navigation-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem;
+
+    .Page-navigation-button {
+      padding: 1rem;
+      opacity: .5;
+
+      &:hover {
+        opacity: .9;
+      }
+    }
+  }
+}
+
+.Footer-menu-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: $bg_color;
+  display: flex;
+  justify-content: center;
+
+  .Footer-menu {
+    width: 40%;
+    display: flex;
+    justify-content: space-evenly;
+
+    img {
+      width: 2rem;
+      padding: 1rem;
+      opacity: .65;
+      @include tablet-portrait($tablet_portrait_break) {
+        opacity: .9;
+      }
+
+      &:hover {
+        opacity: .9;
+      }
+    }
+  }
+}

@@ -48,7 +48,7 @@ public class VideoController {
 		final Page<VideoResource> videoPage = videoService.fetchLatest(page, pageSize).map(modeller::toModel);
 		setVideoAttributes(model, videoPage);
 		model.addAttribute("page_title", "Latest Videos");
-		return "video_list";
+		return "video/video_list";
 	}
 
 	@GetMapping("/video/{videoId}")

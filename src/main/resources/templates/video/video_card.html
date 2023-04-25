@@ -7,9 +7,9 @@
 <body>
 <div class="Video-card" data-th-fragment="video-card" data-th-id="${video.id}">
     <div class="Video-thumbnail-container">
-        <div
-                class="Video-thumbnail"
-                data-th-each="link : ${video.links}" th:if="${#strings.equals(link.rel, 'thumbnail')}">
+        <div class="Display-image"
+             data-th-each="link : ${video.links}"
+             th:if="${#strings.equals(link.rel, 'thumbnail')}">
             <img alt="video thumbnail" data-th-alt="${link.rel}" data-th-src="${link.href}"
                  src="/img/video_placeholder.png"
             />
@@ -19,29 +19,19 @@
     <div class="Video-metadata">Tags, metadata, &c. go here</div>
     <script data-th-inline="javascript" type="module">
         import {
-            showVideoPlayer,
             getVideoLink,
-            cycleThumbs,
-            onStartSwipe,
-            onEndSwipe,
+            attachSwipe,
+            showVideoPlayer,
         } from "/js/mp.js";
+
+
         // initialize video card
         $(() => {
             let {id, links} = [[${video}]]
             let url = getVideoLink(links)
             let element = document.getElementById(`${id}`)
-
             // attach event handlers
-            let timer
-            let thumbs = element.querySelectorAll('.Video-thumbnail')
-            element.onclick = showVideoPlayer(url)
-            element.onmouseenter = () => timer = cycleThumbs(thumbs)
-            element.onmouseleave = () => clearInterval(timer)
-            element.ontouchstart = (e) => onStartSwipe(e)
-            element.ontouchend = (e) => onEndSwipe(e, thumbs)
-
-            // show first thumb
-            element.querySelector('.Video-thumbnail').classList.add('current')
+            attachSwipe(element, () => showVideoPlayer(url))
         });
     </script>
 </div>

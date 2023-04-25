@@ -1,9 +1,13 @@
 package self.me.mp.api.controller;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import self.me.mp.api.resource.PictureResource;
 import self.me.mp.api.service.PictureService;
@@ -15,7 +19,7 @@ import java.util.UUID;
 
 import static self.me.mp.api.resource.PictureResource.PictureResourceModeller;
 
-@RestController
+@Controller
 @RequestMapping("pictures")
 public class PictureController {
 
@@ -27,12 +31,33 @@ public class PictureController {
 		this.modeller = modeller;
 	}
 
-	@GetMapping(value = "/latest", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<CollectionModel<PictureResource>> getLatestPictures(
+	@GetMapping("/latest")
+	public String getLatestPictures(
 			@RequestParam(name = "page", defaultValue = "0") int page,
-			@RequestParam(name = "size", defaultValue = "16") int size) {
-		List<Picture> pictures = pictureService.getLatestPictures(page, size).getContent();
-		return ResponseEntity.ok(modeller.toCollectionModel(pictures));
+			@RequestParam(name = "size", defaultValue = "16") int size,
+			@NotNull Model model) {
+
+		Page<Picture> pictures = pictureService.getLatestPictures(page, size);
+		setAttributes(model, pictures);
+		model.addAttribute("page_title", "Latest pictures");
+		return "image/image_list";
+	}
+
+	private void setAttributes(@NotNull Model model, @NotNull Page<Picture> pictures) {
+		List<PictureResource> resources =
+				pictures
+						.get()
+						.map(modeller::toModel)
+						.toList();
+		model.addAttribute("images", resources);
+		model.addAttribute("current_page", pictures.getNumber() + 1);
+		model.addAttribute("total_pages", pictures.getTotalPages());
+		if (pictures.hasNext()) {
+			model.addAttribute("next_page", pictures.nextPageable().getPageNumber());
+		}
+		if (pictures.hasPrevious()) {
+			model.addAttribute("prev_page", pictures.previousPageable().getPageNumber());
+		}
 	}
 
 	@GetMapping(value = "/random")

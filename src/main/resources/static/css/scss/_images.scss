@@ -1,0 +1,76 @@
+@import "variables";
+@import "mixins";
+
+
+.Picture-card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  div > .Picture-card {
+    padding: 1rem;
+    margin: 1rem;
+    @include tablet-portrait($tablet_portrait_break) {
+      margin: 0;
+    }
+
+    &:hover {
+      cursor: pointer;
+
+      .Picture-container {
+        opacity: 1;
+      }
+    }
+
+    .Picture-container {
+      width: 25vw;
+      height: 65vh;
+      display: flex;
+      align-content: center;
+      overflow: hidden;
+      border-radius: 10px;
+      opacity: .9;
+      @include tablet-portrait($tablet_portrait_break) {
+        height: 25vh !important;
+      }
+
+      img {
+        width: 25vw;
+        object-fit: cover;
+      }
+    }
+
+    p {
+      margin: 0.5rem 0 0 0.25rem;
+    }
+  }
+}
+
+.Image-viewer-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: $bg_color;
+  z-index: 100;
+  display: none;
+  overflow: hidden;
+
+  .Image-viewer {
+    min-width: 100%;
+    min-height: 100%;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    @include swipe-image(100vw, 100vh);
+
+    .Image-container {
+      min-width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
+    }
+  }
+}

@@ -1,0 +1,10 @@
+@import "variables";
+
+
+body {
+  background-color: $bg_color;
+  color: whitesmoke;
+  font-family: $default_font;
+  display: flex;
+  justify-content: center;
+}

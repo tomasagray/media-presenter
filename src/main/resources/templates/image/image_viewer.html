@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image viewer</title>
+</head>
+<body>
+<div class="Image-viewer-container" data-th-fragment="image-viewer" id="image-viewer-container">
+    <script data-th-inline="javascript" type="module">
+        import {
+            onHideImageViewer,
+            showPrevImage,
+            showNextImage,
+        } from "/js/mp.js";
+
+        $(() => {
+            // attach event handlers
+            document.getElementById('Close-button').onclick = onHideImageViewer
+            document.addEventListener('keydown', (e) => {
+                let container = document.querySelector('#image-viewer-container')
+                let display = container.style.display
+                if (display && display !== 'none') {
+                    let images = container.querySelectorAll('.Display-image')
+                    if (e.key === 'ArrowLeft') {
+                        showPrevImage(images)
+                    }
+                    if (e.key === 'ArrowRight') {
+                        showNextImage(images)
+                    }
+                }
+            })
+        })
+    </script>
+    <button class="Close-button" id="Close-button">
+        <img alt="Close" src="/img/close-button.svg"/>
+    </button>
+    <div class="Image-viewer" id="image-viewer">
+    </div>
+</div>
+</body>
+</html>

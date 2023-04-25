@@ -1,0 +1,30 @@
+
+.Close-button {
+  position: fixed;
+  top: 3vh;
+  right: 3vw;
+  padding: 1rem;
+  border: none;
+  border-radius: 100%;
+  width: 4rem;
+  height: 4rem;
+  background: rgb(0, 0, 0);
+  background: radial-gradient(circle, rgba(0, 0, 0, .5) 0%, rgba(0, 255, 255, 0) 100%);
+  font-family: monospace;
+  font-size: xx-large;
+  color: whitesmoke;
+  z-index: 200;
+
+  svg {
+    width: 1rem;
+    opacity: .75;
+  }
+
+  &:hover {
+    cursor: pointer;
+
+    svg {
+      opacity: 1;
+    }
+  }
+}

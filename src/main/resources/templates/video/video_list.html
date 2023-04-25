@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head data-th-insert="~{components/header_includes::header-includes}">
+    <title>Videos</title>
+</head>
+<body>
+<div class="Page-container">
+    <div class="Video-card-container">
+        <div data-th-each="video : ${videos}" data-th-insert="~{video/video_card::video-card}">
+        </div>
+    </div>
+    <div data-th-insert="~{components/page_navigation::page-navigation}"></div>
+</div>
+<div data-th-insert="~{video/video_player::video-player}"></div>
+<div data-th-insert="~{components/footer_menu::footer-menu}"></div>
+</body>
+</html>

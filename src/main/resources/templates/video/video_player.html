@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Video Player</title>
+</head>
+<body>
+<div data-th-fragment="video-player" id="Video-player-container">
+    <video autoplay controls id="Video-player" loop>
+    </video>
+    <button class="Close-button" id="Close-button">
+        <img alt="Close" src="/img/close-button.svg"/>
+    </button>
+
+    <script type="module">
+        import {hideVideoPlayer} from "/js/mp.js";
+
+        $(() => {
+            document.getElementById('Close-button').onclick = hideVideoPlayer
+        })
+    </script>
+</div>
+</body>
+</html>

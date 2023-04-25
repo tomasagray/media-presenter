@@ -1,0 +1,20 @@
+<div class="Page-navigation-container" data-th-fragment="page-navigation">
+    <a class="Page-navigation-button"
+       data-th-href="'./latest?page=' + ${prev_page}"
+       data-th-unless="${prev_page == null}"
+       href="./latest">
+        <img alt="More..." src="/img/icon/page_arrow/page_arrow_32.png"
+             style="transform: scaleX(-1)"/>
+    </a>
+    <span>
+        <span data-th-text="${current_page}">current page</span>
+        <span style="font-weight: bolder; color: rgba(180,180,180,.5);"> / </span>
+        <span data-th-text="${total_pages}"># of pages</span>
+   </span>
+    <a class="Page-navigation-button"
+       data-th-href="'./latest?page=' + ${next_page}"
+       data-th-unless="${next_page == null}"
+       href="./latest">
+        <img alt="More..." src="/img/icon/page_arrow/page_arrow_32.png"/>
+    </a>
+</div>

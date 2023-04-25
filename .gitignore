@@ -1,5 +1,6 @@
 _dev/
-.sass-cache/
+.sass-cache**
+*.css.map
 
 HELP.md
 .gradle

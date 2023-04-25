@@ -1,0 +1,50 @@
+@import "mixins";
+
+
+.Video-card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+
+  .Video-card {
+    margin: .2rem;
+    padding: 1rem;
+
+    &:hover {
+      cursor: pointer;
+    }
+
+    .Video-thumbnail-container {
+      @include swipe-image(280px, 180px);
+
+      .Video-card-title {
+        font-weight: bold;
+        margin-bottom: .25em;
+        max-width: 280px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .Video-metadata {
+        font-size: small;
+        color: #888;
+      }
+    }
+  }
+}
+
+#Video-player-container {
+  background-color: black;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+
+  #Video-player {
+    width: 100%;
+    height: 100%;
+  }
+}

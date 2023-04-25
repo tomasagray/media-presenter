@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head data-th-insert="~{components/header_includes::header-includes}">
+    <title data-th-text="${page_title}">Images</title>
+</head>
+<body>
+<div class="Page-container">
+    <div data-th-insert="~{image/image_viewer::image-viewer}"></div>
+    <div class="Picture-card-container">
+        <div data-th-each="image : ${images}" data-th-insert="~{image/image_card::image-card}">
+        </div>
+    </div>
+    <div data-th-insert="~{components/page_navigation::page-navigation}"></div>
+</div>
+<div data-th-insert="~{components/footer_menu::footer-menu}"></div>
+</body>
+</html>

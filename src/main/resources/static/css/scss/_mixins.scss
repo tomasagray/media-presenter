@@ -1,0 +1,29 @@
+@mixin tablet-portrait($max) {
+  @media (max-width: $max - 1) {
+    @content
+  }
+}
+
+@mixin swipe-image($width, $height) {
+  width: $width;
+  height: $height;
+
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: .25rem;
+
+  .Display-image {
+    display: none;
+
+    &.current {
+      display: block;
+    }
+
+    img {
+      height: $height;
+      width: $width;
+    }
+
+    @content;
+  }
+}
