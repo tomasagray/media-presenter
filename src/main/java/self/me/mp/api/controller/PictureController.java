@@ -34,7 +34,7 @@ public class PictureController {
 	@GetMapping({"", "/", "/latest"})
 	public String getLatestPictures(
 			@RequestParam(name = "page", defaultValue = "0") int page,
-			@RequestParam(name = "size", defaultValue = "16") int size,
+			@RequestParam(name = "size", defaultValue = "15") int size,
 			@NotNull Model model) {
 
 		Page<Picture> pictures = pictureService.getLatestPictures(page, size);
@@ -62,7 +62,7 @@ public class PictureController {
 
 	@GetMapping(value = "/random")
 	public ResponseEntity<CollectionModel<PictureResource>> getRandomPictures(
-			@RequestParam(name = "size", defaultValue = "16") int size) {
+			@RequestParam(name = "size", defaultValue = "15") int size) {
 		List<Picture> pictures = pictureService.getRandomPictures(size).getContent();
 		return ResponseEntity.ok(modeller.toCollectionModel(pictures));
 	}

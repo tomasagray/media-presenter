@@ -21,7 +21,6 @@ export const getVideoLink = (links) => links?.find(link => link.rel === 'data')?
 
 export const attachSwipe = (element, onclick) => {
     let images = element.querySelectorAll('.Display-image')
-    console.log('swipe images', images)
     element.onclick = onclick
     let timer
     element.onmouseenter = () => timer = cycleImages(images)

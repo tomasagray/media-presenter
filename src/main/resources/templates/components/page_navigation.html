@@ -1,6 +1,6 @@
 <div class="Page-navigation-container" data-th-fragment="page-navigation">
     <a class="Page-navigation-button"
-       data-th-href="'./latest?page=' + ${prev_page}"
+       data-th-href="'?page=' + ${prev_page}"
        data-th-unless="${prev_page == null}"
        href="./latest">
         <img alt="More..." src="/img/icon/page_arrow/page_arrow_32.png"
@@ -12,7 +12,7 @@
         <span data-th-text="${total_pages}"># of pages</span>
    </span>
     <a class="Page-navigation-button"
-       data-th-href="'./latest?page=' + ${next_page}"
+       data-th-href="'?page=' + ${next_page}"
        data-th-unless="${next_page == null}"
        href="./latest">
         <img alt="More..." src="/img/icon/page_arrow/page_arrow_32.png"/>
