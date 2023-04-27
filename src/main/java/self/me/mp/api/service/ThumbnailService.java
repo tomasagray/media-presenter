@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import self.me.mp.model.Image;
 import self.me.mp.model.Video;
 import self.me.mp.plugin.ffmpeg.FFmpegPlugin;
+import self.me.mp.plugin.ffmpeg.metadata.FFmpegStream;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalTime;
+import java.util.List;
 
 @Service
 public class ThumbnailService {
@@ -39,7 +41,12 @@ public class ThumbnailService {
 		logger.info("Creating thumbnail for Video: {}", video);
 
 		Path thumb = createThumbDir(video);
-		double duration = video.getMetadata().getStreams().get(0).getDuration();
+		List<FFmpegStream> streams = video.getMetadata().getStreams();
+		if (streams == null || streams.size() == 0) {
+			throw new IOException("Video has no streams: " + video);
+		}
+
+		double duration = streams.get(0).getDuration();
 		int sliceFactor = getSliceFactor(duration);
 		double offset = duration * 0.05;
 		double sliceDuration = duration / sliceFactor;

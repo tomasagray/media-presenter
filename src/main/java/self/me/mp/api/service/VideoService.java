@@ -80,20 +80,32 @@ public class VideoService {
 		}
 	}
 
+	private static void renameToSafeFilename(@NotNull Path file, @NotNull String name)
+			throws IOException {
+		String newName = name.replace(" ", "_");
+		logger.info("Renaming file: {} to: {}", file, newName);
+		Files.move(file, file.resolveSibling(newName));
+	}
+
 	private void scanVideoFile(@NotNull Path file, @NotNull Collection<Path> existing) {
 
 		try {
 			if (!existing.contains(file)) {
 				String name = FilenameUtils.getBaseName(file.toString());
+				if (name.contains(" ")) {
+					renameToSafeFilename(file, name);
+					return;     // change will be picked up by watcher
+				}
 				logger.info("Adding new video: {}", name);
-				Video video = new Video(name, file);
+				String correctedName = name.replace("_", " ");
+				Video video = new Video(correctedName, file);
 				updateVideoMetadata(video);
 				saveVideo(video);   // ensure ID set
 				thumbnailService.generateVideoThumbnails(video);
 				saveVideo(video);   // save thumbs
 			}
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+		} catch (Throwable e) {
+			logger.info("Error scanning video: {}", e.getMessage(), e);
 		}
 	}
 
