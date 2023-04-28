@@ -19,7 +19,6 @@ import self.me.mp.model.Tag;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
@@ -81,6 +80,7 @@ public class PictureService {
 					Picture picture = Picture.pictureBuilder()
 							.width(image.getWidth())
 							.height(image.getHeight())
+							.filesize(file.toFile().length())
 							.uri(file.toUri())
 							.title(FilenameUtils.getBaseName(file.toString()))
 							.build();
@@ -105,21 +105,17 @@ public class PictureService {
 		int names = resolved.getNameCount() - 1;    // skip filename
 		for (int i = 0; i < names; i++) {
 			String name = resolved.getName(i).toString();
-			tagService.fetchByName(name)
-					.ifPresentOrElse(
-							tags::add,
-							() -> tags.add(tagService.addNewTag(name))
-					);
+			Tag tag = tagService.getOrCreateTag(name);
+			tags.add(tag);
 		}
 		return tags;
 	}
 
 	private void handleFileEvent(@NotNull Path file, @NotNull WatchEvent.Kind<?> kind) {
 		logger.info("Event: {} happened to picture: {}", kind, file);
-
-		if (kind.equals(ENTRY_CREATE)) {
+		if (ENTRY_CREATE.equals(kind)) {
 			if (Files.isDirectory(file)) {
-				logger.info("It's a dir: {}", file);
+				logger.info("Detected new Picture directory: {}", file);
 				watcherService.walkTreeAndSetWatches(
 						file,
 						path -> scanPicture(path, getExistingPictures()),
@@ -129,10 +125,10 @@ public class PictureService {
 				logger.info("Found new Picture: {}", file);
 				scanPicture(file, new ArrayList<>());
 			}
-		} else if (kind.equals(ENTRY_MODIFY)) {
+		} else if (ENTRY_MODIFY.equals(kind)) {
 			// TODO: handle modify picture
 			logger.info("Picture was modified: {}", file);
-		} else if (kind.equals(ENTRY_DELETE)) {
+		} else if (ENTRY_DELETE.equals(kind)) {
 			logger.info("Deleting Picture at: {}", file);
 			getPictureByPath(file).forEach(pic -> deletePicture(pic.getId()));
 		}
@@ -152,16 +148,7 @@ public class PictureService {
 	}
 
 	public Optional<UrlResource> getPictureData(@NotNull UUID picId) {
-		return getPicture(picId)
-				.map(Image::getUri)
-				.map(uri -> {
-					try {
-						return uri.toURL();
-					} catch (MalformedURLException ignore) {
-						return null;
-					}
-				})
-				.map(UrlResource::new);
+		return getPicture(picId).map(img -> UrlResource.from(img.getUri()));
 	}
 
 	public List<Picture> getPictureByPath(@NotNull Path path) {

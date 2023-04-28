@@ -15,6 +15,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 @Builder
 @AllArgsConstructor
 @Entity
@@ -27,7 +28,7 @@ public class Image {
 	private String title;
 	private final Timestamp added = Timestamp.from(Instant.now());
 
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)
 	private final Set<Tag> tags = new HashSet<>();
 
 	private int height;

@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import self.me.mp.api.service.ComicBookService;
 import self.me.mp.api.service.PictureService;
 import self.me.mp.api.service.RecursiveWatcherService;
 import self.me.mp.api.service.VideoService;
@@ -20,14 +21,17 @@ public class StartWatchingFileSystem implements CommandLineRunner {
 	private final RecursiveWatcherService watcherService;
 	private final VideoService videoService;
 	private final PictureService pictureService;
+	private final ComicBookService comicService;
 
 	public StartWatchingFileSystem(
 			RecursiveWatcherService watcherService,
 			VideoService videoService,
-			PictureService pictureService) {
+			PictureService pictureService,
+			ComicBookService comicService) {
 		this.watcherService = watcherService;
 		this.videoService = videoService;
 		this.pictureService = pictureService;
+		this.comicService = comicService;
 	}
 
 	@Override
@@ -39,5 +43,6 @@ public class StartWatchingFileSystem implements CommandLineRunner {
 		// perform initial file scans...
 		videoService.init();
 		pictureService.init();
+		comicService.init();
 	}
 }

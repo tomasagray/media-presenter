@@ -7,24 +7,25 @@
 <body>
 <div class="Picture-card" data-th-fragment="image-card">
     <script data-th-inline="javascript" type="module">
-        import {onShowImageViewer} from "/js/mp.js";
+        import {
+            onShowImageViewer,
+            getSiblingImages,
+            hasPages,
+            getPageImages,
+        } from "/js/mp.js";
 
         $(() => {
-            let cards = document.getElementsByClassName('Picture-card')
-            let images = []
-            for (let i = 0; i < cards.length; i++) {
-                images[i] = cards[i].querySelector('img')
-            }
-            let {id} = [[${image}]]
-            document.getElementById(id).onclick = () => onShowImageViewer(images)
+            let image = [[${image}]]
+            let images = hasPages(image) ? getPageImages(image) : getSiblingImages()
+            document.getElementById(image.id).onclick = () => onShowImageViewer(images)
         })
     </script>
     <div class="Display-image Picture-container" data-th-id="${image.id}">
         <img
-                alt="Picture"
-                data-th-src="${image.links.getLink('data').get().href}"
                 src=""
+                alt="Picture"
                 th:if="${image.links.getLink('data').isPresent()}"
+                data-th-src="${image.links.getLink('data').get().href}"
         />
     </div>
     <p data-th-text="${image.title}">Image title</p>

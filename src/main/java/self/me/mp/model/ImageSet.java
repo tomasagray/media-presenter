@@ -1,14 +1,12 @@
 package self.me.mp.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -16,19 +14,23 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
 @Entity
 public class ImageSet {
 
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@ToString.Exclude
 	private final Set<Image> images;
-	private final Timestamp added = Timestamp.from(Instant.now());
-	@ManyToMany
-	private final Set<Tag> tags = new HashSet<>();
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "image_set_generator")
-	private Long id;
+	@GeneratedValue(generator = "uuid2")
+	@GenericGenerator(name = "uuid2", strategy = "uuid2")
+	private UUID id;
+	@ManyToMany
+	private Set<Tag> tags;
+	private final Timestamp added = Timestamp.from(Instant.now());
 	private String title;
 
 	public ImageSet() {

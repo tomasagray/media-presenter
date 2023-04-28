@@ -1,10 +1,7 @@
 package self.me.mp.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import self.me.mp.db.converter.FFmpegMetadataConverter;
 import self.me.mp.db.converter.PathConverter;
@@ -20,6 +17,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 @Entity
 public class Video {

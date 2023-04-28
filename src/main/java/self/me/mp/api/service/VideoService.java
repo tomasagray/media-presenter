@@ -54,7 +54,6 @@ public class VideoService {
 
 	public void init() throws IOException {
 		logger.info("Initializing videos in: {}", videoLocation);
-
 		Set<Path> existing = getExistingVideos();
 		watcherService.watch(
 				videoLocation,
@@ -80,8 +79,9 @@ public class VideoService {
 		}
 	}
 
-	private static void renameToSafeFilename(@NotNull Path file, @NotNull String name)
+	private static void renameToSafeFilename(@NotNull Path file)
 			throws IOException {
+		String name = FilenameUtils.getBaseName(file.toString());
 		String newName = name.replace(" ", "_");
 		logger.info("Renaming file: {} to: {}", file, newName);
 		Files.move(file, file.resolveSibling(newName));
@@ -93,10 +93,10 @@ public class VideoService {
 			if (!existing.contains(file)) {
 				String name = FilenameUtils.getBaseName(file.toString());
 				if (name.contains(" ")) {
-					renameToSafeFilename(file, name);
+					renameToSafeFilename(file);
 					return;     // change will be picked up by watcher
 				}
-				logger.info("Adding new video: {}", name);
+				logger.info("Adding new video: {}", file);
 				String correctedName = name.replace("_", " ");
 				Video video = new Video(correctedName, file);
 				updateVideoMetadata(video);
@@ -110,7 +110,7 @@ public class VideoService {
 	}
 
 	private void handleVideoFileEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
-		if (kind.equals(ENTRY_CREATE)) {
+		if (ENTRY_CREATE.equals(kind)) {
 			if (Files.isDirectory(path)) {
 				watcherService.walkTreeAndSetWatches(
 						path,
@@ -121,10 +121,10 @@ public class VideoService {
 				logger.info("Adding new video: {}", path);
 				scanVideoFile(path, new ArrayList<>());
 			}
-		} else if (kind.equals(ENTRY_MODIFY)) {
+		} else if (ENTRY_MODIFY.equals(kind)) {
 			logger.info("Video was modified: {}", path);
 			// TODO: handle modify video
-		} else if (kind.equals(ENTRY_DELETE)) {
+		} else if (ENTRY_DELETE.equals(kind)) {
 			if (Files.isRegularFile(path)) {
 				logger.info("Deleting Video: {}", path);
 				fetchVideoByPath(path)

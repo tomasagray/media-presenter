@@ -104,3 +104,29 @@ export const onHideImageViewer = () => {
     container.style.display = 'none'
     document.getElementById('image-viewer').innerHTML = ''
 }
+
+export const getSiblingImages = () => {
+    let cards = document.getElementsByClassName('Picture-card')
+    let images = []
+    for (let i = 0; i < cards.length; i++) {
+        images[i] = cards[i].querySelector('img')
+    }
+    return images
+}
+
+export const hasPages = (image) => {
+    let {links} = image
+    let pageLink = links.find(link => link.rel.includes('page_'))
+    return pageLink && pageLink.href !== null
+}
+
+export const getPageImages = (comic) => {
+    return comic.links
+        .filter(link => link.rel.includes('page_'))
+        .map(link => {
+            let img = document.createElement('img')
+            img.src = link.href
+            img.alt = 'Comic page'
+            return img
+        })
+}
