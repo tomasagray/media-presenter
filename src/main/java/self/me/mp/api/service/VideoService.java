@@ -81,7 +81,7 @@ public class VideoService {
 
 	private static void renameToSafeFilename(@NotNull Path file)
 			throws IOException {
-		String name = FilenameUtils.getBaseName(file.toString());
+		String name = file.toString();
 		String newName = name.replace(" ", "_");
 		logger.info("Renaming file: {} to: {}", file, newName);
 		Files.move(file, file.resolveSibling(newName));
@@ -125,17 +125,11 @@ public class VideoService {
 			logger.info("Video was modified: {}", path);
 			// TODO: handle modify video
 		} else if (ENTRY_DELETE.equals(kind)) {
-			if (Files.isRegularFile(path)) {
-				logger.info("Deleting Video: {}", path);
-				fetchVideoByPath(path)
-						.ifPresentOrElse(
-								this::deleteVideo,
-								() -> {
-									String msg = "Deleted video not found in DB! " + path;
-									throw new IllegalStateException(msg);
-								}
-						);
-			}
+			fetchVideoByPath(path)
+					.ifPresentOrElse(
+							this::deleteVideo,
+							() -> logger.info("Deleted video that was not in DB: {}", path)
+					);
 		}
 	}
 
@@ -177,6 +171,7 @@ public class VideoService {
 	}
 
 	public void deleteVideo(@NotNull Video video) {
+		logger.info("Deleting Video: {}", video);
 		videoRepository.delete(video);
 	}
 

@@ -1,7 +1,10 @@
 package self.me.mp.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import self.me.mp.db.converter.FFmpegMetadataConverter;
 import self.me.mp.db.converter.PathConverter;
@@ -16,7 +19,6 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor
 @Entity
@@ -49,5 +51,10 @@ public class Video {
 
 	public void addThumbnail(Image thumbnail) {
 		this.thumbnails.addImage(thumbnail);
+	}
+
+	public String toString() {
+		return String.format("[ID=%s, title=%s, file=%s, added=%s]",
+				getId(), getTitle(), getFile(), getAdded());
 	}
 }
