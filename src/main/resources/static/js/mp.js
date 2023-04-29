@@ -26,8 +26,8 @@ export const attachImageCycleSwipe = (element, onclick) => {
     element.onclick = onclick
     element.ontouchstart = (e) => onStartSwipe(e)
     element.ontouchend = (e) => onEndSwipe(e,
-        () => showPrevImage(images),
-        () => showNextImage(images))
+        () => showNextImage(images),
+        () => showPrevImage(images))
     // show first image
     element.querySelector('.Display-image').classList.add('current')
 }

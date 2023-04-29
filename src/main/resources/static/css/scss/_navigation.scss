@@ -3,7 +3,7 @@
 
 
 .Page-container {
-  width: 90%;
+  width: 100%;
   margin-bottom: 2rem;
 
   .Page-navigation-container {
@@ -41,7 +41,7 @@
       width: 2rem;
       padding: 1rem;
       opacity: .65;
-      @include tablet-portrait($tablet_portrait_break) {
+      @include screen-size($tablet_portrait_max) {
         opacity: .9;
       }
 

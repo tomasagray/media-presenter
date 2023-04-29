@@ -1,4 +1,4 @@
-@mixin tablet-portrait($max) {
+@mixin screen-size($max) {
   @media (max-width: $max - 1) {
     @content
   }

@@ -6,20 +6,31 @@
 </head>
 <body>
 <div class="Footer-menu-container" data-th-fragment="footer-menu">
-    <div class="Footer-menu">
-        <a href="/">
-            <img alt="Home" src="/img/icon/home_selected/home_selected_64.png"/>
+    <div class="Footer-menu" id="footer-menu">
+        <a href="/" id="home-link">
+            <img alt="Home" src="/img/icon/home_unselected/home_unselected_64.png"/>
         </a>
-        <a href="/videos">
-            <img alt="Video" src="/img/icon/video_selected/video_selected_64.png"/>
+        <a href="/videos" id="videos-link">
+            <img alt="Video" src="/img/icon/videos_unselected/videos_unselected_64.png"/>
         </a>
-        <a href="/pictures">
-            <img alt="Pictures" src="/img/icon/photo_selected/photo_selected_64.png"/>
+        <a href="/pictures" id="pictures-link">
+            <img alt="Pictures" src="/img/icon/pictures_unselected/pictures_unselected_64.png"/>
         </a>
-        <a href="/comics">
-            <img alt="Comics" src="/img/icon/comic_selected/comic_selected_64.png"/>
+        <a href="/comics" id="comics-link">
+            <img alt="Comics" src="/img/icon/comics_unselected/comics_unselected_64.png"/>
         </a>
     </div>
+    <script>
+        $(() => {
+            let url = window.location.href
+            let key = url.match(/home|videos|pictures|comics/)[0]
+            if (key) {
+                let selector = `${key}-link`
+                document.getElementById(selector).innerHTML =
+                    `<img alt="${key}" src="/img/icon/${key}_selected/${key}_selected_64.png" />`
+            }
+        })
+    </script>
 </div>
 </body>
 </html>

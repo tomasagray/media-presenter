@@ -1,15 +1,18 @@
 @import "mixins";
-
+@import "variables";
 
 .Video-card-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: center;
 
   .Video-card {
     margin: .2rem;
     padding: 1rem;
+    width: 25vw;
+    @include screen-size($tablet_portrait_max) {
+      width: revert;
+    }
 
     &:hover {
       cursor: pointer;
@@ -17,19 +20,21 @@
 
     .Video-thumbnail-container {
       @include swipe-image(280px, 180px);
+    }
 
-      .Video-card-title {
-        font-weight: bold;
-        margin-bottom: .25em;
-        max-width: 280px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
+    .Video-card-title {
+      font-weight: bold;
+      margin-bottom: .25em;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-      .Video-metadata {
-        font-size: small;
-        color: #888;
-      }
+    .Video-metadata {
+      font-size: small;
+      color: #888;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 }

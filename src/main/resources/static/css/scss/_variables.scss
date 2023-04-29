@@ -1,3 +1,7 @@
 $bg_color: #121212;
 $default_font: 'Mulish', sans-serif;
-$tablet_portrait_break: 900px;
+// breakpoints
+$phone_max: 600px;
+$tablet_portrait_max: 900px;
+$tablet_landscape_max: 1200px;
+$small_desktop_max: 1800px;

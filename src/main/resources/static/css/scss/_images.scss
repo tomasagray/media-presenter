@@ -10,7 +10,7 @@
   div > .Picture-card {
     padding: 1rem;
     margin: 1rem;
-    @include tablet-portrait($tablet_portrait_break) {
+    @include screen-size($tablet_portrait_max) {
       margin: 0;
     }
 
@@ -30,8 +30,11 @@
       overflow: hidden;
       border-radius: 10px;
       opacity: .9;
-      @include tablet-portrait($tablet_portrait_break) {
-        height: 25vh !important;
+      @include screen-size($tablet_landscape_max) {
+        height: 50vh !important;
+      }
+      @include screen-size($tablet_portrait_max) {
+        height: 30vh !important;
       }
 
       img {
