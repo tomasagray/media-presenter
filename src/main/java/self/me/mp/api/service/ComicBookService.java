@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import self.me.mp.db.ComicBookRepository;
 import self.me.mp.db.ImageRepository;
@@ -62,6 +63,7 @@ public class ComicBookService {
 				.build();
 	}
 
+	@Async
 	public void init() throws IOException {
 		logger.info("Scanning Comic Books in: {}", comicsLocation);
 		watcherService.watch(

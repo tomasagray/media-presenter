@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import self.me.mp.db.VideoRepository;
 import self.me.mp.model.Image;
@@ -52,6 +53,7 @@ public class VideoService {
 		this.thumbnailService = thumbnailService;
 	}
 
+	@Async
 	public void init() throws IOException {
 		logger.info("Initializing videos in: {}", videoLocation);
 		Set<Path> existing = getExistingVideos();

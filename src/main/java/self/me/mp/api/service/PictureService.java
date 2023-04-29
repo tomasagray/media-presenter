@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -49,6 +50,7 @@ public class PictureService {
 		this.tagService = tagService;
 	}
 
+	@Async
 	public void init() throws IOException {
 
 		Set<Path> existing = getExistingPictures();

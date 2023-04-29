@@ -11,10 +11,15 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class AsyncConfig {
 
+	private static final int CORE_POOL_SIZE = 5;
+	private static final int QUEUE_CAPACITY = 1000;
+
 	@Bean(name = "watcher")
 	public Executor threadPoolTaskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		// TODO: customize executor here...
+		executor.setCorePoolSize(CORE_POOL_SIZE);
+		executor.setMaxPoolSize(Integer.MAX_VALUE);
+		executor.setQueueCapacity(QUEUE_CAPACITY);
 		return executor;
 	}
 }
