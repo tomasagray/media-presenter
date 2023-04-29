@@ -20,7 +20,8 @@
     <script data-th-inline="javascript" type="module">
         import {
             getVideoLink,
-            attachSwipe,
+            attachImageCycleSwipe,
+            cycleImages,
             showVideoPlayer,
         } from "/js/mp.js";
 
@@ -31,7 +32,11 @@
             let url = getVideoLink(links)
             let element = document.getElementById(`${id}`)
             // attach event handlers
-            attachSwipe(element, () => showVideoPlayer(url))
+            attachImageCycleSwipe(element, () => showVideoPlayer(url))
+            let images = element.querySelectorAll('.Display-image')
+            let timer
+            element.onmouseenter = () => timer = cycleImages(images)
+            element.onmouseleave = () => clearInterval(timer)
         });
     </script>
 </div>

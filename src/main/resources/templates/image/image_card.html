@@ -16,8 +16,15 @@
 
         $(() => {
             let image = [[${image}]]
-            let images = hasPages(image) ? getPageImages(image) : getSiblingImages()
-            document.getElementById(image.id).onclick = () => onShowImageViewer(images)
+            if (hasPages(image)) {
+                let images = getPageImages(image)
+                document.getElementById(image.id).onclick = () => onShowImageViewer(images)
+            } else {
+                let images = getSiblingImages()
+                let selected = image.links.find(link => link.rel === 'data').href
+                document.getElementById(image.id).onclick =
+                    () => onShowImageViewer(images, selected)
+            }
         })
     </script>
     <div class="Display-image Picture-container" data-th-id="${image.id}">

@@ -165,22 +165,17 @@ public class ComicBookService {
 			logger.info("Comic Book image: {} was modified", file);
 		} else if (ENTRY_DELETE.equals(kind)) {
 			logger.info("Comic Book image was deleted: {}", file);
-			handleDeleteImage(file);
+			handleDeletedImage(file);
 		}
 	}
 
-	private void handleDeleteImage(@NotNull Path file) {
+	private void handleDeletedImage(@NotNull Path file) {
 		Optional<Image> imgOpt = imageRepository.findByUri(file.toUri());
 		if (imgOpt.isPresent()) {
 			Image image = imgOpt.get();
 			Optional<ComicBook> comicOpt = comicBookRepo.findComicBookByImagesContaining(image);
 			if (comicOpt.isPresent()) {
 				ComicBook comicBook = comicOpt.get();
-
-
-				isEqual(comicBook, image);
-
-
 				boolean removed = comicBook.getImages().remove(image);
 				if (!removed) {
 					throw new IllegalStateException("Could not remove Image from Comic Book: " + image);
@@ -195,17 +190,6 @@ public class ComicBookService {
 			}
 		} else {
 			throw new IllegalStateException("Detected deletion of unknown Comic Book Image: " + file);
-		}
-	}
-
-	private void isEqual(ComicBook comicBook, Image image) {
-		for (Image img :
-				comicBook.getImages()) {
-			if (img.equals(image)) {
-				logger.info("Found image: {}", img);
-			} else {
-				logger.info("Images do not match: \n{}\n{}", image, img);
-			}
 		}
 	}
 

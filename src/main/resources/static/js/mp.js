@@ -3,7 +3,8 @@ console.log('mp.js was picked up')
 
 const MIN_SWIPE_PX = 10
 
-export const showVideoPlayer = (url) => () => {
+export const showVideoPlayer = (url) => {
+    $('.Footer-menu-container').css('display', 'none')
     $('#Video-player-container').css('display', 'block')
     let player = $('#Video-player')
     player.attr('src', url)
@@ -14,17 +15,15 @@ export const hideVideoPlayer = () => {
     let player = $('#Video-player')
     player.attr('src', null)
     player[0].load()
+    $('.Footer-menu-container').css('display', 'flex')
     $('#Video-player-container').css('display', 'none')
 }
 
 export const getVideoLink = (links) => links?.find(link => link.rel === 'data')?.href
 
-export const attachSwipe = (element, onclick) => {
+export const attachImageCycleSwipe = (element, onclick) => {
     let images = element.querySelectorAll('.Display-image')
     element.onclick = onclick
-    let timer
-    element.onmouseenter = () => timer = cycleImages(images)
-    element.onmouseleave = () => clearInterval(timer)
     element.ontouchstart = (e) => onStartSwipe(e)
     element.ontouchend = (e) => onEndSwipe(e,
         () => showPrevImage(images),
@@ -86,7 +85,7 @@ export const onEndSwipe = (e, onSwipeLeft, onSwipeRight) => {
     }
 }
 
-export const onShowImageViewer = (images) => {
+export const onShowImageViewer = (images, selected) => {
     for (const img of images) {
         let clone = img.cloneNode(true)
         let container = document.createElement('div')
@@ -96,7 +95,22 @@ export const onShowImageViewer = (images) => {
     }
     let container = document.getElementById('image-viewer-container')
     container.style.display = 'block'
-    attachSwipe(container, null)
+    attachImageCycleSwipe(container, null)
+    if (selected) {
+        setSelected(selected)
+    }
+}
+
+const setSelected = (selected) => {
+    let images = document.querySelectorAll('#image-viewer .Display-image')
+    images.forEach(img => {
+        let src = img.querySelector('img').src
+        if (src === selected) {
+            img.classList.add('current')
+        } else {
+            img.classList.remove('current')
+        }
+    })
 }
 
 export const onHideImageViewer = () => {
