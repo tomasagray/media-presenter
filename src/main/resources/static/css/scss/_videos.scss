@@ -21,21 +21,6 @@
     .Video-thumbnail-container {
       @include swipe-image(280px, 180px);
     }
-
-    .Video-card-title {
-      font-weight: bold;
-      margin-bottom: .25em;
-      max-width: 280px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .Video-metadata {
-      font-size: small;
-      color: #888;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
   }
 }
 

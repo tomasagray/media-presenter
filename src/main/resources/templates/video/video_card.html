@@ -15,8 +15,20 @@
             />
         </div>
     </div>
-    <div class="Video-card-title" data-th-text="${video.title}">Title</div>
-    <div class="Video-metadata">Tags, metadata, &c. go here</div>
+    <div class="Card-metadata">
+        <div class="Card-title" data-th-text="${video.title}">Title</div>
+        <div class="Card-tags">
+            <img alt="Tags" src="/img/icon/tags/tags_32.png"/>
+            <span class="Card-tags"
+                  data-th-each="tag : ${video.tags}"
+                  data-th-text="${tag.name}">
+                Tags
+            </span>
+            <span class="Card-tag" th:if="${#lists.isEmpty(video.tags)}">
+                (none)
+            </span>
+        </div>
+    </div>
     <script data-th-inline="javascript" type="module">
         import {
             getVideoLink,

@@ -28,3 +28,30 @@
     }
   }
 }
+
+.Card-metadata {
+  margin: .25rem 0 .15rem .25rem;
+
+  .Card-title {
+    margin-bottom: .25rem;
+    font-weight: bold;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .Card-tags {
+    display: flex;
+    align-items: center;
+    font-size: small;
+    color: #888;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    img {
+      width: 12px;
+      margin-right: .25rem;
+      opacity: .65;
+    }
+  }
+}

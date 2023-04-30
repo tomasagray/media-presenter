@@ -35,7 +35,20 @@
                 data-th-src="${image.links.getLink('data').get().href}"
         />
     </div>
-    <p data-th-text="${image.title}">Image title</p>
+    <div class="Card-metadata">
+        <div class="Card-title" data-th-text="${image.title}">Title</div>
+        <div class="Card-tags">
+            <img alt="Tags" src="/img/icon/tags/tags_32.png"/>
+            <span class="Card-tags"
+                  data-th-each="tag : ${image.tags}"
+                  data-th-text="${tag.name}">
+                Tags
+            </span>
+            <span class="Card-tag" th:if="${#lists.isEmpty(image.tags)}">
+                (none)
+            </span>
+        </div>
+    </div>
 </div>
 </body>
 </html>

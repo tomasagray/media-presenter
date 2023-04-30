@@ -58,9 +58,6 @@ public class ComicBookResource extends RepresentationModel<ComicBookResource> {
 								.getPageData(cover.getId()))
 								.withRel("data"));
 			}
-
-			System.out.printf("Comic: %s has %d pages%n", entity.getId(), entity.getImages().size());
-
 			for (int i = 0; i < images.size(); i++) {
 				model.add(
 						linkTo(methodOn(ComicBookController.class)
