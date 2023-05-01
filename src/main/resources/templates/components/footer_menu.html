@@ -23,12 +23,11 @@
     <script>
         $(() => {
             let url = window.location.href
-            let key = url.match(/home|videos|pictures|comics/)[0]
-            if (key) {
-                let selector = `${key}-link`
-                document.getElementById(selector).innerHTML =
-                    `<img alt="${key}" src="/img/icon/${key}_selected/${key}_selected_64.png" />`
-            }
+            let match = url.match(/home|videos|pictures|comics/)
+            let selector = match ? `${match[0]}-link` : 'home-link'
+            let key = match ? match[0] : 'home'
+            document.getElementById(selector).innerHTML =
+                `<img alt="${key}" src="/img/icon/${key}_selected/${key}_selected_64.png" />`
         })
     </script>
 </div>

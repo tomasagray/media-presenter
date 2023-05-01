@@ -1,3 +1,6 @@
+@import "variables";
+
+
 @mixin screen-size($max) {
   @media (max-width: $max - 1) {
     @content
@@ -26,4 +29,25 @@
 
     @content;
   }
+}
+
+@mixin card-container {
+  display: inline-grid;
+  grid-row-gap: 5%;
+  grid-template: auto / auto auto auto auto;
+  @include screen-size($small_desktop_max) {
+    grid-template: auto / 30% 30% 30%;
+  }
+  @include screen-size($tablet_landscape_max) {
+    grid-template: auto / auto auto auto;
+    grid-row-gap: 2rem;
+  }
+  @include screen-size($tablet_portrait_max) {
+    grid-template: auto / auto auto;
+    grid-row-gap: 2rem;
+  }
+  grid-column-gap: 4rem;
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
 }

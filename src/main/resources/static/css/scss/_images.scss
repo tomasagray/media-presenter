@@ -3,49 +3,50 @@
 
 
 .Picture-card-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  @include card-container;
+  @include screen-size($tablet_portrait_max) {
+    grid-template: auto / auto;
+  }
+}
 
-  div > .Picture-card {
-    padding: 1rem;
-    margin: 1rem;
-    @include screen-size($tablet_portrait_max) {
-      margin: 0;
-    }
+div > .Picture-card {
+  @include screen-size($tablet_portrait_max) {
+    margin: 2rem;
+  }
 
-    &:hover {
-      cursor: pointer;
-
-      .Picture-container {
-        opacity: 1;
-      }
-    }
+  &:hover {
+    cursor: pointer;
 
     .Picture-container {
+      opacity: 1;
+    }
+  }
+
+  .Picture-container {
+    width: 20vw;
+    height: 50vh;
+    display: flex;
+    align-content: center;
+    overflow: hidden;
+    border-radius: 10px;
+    opacity: .9;
+    @include screen-size($tablet_landscape_max) {
       width: 25vw;
-      height: 65vh;
-      display: flex;
-      align-content: center;
-      overflow: hidden;
-      border-radius: 10px;
-      opacity: .9;
-      @include screen-size($tablet_landscape_max) {
-        height: 50vh !important;
-      }
-      @include screen-size($tablet_portrait_max) {
-        height: 30vh !important;
-      }
-
-      img {
-        width: 25vw;
-        object-fit: cover;
-      }
+    }
+    @include screen-size($tablet_portrait_max) {
+      margin: 0;
+      width: 100%;
+      height: auto;
     }
 
-    p {
-      margin: 0.5rem 0 0 0.25rem;
+    img {
+      width: 100%;
+      object-fit: cover;
     }
+  }
+
+  p {
+    margin: 0.5rem 0 0 0.25rem;
   }
 }
 

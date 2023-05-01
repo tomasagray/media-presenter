@@ -6,7 +6,7 @@
         <img alt="More..." src="/img/icon/page_arrow/page_arrow_32.png"
              style="transform: scaleX(-1)"/>
     </a>
-    <span>
+    <span data-th-unless="${current_page == null}">
         <span data-th-text="${current_page}">current page</span>
         <span style="font-weight: bolder; color: rgba(180,180,180,.5);"> / </span>
         <span data-th-text="${total_pages}"># of pages</span>
@@ -17,4 +17,12 @@
        href="./latest">
         <img alt="More..." src="/img/icon/page_arrow/page_arrow_32.png"/>
     </a>
+    <div class="More-link" th:if="${current_page == null}">
+        <a href="#" onclick="history.go(0); window.location.reload()">
+            <span>
+                <img alt="More" src="/img/icon/more/more_16.png"/>
+                find more
+            </span>
+        </a>
+    </div>
 </div>

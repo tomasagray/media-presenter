@@ -5,7 +5,6 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -61,17 +60,20 @@ public class PictureController {
 	}
 
 	@GetMapping(value = "/random")
-	public ResponseEntity<CollectionModel<PictureResource>> getRandomPictures(
-			@RequestParam(name = "size", defaultValue = "15") int size) {
-		List<Picture> pictures = pictureService.getRandomPictures(size).getContent();
-		return ResponseEntity.ok(modeller.toCollectionModel(pictures));
+	public String getRandomPictures(
+			@RequestParam(name = "size", defaultValue = "15") int size,
+			@NotNull Model model) {
+		List<Picture> pictures = pictureService.getRandomPictures(size);
+		CollectionModel<PictureResource> resources = modeller.toCollectionModel(pictures);
+		model.addAttribute("images", resources);
+		model.addAttribute("page_title", "Pictures");
+		return "image/image_list";
 	}
 
 	@GetMapping(value = "/picture/{picId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<PictureResource> getPicture(@PathVariable("picId") UUID picId) {
+	public PictureResource getPicture(@PathVariable("picId") UUID picId) {
 		return pictureService.getPicture(picId)
 				.map(modeller::toModel)
-				.map(ResponseEntity::ok)
 				.orElseThrow(() -> new IllegalArgumentException("Picture not found: " + picId));
 	}
 

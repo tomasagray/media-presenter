@@ -12,6 +12,7 @@ export const showVideoPlayer = (url) => {
 }
 
 export const hideVideoPlayer = () => {
+    console.log('hiding')
     let player = $('#Video-player')
     player.attr('src', null)
     player[0].load()

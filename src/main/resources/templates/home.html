@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head data-th-insert="~{components/header_includes::header-includes}">
+    <title data-th-text="${page_title}">Home</title>
+</head>
+<body>
+<div class="Page-container">
+    <h1>Videos</h1>
+    <div class="Video-card-container">
+        <div class="Video-card"
+             data-th-each="video : ${videos.getContent()}"
+             data-th-insert="~{video/video_card}">
+        </div>
+    </div>
+    <div class="More-link">
+        <a href="/videos/random">
+            <span>
+                <img alt="More" src="/img/icon/more/more_16.png"/>
+                find more
+            </span>
+        </a>
+    </div>
+    <h1>Pictures</h1>
+    <div class="Picture-card-container">
+        <div class="Picture-card"
+             data-th-each="image : ${pictures.getContent()}"
+             data-th-insert="~{image/image_card}">
+        </div>
+    </div>
+    <div class="More-link">
+        <a href="/pictures/random">
+            <span>
+                <img alt="More" src="/img/icon/more/more_16.png"/>
+                find more
+            </span>
+        </a>
+    </div>
+    <h1>Comic Books</h1>
+    <div class="Picture-card-container">
+        <div class="Picture-card"
+             data-th-each="image : ${comics.getContent()}"
+             data-th-insert="~{image/image_card}">
+        </div>
+    </div>
+    <div class="More-link">
+        <a href="/comics/random">
+            <span>
+                <img alt="More" src="/img/icon/more/more_16.png"/>
+                find more
+            </span>
+        </a>
+    </div>
+    <div style="width: 100%; height: 2rem;">%nbsp;</div>
+</div>
+<div data-th-insert="~{image/image_viewer::image-viewer}"></div>
+<div data-th-insert="~{video/video_player::video-player}"></div>
+<div data-th-insert="~{components/footer_menu::footer-menu}"></div>
+</body>
+</html>

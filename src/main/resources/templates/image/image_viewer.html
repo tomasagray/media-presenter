@@ -15,7 +15,7 @@
 
         $(() => {
             // attach event handlers
-            document.getElementById('Close-button').onclick = onHideImageViewer
+            document.getElementById('Image-viewer-close-button').onclick = onHideImageViewer
             document.addEventListener('keydown', (e) => {
                 let container = document.querySelector('#image-viewer-container')
                 let display = container.style.display
@@ -31,7 +31,7 @@
             })
         })
     </script>
-    <button class="Close-button" id="Close-button">
+    <button class="Close-button" id="Image-viewer-close-button">
         <img alt="Close" src="/img/close-button.svg"/>
     </button>
     <div class="Image-viewer" id="image-viewer">

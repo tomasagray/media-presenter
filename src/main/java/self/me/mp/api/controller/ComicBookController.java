@@ -3,6 +3,7 @@ package self.me.mp.api.controller;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -54,8 +55,40 @@ public class ComicBookController {
 		}
 	}
 
+	@GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
+	public CollectionModel<ComicBookResource> getAllComics() {
+		List<ComicBook> comics = comicBookService.getAllComics();
+		return modeller.toCollectionModel(comics);
+	}
+
+	@GetMapping(value = "/all/paged", produces = MediaType.APPLICATION_JSON_VALUE)
+	public CollectionModel<ComicBookResource> getAllComicsPaged(
+			@RequestParam(name = "page", defaultValue = "0") int page,
+			@RequestParam(name = "size", defaultValue = "15") int size) {
+		Page<ComicBook> comics = comicBookService.getAllComics(page, size);
+		return modeller.toCollectionModel(comics);
+	}
+
+	@GetMapping(value = "/random", produces = MediaType.APPLICATION_JSON_VALUE)
+	public String getRandomComics(
+			@RequestParam(name = "count", defaultValue = "15") int count,
+			@NotNull Model model) {
+		List<ComicBook> comics = comicBookService.getRandomComics(count);
+		CollectionModel<ComicBookResource> resources = modeller.toCollectionModel(comics);
+		model.addAttribute("images", resources);
+		model.addAttribute("page_title", "Comic Books");
+		return "image/image_list";
+	}
+
+	@GetMapping(value = "/comic/{comicId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ComicBookResource getComic(@PathVariable("comicId") UUID comicId) {
+		return comicBookService.getComicBook(comicId)
+				.map(modeller::toModel)
+				.orElseThrow(() -> new IllegalArgumentException("No Comic Book with ID: " + comicId));
+	}
+
 	@GetMapping(
-			value = "/page/{pageId}/data",
+			value = "/comic/page/{pageId}/data",
 			produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
 	@ResponseBody
 	public UrlResource getPageData(@PathVariable("pageId") UUID pageId) {

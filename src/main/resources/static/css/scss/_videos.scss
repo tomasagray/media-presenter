@@ -2,16 +2,15 @@
 @import "variables";
 
 .Video-card-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  @include card-container;
 
   .Video-card {
-    margin: .2rem;
-    padding: 1rem;
-    width: 25vw;
+    width: 20vw;
+    @include screen-size($small_desktop_max) {
+      width: 25vw;
+    }
     @include screen-size($tablet_portrait_max) {
-      width: revert;
+      width: 40vw;
     }
 
     &:hover {
@@ -19,7 +18,7 @@
     }
 
     .Video-thumbnail-container {
-      @include swipe-image(280px, 180px);
+      @include swipe-image(100%, unset);
     }
   }
 }

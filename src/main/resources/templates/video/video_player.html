@@ -8,7 +8,7 @@
 <div data-th-fragment="video-player" id="Video-player-container">
     <video autoplay controls id="Video-player" loop>
     </video>
-    <button class="Close-button" id="Close-button">
+    <button class="Close-button" id="Video-player-close-button">
         <img alt="Close" src="/img/close-button.svg"/>
     </button>
 
@@ -16,7 +16,7 @@
         import {hideVideoPlayer} from "/js/mp.js";
 
         $(() => {
-            document.getElementById('Close-button').onclick = hideVideoPlayer
+            document.getElementById('Video-player-close-button').onclick = hideVideoPlayer
         })
     </script>
 </div>

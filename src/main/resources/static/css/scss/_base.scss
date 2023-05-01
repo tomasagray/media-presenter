@@ -8,3 +8,14 @@ body {
   display: flex;
   justify-content: center;
 }
+
+a {
+  color: whitesmoke;
+  opacity: .75;
+  text-decoration: none;
+
+  &:hover {
+    opacity: 1;
+    text-decoration: underline;
+  }
+}

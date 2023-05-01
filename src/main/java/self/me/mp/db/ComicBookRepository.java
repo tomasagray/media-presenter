@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import self.me.mp.model.ComicBook;
 import self.me.mp.model.Image;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,6 +18,8 @@ public interface ComicBookRepository extends JpaRepository<ComicBook, UUID> {
 	@Query("SELECT cb FROM ComicBook cb ORDER BY cb.added")
 	Page<ComicBook> findLatest(Pageable request);
 
-	//	@Query("SELECT cb FROM ComicBook cb WHERE :image cb.images")
 	Optional<ComicBook> findComicBookByImagesContaining(Image image);
+
+	@Query("SELECT cb FROM ComicBook cb ORDER BY rand()")
+	List<ComicBook> findRandomComics(Pageable request);
 }

@@ -140,9 +140,8 @@ public class PictureService {
 		return pictureRepo.findLatest(PageRequest.of(page, pageSize));
 	}
 
-	public Page<Picture> getRandomPictures(int count) {
-		PageRequest request = PageRequest.ofSize(count);
-		return pictureRepo.findRandom(request);
+	public List<Picture> getRandomPictures(int count) {
+		return pictureRepo.findRandom(PageRequest.ofSize(count));
 	}
 
 	public Optional<Picture> getPicture(@NotNull UUID picId) {

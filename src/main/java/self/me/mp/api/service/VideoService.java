@@ -127,7 +127,7 @@ public class VideoService {
 			logger.info("Video was modified: {}", path);
 			// TODO: handle modify video
 		} else if (ENTRY_DELETE.equals(kind)) {
-			fetchVideoByPath(path)
+			getVideoByPath(path)
 					.ifPresentOrElse(
 							this::deleteVideo,
 							() -> logger.info("Deleted video that was not in DB: {}", path)
@@ -139,21 +139,25 @@ public class VideoService {
 		return videoRepository.save(video);
 	}
 
-	public Page<Video> fetchAll(int page, int pageSize) {
+	public Page<Video> getAll(int page, int pageSize) {
 		return videoRepository.findAll(PageRequest.of(page, pageSize));
 	}
 
-	public Page<Video> fetchLatest(int page, int pageSize) {
+	public Page<Video> getLatest(int page, int pageSize) {
 		return videoRepository.findAllByOrderByAddedDesc(PageRequest.of(page, pageSize));
 	}
 
-	public Optional<Video> fetchById(@NotNull UUID videoId) {
+	public List<Video> getRandom(int count) {
+		return videoRepository.findRandom(PageRequest.ofSize(count));
+	}
+
+	public Optional<Video> getById(@NotNull UUID videoId) {
 		return videoRepository.findById(videoId);
 	}
 
 	public UrlResource getVideoData(@NotNull UUID videoId) throws MalformedURLException {
 		logger.info("Reading video data for: {}", videoId);
-		Optional<Video> videoOptional = fetchById(videoId);
+		Optional<Video> videoOptional = getById(videoId);
 		if (videoOptional.isPresent()) {
 			Video video = videoOptional.get();
 			return new UrlResource(video.getFile().toUri());
@@ -161,15 +165,11 @@ public class VideoService {
 		throw new IllegalArgumentException("Video not found: " + videoId);
 	}
 
-	public Optional<Video> fetchVideoByPath(@NotNull Path path) {
+	public Optional<Video> getVideoByPath(@NotNull Path path) {
 		return videoRepository.findAll()
 				.stream()
 				.filter(video -> video.getFile().equals(path))
 				.findFirst();
-	}
-
-	public Video updateVideo(@NotNull Video video) {
-		return videoRepository.save(video);
 	}
 
 	public void deleteVideo(@NotNull Video video) {
@@ -185,7 +185,7 @@ public class VideoService {
 	}
 
 	public UrlResource getVideoThumb(@NotNull UUID videoId, @NotNull UUID thumbId) {
-		return fetchById(videoId)
+		return getById(videoId)
 				.map(Video::getThumbnails)
 				.map(thumbs -> thumbs.getImage(thumbId))
 				.map(Image::getUri)

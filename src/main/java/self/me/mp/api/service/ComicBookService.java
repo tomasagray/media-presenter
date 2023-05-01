@@ -207,6 +207,10 @@ public class ComicBookService {
 		return comicBookRepo.findLatest(PageRequest.of(page, size));
 	}
 
+	public List<ComicBook> getRandomComics(int count) {
+		return comicBookRepo.findRandomComics(PageRequest.ofSize(count));
+	}
+
 	public Optional<ComicBook> getComicBook(UUID bookId) {
 		return comicBookRepo.findById(bookId);
 	}

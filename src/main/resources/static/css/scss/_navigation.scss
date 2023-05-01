@@ -3,12 +3,15 @@
 
 
 .Page-container {
-  width: 100%;
-  margin-bottom: 2rem;
+  width: 90%;
+  @include screen-size($tablet_landscape_max) {
+    width: 100%;
+  }
+  padding-bottom: 2rem;
 
   .Page-navigation-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     padding: 2rem;
 
@@ -47,6 +50,28 @@
 
       &:hover {
         opacity: .9;
+      }
+    }
+  }
+}
+
+.More-link {
+  margin: 3rem;
+  font-size: large;
+  text-align: center;
+
+  a {
+    padding: 1rem 2rem;
+    border: 1px solid whitesmoke;
+    display: inline-flex;
+
+    span {
+      display: flex;
+      align-items: center;
+
+      img {
+        width: 16px;
+        margin-right: 1rem;
       }
     }
   }
