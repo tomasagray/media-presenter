@@ -19,8 +19,49 @@
         <a href="/comics" id="comics-link">
             <img alt="Comics" src="/img/icon/comics_unselected/comics_unselected_64.png"/>
         </a>
+        <button class="Footer-menu-button" onclick="onShowSearchModal()">
+            <img alt="Search" src="/img/icon/search/search_64.png"/>
+        </button>
+    </div>
+    <div class="Search-modal-container" id="search-modal-container">
+        <div class="Search-modal">
+            <div class="Search-form-container" id="search-modal">
+                <form action="/search/all" class="Search-form" method="GET">
+                    <label for="search-form"></label>
+                    <input id="search-form" name="q" placeholder="Search..." type="search"/>
+                    <button type="submit">
+                        <img alt="Search" src="/img/icon/search/search_64.png"/>
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
     <script>
+        let listener = null
+        const onShowSearchModal = () => {
+            console.log('show search modal here')
+            $('#search-modal-container').css('display', 'block')
+            console.log('modal displayed')
+            setTimeout(() => {  // prevent race condition
+                onClickOutside('#search-modal')
+                document.addEventListener('click', listener)
+            }, 50)
+        }
+
+        const onHideSearchModal = () => {
+            $('#search-modal-container').css('display', 'none')
+            document.removeEventListener('click', listener)
+        }
+
+        const onClickOutside = (selector) => {
+            listener = (e) => {
+                const closest = e.target.closest(selector)
+                if (closest === null && $(selector).is(':visible')) {
+                    onHideSearchModal()
+                }
+            }
+        }
+
         $(() => {
             let url = window.location.href
             let match = url.match(/home|videos|pictures|comics/)
@@ -28,6 +69,11 @@
             let key = match ? match[0] : 'home'
             document.getElementById(selector).innerHTML =
                 `<img alt="${key}" src="/img/icon/${key}_selected/${key}_selected_64.png" />`
+            $(document).keyup(e => {
+                if (e.key === 'Escape') {
+                    onHideSearchModal()
+                }
+            })
         })
     </script>
 </div>

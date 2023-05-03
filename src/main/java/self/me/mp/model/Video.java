@@ -6,6 +6,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import self.me.mp.db.converter.FFmpegMetadataConverter;
 import self.me.mp.db.converter.PathConverter;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
@@ -22,16 +27,21 @@ import java.util.UUID;
 @EqualsAndHashCode
 @RequiredArgsConstructor
 @Entity
+@Indexed
 public class Video {
 
 	@Id
 	@GeneratedValue(generator = "uuid2")
 	@GenericGenerator(name = "uuid2", strategy = "uuid2")
 	private UUID id;
+
+	@FullTextField
 	private final String title;
 	private final Timestamp added = Timestamp.from(Instant.now());
 
 	@ManyToMany
+	@IndexedEmbedded
+	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private final Set<Tag> tags = new HashSet<>();
 
 	@Convert(converter = PathConverter.class)

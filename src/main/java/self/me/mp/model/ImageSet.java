@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -19,19 +24,26 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @Entity
+@Indexed
 public class ImageSet {
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@ToString.Exclude
-	private final Set<Image> images;
 	@Id
 	@GeneratedValue(generator = "uuid2")
 	@GenericGenerator(name = "uuid2", strategy = "uuid2")
 	private UUID id;
-	@ManyToMany
+
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@ToString.Exclude
+	private final Set<Image> images;
+
+	@FullTextField
+	private String title;
+
+	@ManyToMany(targetEntity = Tag.class)
+	@IndexedEmbedded
+	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private Set<Tag> tags;
 	private final Timestamp added = Timestamp.from(Instant.now());
-	private String title;
 
 	public ImageSet() {
 		this.images = new LinkedHashSet<>();

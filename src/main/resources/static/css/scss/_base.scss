@@ -19,3 +19,12 @@ a {
     text-decoration: underline;
   }
 }
+
+button {
+  background: none;
+  border: none;
+
+  &:hover {
+    cursor: pointer;
+  }
+}

@@ -5,19 +5,22 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.util.UUID;
 
-@Entity
 @Data
+@Entity
+@Indexed
 public class Tag {
 
+	@FullTextField
+	private final String name;
 	@Id
 	@GeneratedValue(generator = "uuid2")
 	@GenericGenerator(name = "uuid2", strategy = "uuid2")
-	private UUID id;
-
-	private final String name;
+	private UUID tagId;
 
 	public Tag() {
 		this.name = null;
