@@ -52,7 +52,6 @@
         opacity: .9;
       }
     }
-
   }
 }
 
@@ -96,6 +95,7 @@
       background-color: #333;
       padding: 2rem;
       border-radius: 10px;
+      box-shadow: 3px 6px 10px rgba(0, 0, 0, .6);
 
       .Search-form {
         display: flex;
@@ -113,6 +113,8 @@
 
         button[type=submit] {
           display: flex;
+          justify-content: center;
+          align-items: center;
           background-color: rgba(180, 180, 180, .3);
           margin-left: 1.5rem;
           border-radius: 5px;
@@ -122,7 +124,7 @@
           }
 
           img {
-            width: 16px;
+            width: 24px;
             opacity: .5;
             padding: .25rem .5rem;
           }
