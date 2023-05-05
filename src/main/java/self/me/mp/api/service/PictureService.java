@@ -16,6 +16,7 @@ import self.me.mp.db.PictureRepository;
 import self.me.mp.model.Image;
 import self.me.mp.model.Picture;
 import self.me.mp.model.Tag;
+import self.me.mp.model.UserPreferences;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -37,6 +38,7 @@ public class PictureService {
 	private final PictureRepository pictureRepo;
 	private final RecursiveWatcherService watcherService;
 	private final TagService tagService;
+	private final UserService userService;
 
 	@Value("${pictures.location}")
 	private Path pictureLocation;
@@ -44,10 +46,11 @@ public class PictureService {
 	public PictureService(
 			PictureRepository pictureRepo,
 			RecursiveWatcherService watcherService,
-			TagService tagService) {
+			TagService tagService, UserService userService) {
 		this.pictureRepo = pictureRepo;
 		this.watcherService = watcherService;
 		this.tagService = tagService;
+		this.userService = userService;
 	}
 
 	@Async
@@ -161,5 +164,16 @@ public class PictureService {
 	public void deletePicture(@NotNull UUID picId) {
 		logger.info("Deleting Picture: {}", picId);
 		pictureRepo.deleteById(picId);
+	}
+
+	public Picture toggleIsPictureFavorite(@NotNull UUID picId) {
+		Optional<Picture> optional = getPicture(picId);
+		if (optional.isEmpty()) {
+			throw new IllegalArgumentException("Trying to favorite non-existent Picture: " + picId);
+		}
+		Picture picture = optional.get();
+		UserPreferences preferences = userService.getUserPreferences();
+		preferences.toggleFavorite(picture);
+		return picture;
 	}
 }

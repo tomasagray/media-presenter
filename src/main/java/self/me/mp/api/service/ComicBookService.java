@@ -15,6 +15,7 @@ import self.me.mp.db.ImageRepository;
 import self.me.mp.model.ComicBook;
 import self.me.mp.model.Image;
 import self.me.mp.model.Tag;
+import self.me.mp.model.UserPreferences;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -36,7 +37,10 @@ public class ComicBookService {
 	private final ImageRepository imageRepository;
 	private final RecursiveWatcherService watcherService;
 	private final TagService tagService;
+	private final UserService userService;
+
 	private final Map<String, Path> invalidFiles = new HashMap<>();
+
 	@Value("${comics.location}")
 	private Path comicsLocation;
 
@@ -44,11 +48,12 @@ public class ComicBookService {
 			ComicBookRepository comicBookRepo,
 			ImageRepository imageRepository,
 			RecursiveWatcherService watcherService,
-			TagService tagService) {
+			TagService tagService, UserService userService) {
 		this.comicBookRepo = comicBookRepo;
 		this.imageRepository = imageRepository;
 		this.watcherService = watcherService;
 		this.tagService = tagService;
+		this.userService = userService;
 	}
 
 	private static Image createImage(@NotNull Path file) throws IOException {
@@ -230,5 +235,16 @@ public class ComicBookService {
 
 	public void delete(@NotNull ComicBook comicBook) {
 		comicBookRepo.delete(comicBook);
+	}
+
+	public ComicBook toggleIsComicFavorite(@NotNull UUID comicId) {
+		Optional<ComicBook> optional = getComicBook(comicId);
+		if (optional.isEmpty()) {
+			throw new IllegalArgumentException("Trying to favorite non-existent Comic Book: " + comicId);
+		}
+		ComicBook comic = optional.get();
+		UserPreferences preferences = userService.getUserPreferences();
+		preferences.toggleFavorite(comic);
+		return comic;
 	}
 }

@@ -96,6 +96,13 @@ public class ComicBookController {
 				.orElseThrow(() -> new IllegalArgumentException("Comic page not found: " + pageId));
 	}
 
+	@PatchMapping(value = "/comic/{comicId}/favorite", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ComicBookResource toggleIsComicBookFavorite(@PathVariable UUID comicId) {
+		ComicBook comic = comicBookService.toggleIsComicFavorite(comicId);
+		return modeller.toModel(comic);
+	}
+
 	@GetMapping(value = "/invalid", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Path> getInvalidFiles() {

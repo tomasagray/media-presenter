@@ -85,6 +85,13 @@ public class PictureController {
 	}
 
 
+	@PatchMapping(value = "/picture/{picId}/favorite", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public PictureResource togglePictureFavorite(@PathVariable UUID picId) {
+		Picture picture = pictureService.toggleIsPictureFavorite(picId);
+		return modeller.toModel(picture);
+	}
+
 	@GetMapping(value = "/invalid", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String getInvalid() {

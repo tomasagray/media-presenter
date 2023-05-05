@@ -11,8 +11,10 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.mp.api.controller.PictureController;
-import self.me.mp.model.Image;
+import self.me.mp.api.service.UserService;
+import self.me.mp.model.Picture;
 import self.me.mp.model.Tag;
+import self.me.mp.model.UserPreferences;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,28 +37,41 @@ public class PictureResource extends RepresentationModel<PictureResource> {
 	private int width;
 	private long filesize;
 	private List<Tag> tags;
+	private boolean favorite;
 
 	@Component
 	public static class PictureResourceModeller
-			extends RepresentationModelAssemblerSupport<Image, PictureResource> {
+			extends RepresentationModelAssemblerSupport<Picture, PictureResource> {
 
-		public PictureResourceModeller() {
+		private final UserService userService;
+
+		public PictureResourceModeller(UserService userService) {
 			super(PictureController.class, PictureResource.class);
+			this.userService = userService;
 		}
 
 		@Override
-		public @NotNull PictureResource toModel(@NotNull Image entity) {
+		public @NotNull PictureResource toModel(@NotNull Picture entity) {
+
+			UserPreferences preferences = userService.getUserPreferences();
 			PictureResource model = instantiateModel(entity);
 			UUID id = entity.getId();
+
 			model.setId(id);
 			model.setTitle(entity.getTitle());
 			model.setWidth(entity.getWidth());
 			model.setHeight(entity.getHeight());
 			model.setFilesize(entity.getFilesize());
 			model.setTags(new ArrayList<>(entity.getTags()));
+			model.setFavorite(preferences.isFavorite(entity));
+
+			// attach links
 			model.add(linkTo(methodOn(PictureController.class)
 					.getPicture(id))
 					.withSelfRel());
+			model.add(linkTo(methodOn(PictureController.class)
+					.togglePictureFavorite(id))
+					.withRel("favorite"));
 			model.add(linkTo(methodOn(PictureController.class)
 					.getPictureData(id))
 					.withRel("data"));

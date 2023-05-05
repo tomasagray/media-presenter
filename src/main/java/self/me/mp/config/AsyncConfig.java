@@ -1,4 +1,4 @@
-package self.me.mp;
+package self.me.mp.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

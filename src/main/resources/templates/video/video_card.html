@@ -18,7 +18,15 @@
     <div class="Card-metadata">
         <div class="Card-title" data-th-text="${video.title}">Title</div>
         <div class="Card-tags">
-            <img alt="Tags" src="/img/icon/tags/tags_32.png"/>
+            <div class="Card-icon-container">
+                <img alt="Favorite"
+                     src="/img/icon/favorite/favorite_32.png"
+                     th:if="${video.favorite}"/>
+                <img alt="Not Favorite"
+                     src="/img/icon/not_favorite/not_favorite_32.png"
+                     th:unless="${video.favorite}"/>
+                <img alt="Tags" src="/img/icon/tags/tags_32.png"/>
+            </div>
             <span class="Card-tags"
                   data-th-each="tag : ${video.tags}"
                   data-th-text="${tag.name}">
@@ -31,24 +39,12 @@
     </div>
     <script data-th-inline="javascript" type="module">
         import {
-            getVideoLink,
-            attachImageCycleSwipe,
-            cycleImages,
-            showVideoPlayer,
+            attachVideoCardHandlers,
         } from "/js/mp.js";
 
-
-        // initialize video card
         $(() => {
-            let {id, links} = [[${video}]]
-            let url = getVideoLink(links)
-            let element = document.getElementById(`${id}`)
-            // attach event handlers
-            attachImageCycleSwipe(element, () => showVideoPlayer(url))
-            let images = element.querySelectorAll('.Display-image')
-            let timer
-            element.onmouseenter = () => timer = cycleImages(images)
-            element.onmouseleave = () => clearInterval(timer)
+            const video = [[${video}]]
+            attachVideoCardHandlers(video)
         });
     </script>
 </div>

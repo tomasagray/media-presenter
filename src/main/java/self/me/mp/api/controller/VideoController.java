@@ -74,6 +74,7 @@ public class VideoController {
 	}
 
 	@GetMapping("/video/{videoId}")
+	@ResponseBody
 	public VideoResource getVideo(@PathVariable("videoId") UUID videoId) {
 		return videoService.getById(videoId)
 				.map(modeller::toModel)
@@ -123,5 +124,12 @@ public class VideoController {
 
 		UrlResource thumb = videoService.getVideoThumb(videoId, thumbId);
 		return ResponseEntity.ok(thumb);
+	}
+
+	@PatchMapping(value = "/video/{videoId}/favorite", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public VideoResource toggleVideoFavorite(@PathVariable UUID videoId) {
+		Video video = videoService.toggleVideoFavorite(videoId);
+		return modeller.toModel(video);
 	}
 }

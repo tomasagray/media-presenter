@@ -15,7 +15,9 @@
 
         $(() => {
             // attach event handlers
-            document.getElementById('Image-viewer-close-button').onclick = onHideImageViewer
+            $('#Image-viewer-close-button').on('click', () => onHideImageViewer())
+            $('#Toggle-image-favorite-button').on('click',
+                () => alert('TODO: Implement Picture, Comic Book favorite action'))
             document.addEventListener('keydown', (e) => {
                 let container = document.querySelector('#image-viewer-container')
                 let display = container.style.display
@@ -31,9 +33,21 @@
             })
         })
     </script>
-    <button class="Close-button" id="Image-viewer-close-button">
-        <img alt="Close" src="/img/close-button.svg"/>
-    </button>
+    <div class="Viewer-controls-container">
+        <button class="Viewer-button" id="Image-viewer-close-button">
+            <img alt="Close" src="/img/close-button.svg"/>
+        </button>
+        <button class="Viewer-button Favorite-button" id="Toggle-image-favorite-button">
+            <img alt="Not favorite" class="Not-favorite"
+                 id="Image-not-favorite" src="/img/icon/not_favorite/not_favorite_64.png"/>
+            <img alt="Favorite" class="Favorite"
+                 id="Image-favorite" src="/img/icon/favorite/favorite_64.png"/>
+            <div class="Loading-spinner">
+                <div></div>
+                <div></div>
+            </div>
+        </button>
+    </div>
     <div class="Image-viewer" id="image-viewer">
     </div>
 </div>

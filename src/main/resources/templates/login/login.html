@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head data-th-insert="~{components/header_includes::header-includes}">
+    <meta charset="UTF-8">
+    <title data-th-text="${page_title}">Login page</title>
+</head>
+<body>
+<div class="Login-form-container">
+    <div class="Login-form">
+        <h1>Login</h1>
+        <form action="/request_login" method="POST">
+            <label for="username">Username</label>
+            <input id="username" name="username" placeholder="username..." type="text">
+            <label for="password">Password</label>
+            <input id="password" name="password" placeholder="password..." type="password">
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

@@ -8,15 +8,26 @@
 <div data-th-fragment="video-player" id="Video-player-container">
     <video autoplay controls id="Video-player" loop>
     </video>
-    <button class="Close-button" id="Video-player-close-button">
-        <img alt="Close" src="/img/close-button.svg"/>
-    </button>
-
+    <div class="Viewer-controls-container">
+        <button class="Viewer-button" id="Video-player-close-button">
+            <img alt="Close" src="/img/close-button.svg"/>
+        </button>
+        <button class="Viewer-button Favorite-button" id="Toggle-video-favorite-button">
+            <img alt="Not favorite" class="Not-favorite"
+                 id="Video-not-favorite" src="/img/icon/not_favorite/not_favorite_64.png"/>
+            <img alt="Favorite" class="Favorite"
+                 id="Video-favorite" src="/img/icon/favorite/favorite_64.png"/>
+            <div class="Loading-spinner">
+                <div></div>
+                <div></div>
+            </div>
+        </button>
+    </div>
     <script type="module">
         import {hideVideoPlayer} from "/js/mp.js";
 
         $(() => {
-            document.getElementById('Video-player-close-button').onclick = hideVideoPlayer
+            $('#Video-player-close-button').on('click', hideVideoPlayer)
         })
     </script>
 </div>

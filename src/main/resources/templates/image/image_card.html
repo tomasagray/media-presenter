@@ -18,12 +18,11 @@
             let image = [[${image}]]
             if (hasPages(image)) {
                 let images = getPageImages(image)
-                document.getElementById(image.id).onclick = () => onShowImageViewer(images)
+                $(`#${image.id}`).on('click', () => onShowImageViewer(images))
             } else {
                 let images = getSiblingImages()
                 let selected = image.links.find(link => link.rel === 'data').href
-                document.getElementById(image.id).onclick =
-                    () => onShowImageViewer(images, selected)
+                $(`#${image.id}`).on('click', () => onShowImageViewer(images, selected))
             }
         })
     </script>
@@ -38,7 +37,15 @@
     <div class="Card-metadata">
         <div class="Card-title" data-th-text="${image.title}">Title</div>
         <div class="Card-tags">
-            <img alt="Tags" src="/img/icon/tags/tags_32.png"/>
+            <div class="Card-icon-container">
+                <img alt="Favorite"
+                     src="/img/icon/favorite/favorite_32.png"
+                     th:if="${image.favorite}"/>
+                <img alt="Not Favorite"
+                     src="/img/icon/not_favorite/not_favorite_32.png"
+                     th:unless="${image.favorite}"/>
+                <img alt="Tags" src="/img/icon/tags/tags_32.png"/>
+            </div>
             <span class="Card-tags"
                   data-th-each="tag : ${image.tags}"
                   data-th-text="${tag.name}">

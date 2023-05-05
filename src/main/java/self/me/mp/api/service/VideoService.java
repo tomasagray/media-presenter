@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import self.me.mp.db.VideoRepository;
 import self.me.mp.model.Image;
+import self.me.mp.model.UserPreferences;
 import self.me.mp.model.Video;
 import self.me.mp.plugin.ffmpeg.FFmpegPlugin;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
@@ -38,6 +39,7 @@ public class VideoService {
 	private final FFmpegPlugin ffmpegPlugin;
 	private final RecursiveWatcherService watcherService;
 	private final ThumbnailService thumbnailService;
+	private final UserService userService;
 
 	@Value("${videos.location}")
 	private Path videoLocation;
@@ -46,11 +48,13 @@ public class VideoService {
 			VideoRepository videoRepository,
 			FFmpegPlugin ffmpegPlugin,
 			RecursiveWatcherService watcherService,
-			ThumbnailService thumbnailService) {
+			ThumbnailService thumbnailService,
+			UserService userService) {
 		this.videoRepository = videoRepository;
 		this.ffmpegPlugin = ffmpegPlugin;
 		this.watcherService = watcherService;
 		this.thumbnailService = thumbnailService;
+		this.userService = userService;
 	}
 
 	@Async
@@ -192,5 +196,16 @@ public class VideoService {
 				.map(VideoService::toUrl)
 				.map(UrlResource::new)
 				.orElseThrow();
+	}
+
+	public Video toggleVideoFavorite(@NotNull UUID videoId) {
+		Optional<Video> optional = getById(videoId);
+		if (optional.isEmpty()) {
+			throw new IllegalArgumentException("Trying to favorite non-existent Video: " + videoId);
+		}
+		Video video = optional.get();
+		UserPreferences preferences = userService.getUserPreferences();
+		preferences.toggleFavorite(video);
+		return video;
 	}
 }
