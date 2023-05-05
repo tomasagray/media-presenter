@@ -70,7 +70,7 @@ public class SecurityConfig {
 				.hasRole(Roles.ADMIN.name())
 				.requestMatchers("/anonymous*")
 				.anonymous()
-				.requestMatchers("/login*")
+				.requestMatchers("/login*", "/css/**", "/img/**", "/js/**")
 				.permitAll()
 				.anyRequest()
 				.authenticated()

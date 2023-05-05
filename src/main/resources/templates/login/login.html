@@ -2,20 +2,50 @@
 <html lang="en">
 <head data-th-insert="~{components/header_includes::header-includes}">
     <meta charset="UTF-8">
-    <title data-th-text="${page_title}">Login page</title>
+    <title data-th-text="${page_title}">Login</title>
 </head>
 <body>
 <div class="Login-form-container">
     <div class="Login-form">
-        <h1>Login</h1>
+        <h2>Please enter credentials</h2>
         <form action="/request_login" method="POST">
             <label for="username">Username</label>
-            <input id="username" name="username" placeholder="username..." type="text">
+            <input autocomplete="username" id="username" name="username" placeholder="username..." type="text">
             <label for="password">Password</label>
-            <input id="password" name="password" placeholder="password..." type="password">
-            <button type="submit">Login</button>
+            <input autocomplete="current-password" id="password" name="password" placeholder="password..."
+                   type="password">
+            <div class="Login-error" th:if="${isError}">
+                <strong>Error logging in.</strong> <br/>
+                Please try again.
+            </div>
+            <button disabled id="submit-button" type="submit">LOGIN</button>
         </form>
     </div>
+    <script>
+        let isUsernameValid = false, isPasswordValid = false, isFormValid = false
+        // validate login form
+        const evaluateForm = () => {
+            if (isUsernameValid && isPasswordValid) {
+                isFormValid = true
+                $('#submit-button').attr('disabled', false)
+            } else {
+                isFormValid = false
+                $('#submit-button').attr('disabled', true)
+            }
+        }
+        $('#username').on('input', e => {
+            // validate username
+            let usernameVal = e.target.value
+            isUsernameValid = usernameVal.length >= 3
+            evaluateForm()
+        })
+        $('#password').on('input', e => {
+            // validate password
+            let passwordVal = e.target.value
+            isPasswordValid = passwordVal.length >= 8 && passwordVal.length <= 32
+            evaluateForm()
+        })
+    </script>
 </div>
 </body>
 </html>

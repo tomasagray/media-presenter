@@ -16,12 +16,13 @@ public class LoginController {
 			@RequestParam(value = "error", defaultValue = "false") boolean isError,
 			@NotNull Model model) {
 		model.addAttribute("isError", isError);
+		model.addAttribute("page_title", "MP: Login");
 		return "login/login";
 	}
 
 	@PostMapping("/request_login")
 	@ResponseBody
 	public String requestLogin() {
-		return "logging in";
+		return "logging in...";
 	}
 }

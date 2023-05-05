@@ -76,6 +76,7 @@ public class HomeController {
 		model.addAttribute("videos", videoResources);
 		model.addAttribute("pictures", pictureResources);
 		model.addAttribute("comics", comicResources);
+		model.addAttribute("page_title", "Favorites");
 		return "home";
 	}
 }

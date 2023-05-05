@@ -28,3 +28,11 @@ button {
     cursor: pointer;
   }
 }
+
+input {
+  padding: .5rem;
+  border-radius: 10px;
+  border: 1px solid #aaa;
+  background-color: rgba(0, 0, 0, .4);
+  color: whitesmoke;
+}
