@@ -77,9 +77,7 @@ public class PictureService {
 		try {
 			if (!existing.contains(file)) {
 				// get tags from sub dirs
-				Path resolved = pictureLocation.relativize(file);
-				List<Tag> tags = getTags(resolved);
-
+				List<Tag> tags = tagService.getTags(pictureLocation.relativize(file));
 				BufferedImage image = ImageIO.read(file.toFile());
 				if (image != null) {
 					Picture picture = Picture.pictureBuilder()
@@ -103,17 +101,6 @@ public class PictureService {
 
 	public MultiValueMap<String, Path> getInvalidFiles() {
 		return invalidFiles;
-	}
-
-	private @NotNull List<Tag> getTags(@NotNull Path resolved) {
-		final List<Tag> tags = new ArrayList<>();
-		int names = resolved.getNameCount() - 1;    // skip filename
-		for (int i = 0; i < names; i++) {
-			String name = resolved.getName(i).toString();
-			Tag tag = tagService.getOrCreateTag(name);
-			tags.add(tag);
-		}
-		return tags;
 	}
 
 	private void handleFileEvent(@NotNull Path file, @NotNull WatchEvent.Kind<?> kind) {

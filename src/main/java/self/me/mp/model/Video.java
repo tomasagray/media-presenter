@@ -18,7 +18,6 @@ import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,7 +41,7 @@ public class Video {
 	@ManyToMany
 	@IndexedEmbedded
 	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
-	private final Set<Tag> tags = new HashSet<>();
+	private Set<Tag> tags;
 
 	@Convert(converter = PathConverter.class)
 	private final Path file;

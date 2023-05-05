@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import self.me.mp.db.VideoRepository;
 import self.me.mp.model.Image;
+import self.me.mp.model.Tag;
 import self.me.mp.model.UserPreferences;
 import self.me.mp.model.Video;
 import self.me.mp.plugin.ffmpeg.FFmpegPlugin;
@@ -39,6 +40,7 @@ public class VideoService {
 	private final FFmpegPlugin ffmpegPlugin;
 	private final RecursiveWatcherService watcherService;
 	private final ThumbnailService thumbnailService;
+	private final TagService tagService;
 	private final UserService userService;
 
 	@Value("${videos.location}")
@@ -49,11 +51,12 @@ public class VideoService {
 			FFmpegPlugin ffmpegPlugin,
 			RecursiveWatcherService watcherService,
 			ThumbnailService thumbnailService,
-			UserService userService) {
+			TagService tagService, UserService userService) {
 		this.videoRepository = videoRepository;
 		this.ffmpegPlugin = ffmpegPlugin;
 		this.watcherService = watcherService;
 		this.thumbnailService = thumbnailService;
+		this.tagService = tagService;
 		this.userService = userService;
 	}
 
@@ -106,6 +109,8 @@ public class VideoService {
 				String correctedName = name.replace("_", " ");
 				Video video = new Video(correctedName, file);
 				updateVideoMetadata(video);
+				List<Tag> tags = tagService.getTags(videoLocation.relativize(file));
+				video.setTags(new HashSet<>(tags));
 				saveVideo(video);   // ensure ID set
 				thumbnailService.generateVideoThumbnails(video);
 				saveVideo(video);   // save thumbs
@@ -139,8 +144,8 @@ public class VideoService {
 		}
 	}
 
-	public Video saveVideo(@NotNull Video video) {
-		return videoRepository.save(video);
+	public void saveVideo(@NotNull Video video) {
+		videoRepository.save(video);
 	}
 
 	public Page<Video> getAll(int page, int pageSize) {
@@ -181,11 +186,10 @@ public class VideoService {
 		videoRepository.delete(video);
 	}
 
-	public Video updateVideoMetadata(@NotNull Video video) throws IOException {
+	public void updateVideoMetadata(@NotNull Video video) throws IOException {
 		final URI videoUri = video.getFile().toUri();
 		final FFmpegMetadata metadata = ffmpegPlugin.readFileMetadata(videoUri);
 		video.setMetadata(metadata);
-		return video;
 	}
 
 	public UrlResource getVideoThumb(@NotNull UUID videoId, @NotNull UUID thumbId) {

@@ -126,9 +126,7 @@ public class ComicBookService {
 		String comicName = names.removeLast();
 		Set<Image> images = new HashSet<>();
 		images.add(createImage(file));
-		List<Tag> tags = names.stream()
-				.map(tagService::getOrCreateTag)
-				.toList();
+		List<Tag> tags = tagService.getTags(comicsLocation.relativize(file));
 		ComicBook comic = ComicBook.builder()
 				.location(parent)
 				.title(comicName)
