@@ -62,7 +62,6 @@ const toggleFavorite = async (entity) => {
 }
 
 export const hideVideoPlayer = () => {
-    console.log('hiding')
     let player = $('#Video-player')
     player.attr('src', null)
     player[0].load()
@@ -194,4 +193,28 @@ export const getPageImages = (comic) => {
             img.alt = 'Comic page'
             return img
         })
+}
+
+// TODO: move to mp.js
+let listener = null
+export const onShowSearchModal = () => {
+    $('#search-modal-container').css('display', 'block')
+    setTimeout(() => {  // prevent race condition
+        onClickOutside('#search-modal')
+        document.addEventListener('click', listener)
+    }, 50)
+}
+
+const onClickOutside = (selector) => {
+    listener = (e) => {
+        const closest = e.target.closest(selector)
+        if (closest === null && $(selector).is(':visible')) {
+            onHideSearchModal()
+        }
+    }
+}
+
+export const onHideSearchModal = () => {
+    $('#search-modal-container').css('display', 'none')
+    document.removeEventListener('click', listener)
 }

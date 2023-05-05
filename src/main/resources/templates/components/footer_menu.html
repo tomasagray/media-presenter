@@ -10,6 +10,9 @@
         <a href="/" id="home-link">
             <img alt="Home" src="/img/icon/home_unselected/home_unselected_64.png"/>
         </a>
+        <a href="/favorites" id="favorites-link">
+            <img alt="Favorites" src="/img/icon/not_favorite/not_favorite_64.png"/>
+        </a>
         <a href="/videos" id="videos-link">
             <img alt="Video" src="/img/icon/videos_unselected/videos_unselected_64.png"/>
         </a>
@@ -19,7 +22,7 @@
         <a href="/comics" id="comics-link">
             <img alt="Comics" src="/img/icon/comics_unselected/comics_unselected_64.png"/>
         </a>
-        <button class="Footer-menu-button" onclick="onShowSearchModal()">
+        <button class="Footer-menu-button" id="Search-modal-button">
             <img alt="Search" src="/img/icon/search/search_64.png"/>
         </button>
     </div>
@@ -36,44 +39,37 @@
             </div>
         </div>
     </div>
-    <script>
-        let listener = null
-        const onShowSearchModal = () => {
-            console.log('show search modal here')
-            $('#search-modal-container').css('display', 'block')
-            console.log('modal displayed')
-            setTimeout(() => {  // prevent race condition
-                onClickOutside('#search-modal')
-                document.addEventListener('click', listener)
-            }, 50)
-        }
-
-        const onHideSearchModal = () => {
-            $('#search-modal-container').css('display', 'none')
-            document.removeEventListener('click', listener)
-        }
-
-        const onClickOutside = (selector) => {
-            listener = (e) => {
-                const closest = e.target.closest(selector)
-                if (closest === null && $(selector).is(':visible')) {
-                    onHideSearchModal()
-                }
-            }
-        }
+    <script type="module">
+        import {
+            onShowSearchModal,
+            onHideSearchModal,
+        } from "/js/mp.js";
 
         $(() => {
+            $('#Search-modal-button').click(onShowSearchModal)
+
             let url = window.location.href
             let match = url.match(/home|videos|pictures|comics/)
-            let selector = match ? `${match[0]}-link` : 'home-link'
-            let key = match ? match[0] : 'home'
-            document.getElementById(selector).innerHTML =
-                `<img alt="${key}" src="/img/icon/${key}_selected/${key}_selected_64.png" />`
+            if (match) {
+                let key = match[0]
+                let selector = `${key}-link`
+                document.getElementById(selector).innerHTML =
+                    `<img alt="${key}" src="/img/icon/${key}_selected/${key}_selected_64.png" />`
+            } else if (url.match(/favorites/)) {
+                $('#favorites-link').html(
+                    '<img alt="Favorites" src="/img/icon/favorite/favorite_64.png" />'
+                )
+            } else {
+                $('#home-link').html(
+                    '<img alt="Home" src="/img/icon/home_selected/home_selected_64.png" />'
+                )
+            }
+
             $(document).keyup(e => {
                 if (e.key === 'Escape') {
                     onHideSearchModal()
                 }
-            })
+            });
         })
     </script>
 </div>

@@ -176,4 +176,8 @@ public class PictureService {
 		preferences.toggleFavorite(picture);
 		return picture;
 	}
+
+	public Collection<Picture> getFavoritePictures() {
+		return userService.getUserPreferences().getFavoritePictures();
+	}
 }

@@ -1,5 +1,6 @@
 package self.me.mp.api.controller;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +18,7 @@ import self.me.mp.model.ComicBook;
 import self.me.mp.model.Picture;
 import self.me.mp.model.Video;
 
+import java.util.Collection;
 import java.util.List;
 
 @Controller
@@ -60,6 +62,20 @@ public class HomeController {
 		model.addAttribute("pictures", pictureResources);
 		model.addAttribute("comics", comicResources);
 		model.addAttribute("page_title", "Home");
+		return "home";
+	}
+
+	@GetMapping("/favorites")
+	public String getFavorites(@NotNull Model model) {
+		Collection<Video> videos = videoService.getVideoFavorites();
+		CollectionModel<VideoResource> videoResources = videoModeller.toCollectionModel(videos);
+		Collection<Picture> pictures = pictureService.getFavoritePictures();
+		CollectionModel<PictureResource> pictureResources = pictureModeller.toCollectionModel(pictures);
+		Collection<ComicBook> comics = comicBookService.getFavoriteComics();
+		CollectionModel<ComicBookResource> comicResources = comicModeller.toCollectionModel(comics);
+		model.addAttribute("videos", videoResources);
+		model.addAttribute("pictures", pictureResources);
+		model.addAttribute("comics", comicResources);
 		return "home";
 	}
 }

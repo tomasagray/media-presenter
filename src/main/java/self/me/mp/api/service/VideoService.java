@@ -208,4 +208,8 @@ public class VideoService {
 		preferences.toggleFavorite(video);
 		return video;
 	}
+
+	public Collection<Video> getVideoFavorites() {
+		return userService.getUserPreferences().getFavoriteVideos();
+	}
 }

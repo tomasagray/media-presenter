@@ -247,4 +247,8 @@ public class ComicBookService {
 		preferences.toggleFavorite(comic);
 		return comic;
 	}
+
+	public Collection<ComicBook> getFavoriteComics() {
+		return userService.getUserPreferences().getFavoriteComics();
+	}
 }
