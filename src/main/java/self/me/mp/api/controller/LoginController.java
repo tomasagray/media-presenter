@@ -13,7 +13,6 @@ public class LoginController {
 
 	@GetMapping("/login")
 	public String getLoginForm(
-
 			@RequestParam(value = "error", defaultValue = "false") boolean isError,
 			@NotNull Model model) {
 		model.addAttribute("isError", isError);
