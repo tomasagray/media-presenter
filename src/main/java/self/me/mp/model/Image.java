@@ -30,11 +30,14 @@ public class Image {
 	@Id
 	@GeneratedValue(generator = "uuid2")
 	@GenericGenerator(name = "uuid2", strategy = "uuid2")
+	@Column(columnDefinition = "BINARY(16)")
 	private UUID id;
+
 	@ManyToMany(fetch = FetchType.EAGER)
 	@IndexedEmbedded
 	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private final Set<Tag> tags = new HashSet<>();
+
 	private final Timestamp added = Timestamp.from(Instant.now());
 	@FullTextField
 	private String title;
