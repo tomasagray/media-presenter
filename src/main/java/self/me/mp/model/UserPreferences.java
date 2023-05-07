@@ -1,16 +1,28 @@
 package self.me.mp.model;
 
-import jakarta.persistence.*;
-import lombok.Data;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.ToString.Exclude;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.UUID;
-
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @NoArgsConstructor
 @Entity
 public class UserPreferences {
@@ -24,10 +36,13 @@ public class UserPreferences {
 	private String username;
 
 	@OneToMany
+	@Exclude
 	private Set<Video> favoriteVideos;
 	@OneToMany
+	@Exclude
 	private Set<Picture> favoritePictures;
 	@OneToMany
+	@Exclude
 	private Set<ComicBook> favoriteComics;
 
 	public UserPreferences(String username) {
@@ -66,5 +81,20 @@ public class UserPreferences {
 
 	public boolean toggleFavorite(ComicBook comicBook) {
 		return toggleFavorite(favoriteComics, comicBook);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o))
+			return false;
+		UserPreferences that = (UserPreferences) o;
+		return getId() != null && Objects.equals(getId(), that.getId());
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
 	}
 }

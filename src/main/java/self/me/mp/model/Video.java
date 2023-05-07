@@ -1,7 +1,7 @@
 package self.me.mp.model;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -23,7 +23,6 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@EqualsAndHashCode
 @RequiredArgsConstructor
 @Entity
 @Indexed
@@ -66,5 +65,24 @@ public class Video {
 	public String toString() {
 		return String.format("[ID=%s, title=%s, file=%s, added=%s]",
 				getId(), getTitle(), getFile(), getAdded());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Video video))
+			return false;
+		return Objects.equals(getId(), video.getId()) && Objects.equals(getTitle(), video.getTitle())
+				&& Objects.equals(getAdded(), video.getAdded()) && Objects.equals(getTags(),
+				video.getTags()) && Objects.equals(getFile(), video.getFile()) && Objects.equals(
+				getThumbnails(), video.getThumbnails()) && Objects.equals(getMetadata(),
+				video.getMetadata());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getId(), getTitle(), getAdded(), getTags(), getFile(), getThumbnails(),
+				getMetadata());
 	}
 }

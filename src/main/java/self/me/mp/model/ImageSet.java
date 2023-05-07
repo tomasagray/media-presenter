@@ -1,6 +1,7 @@
 package self.me.mp.model;
 
 import jakarta.persistence.*;
+import java.util.Objects;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.GenericGenerator;
@@ -19,7 +20,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode
 @RequiredArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
@@ -59,5 +59,21 @@ public class ImageSet {
 				.filter(img -> img.getId().equals(imageId))
 				.findFirst()
 				.orElse(null);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof ImageSet imageSet))
+			return false;
+		return Objects.equals(getId(), imageSet.getId()) && Objects.equals(getImages(),
+				imageSet.getImages()) && Objects.equals(getTitle(), imageSet.getTitle()) && Objects.equals(
+				getTags(), imageSet.getTags()) && Objects.equals(getAdded(), imageSet.getAdded());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getId(), getImages(), getTitle(), getTags(), getAdded());
 	}
 }

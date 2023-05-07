@@ -1,6 +1,7 @@
 package self.me.mp.model;
 
 import jakarta.persistence.*;
+import java.util.Objects;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
@@ -20,7 +21,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode
 @Builder
 @AllArgsConstructor
 @Entity
@@ -52,5 +52,24 @@ public class Image {
 
 	public Image() {
 		this.uri = null;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Image image))
+			return false;
+		return getHeight() == image.getHeight() && getWidth() == image.getWidth()
+				&& getFilesize() == image.getFilesize() && Objects.equals(getId(), image.getId())
+				&& Objects.equals(getTags(), image.getTags()) && Objects.equals(getAdded(),
+				image.getAdded()) && Objects.equals(getTitle(), image.getTitle()) && Objects.equals(
+				getUri(), image.getUri());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getId(), getTags(), getAdded(), getTitle(), getHeight(), getWidth(),
+				getFilesize(), getUri());
 	}
 }
