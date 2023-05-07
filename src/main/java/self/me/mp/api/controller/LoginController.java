@@ -25,4 +25,11 @@ public class LoginController {
 	public String requestLogin() {
 		return "logging in...";
 	}
+
+	@GetMapping("/logout_success")
+	public String logout(@NotNull Model model) {
+		model.addAttribute("page_title", "Logged out");
+		model.addAttribute("login_url", "/login");
+		return "login/logout";
+	}
 }

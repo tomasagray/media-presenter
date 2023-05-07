@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head data-th-insert="~{components/header_includes::header-includes}">
+    <meta charset="UTF-8">
+    <title>Logout</title>
+</head>
+<body style="height: 100vh; overflow: hidden;">
+<div class="Logout-container">
+    <h2>You have been logged out.</h2>
+    <p>You will be redirected shortly...</p>
+    <input id="login-url" name="login-url" th:value="${login_url}" type="hidden">
+</div>
+<script>
+    $(() => {
+        const loginUrl = $('#login-url').val()
+        setTimeout(() => {
+            window.location.href = loginUrl
+        }, 5000)
+    })
+</script>
+</body>
+</html>

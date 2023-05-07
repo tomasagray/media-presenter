@@ -94,7 +94,7 @@ public class SecurityConfig {
 				.hasRole(Roles.ADMIN.name())
 				.requestMatchers("/anonymous*")
 				.anonymous()
-				.requestMatchers("/login*", "logout", "/css/**", "/img/**", "/js/**")
+				.requestMatchers("/login*", "/logout*", "/css/**", "/img/**", "/js/**")
 				.permitAll()
 				.anyRequest()
 				.authenticated()
@@ -107,6 +107,7 @@ public class SecurityConfig {
 				.and()
 				.logout()
 				.logoutUrl("/logout")
+				.logoutSuccessUrl("/logout_success")
 				.deleteCookies("JSESSIONID")
 				.and()
 				.build();
