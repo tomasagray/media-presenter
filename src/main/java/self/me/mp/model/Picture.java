@@ -1,21 +1,16 @@
 package self.me.mp.model;
 
 import jakarta.persistence.Entity;
+import lombok.*;
+import org.hibernate.Hibernate;
+
 import java.net.URI;
 import java.util.Objects;
 import java.util.UUID;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import org.hibernate.Hibernate;
 
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @Entity
 @NoArgsConstructor
 public class Picture extends Image {

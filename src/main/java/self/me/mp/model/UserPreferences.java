@@ -1,17 +1,8 @@
 package self.me.mp.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.ToString.Exclude;
@@ -19,12 +10,16 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
-@NoArgsConstructor
 @Entity
+@NoArgsConstructor
 public class UserPreferences {
 
 	@Id
