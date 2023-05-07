@@ -11,10 +11,13 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import self.me.mp.api.service.UserService;
 import self.me.mp.model.UserPreferences;
+
+import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
@@ -28,32 +31,53 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public InMemoryUserDetailsManager userDetailsManager() {
-		// TODO: delete this, replace with JDBC implementation
-		UserDetails user = createUser("user", Roles.USER);
-		UserDetails admin = createUser("admin", Roles.ADMIN);
-		return new InMemoryUserDetailsManager(user, admin);
+	public UserDetailsManager userDetailsManager(DataSource dataSource) {
+		JdbcUserDetailsManager detailsManager = new JdbcUserDetailsManager(dataSource);
+		createDefaultUsers(detailsManager);
+		return detailsManager;
 	}
 
-	public UserDetails createUser(String username, Roles role) {
+	private void createDefaultUsers(@NotNull UserDetailsManager detailsManager) {
+		// TODO: implement new user registration
+		UserDetails user = createUserIfNotExists(
+				"user",
+				passwordEncoder().encode("password"),
+				Roles.USER);
+		if (user != null) {
+			detailsManager.createUser(user);
+		}
+		UserDetails admin = createUserIfNotExists(
+				"admin",
+				passwordEncoder().encode("password"),
+				Roles.ADMIN);
+		if (admin != null) {
+			detailsManager.createUser(admin);
+		}
+	}
 
+	public UserDetails createUserIfNotExists(String username, String password, Roles role) {
 		try {
 			UserPreferences preferences = userService.getUserPreferences(username);
-			logger.info("User: {} already exists; deleting...", username);
-			userService.deleteUserPreferences(preferences.getId());
+			logger.info("Found existing User Preferences: {}", preferences);
+			logger.info("User: {} already exists; skipping creation...", username);
+			return null;
 		} catch (IllegalStateException ignore) {
+			logger.info("User: {} does not exist; creating...", username);
+			return createNewUser(username, password, role);
 		}
-		return createNewUser(username, role);
 	}
 
-	@NotNull
-	private UserDetails createNewUser(@NotNull String username, @NotNull Roles role) {
+	private @NotNull UserDetails createNewUser(
+			@NotNull String username,
+			@NotNull String password,
+			@NotNull Roles role) {
 
 		UserDetails user = User.withUsername(username)
-				.password(passwordEncoder().encode("password"))
+				.password(password)
 				.roles(role.name())
 				.build();
-		logger.info("Created User Preferences: {}", userService.createUserPreferences(user));
+		UserDetails preferences = userService.createUserPreferences(user);
+		logger.info("Created User Preferences: {}", preferences);
 		return user;
 	}
 
@@ -70,7 +94,7 @@ public class SecurityConfig {
 				.hasRole(Roles.ADMIN.name())
 				.requestMatchers("/anonymous*")
 				.anonymous()
-				.requestMatchers("/login*", "/css/**", "/img/**", "/js/**")
+				.requestMatchers("/login*", "logout", "/css/**", "/img/**", "/js/**")
 				.permitAll()
 				.anyRequest()
 				.authenticated()
