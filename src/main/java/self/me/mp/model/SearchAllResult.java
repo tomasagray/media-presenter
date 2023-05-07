@@ -9,9 +9,9 @@ import java.util.Collection;
 @Builder
 public class SearchAllResult {
 
-	private Collection<Video> videos;
-	private Collection<Picture> pictures;
-	private Collection<ComicBook> comics;
+	private Collection<UserVideoView> videos;
+	private Collection<UserImageView> pictures;
+	private Collection<UserComicBookView> comics;
 
 	private long totalResults;
 	private int offset;

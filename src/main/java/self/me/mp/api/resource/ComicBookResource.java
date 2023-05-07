@@ -11,11 +11,9 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.mp.api.controller.ComicBookController;
-import self.me.mp.api.service.UserService;
-import self.me.mp.model.ComicBook;
 import self.me.mp.model.Image;
 import self.me.mp.model.Tag;
-import self.me.mp.model.UserPreferences;
+import self.me.mp.model.UserComicBookView;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -33,39 +31,36 @@ public class ComicBookResource extends RepresentationModel<ComicBookResource> {
 
 	private UUID id;
 	private String title;
-	private Set<Tag> tags;
+	private Collection<Tag> tags;
 	private Timestamp timestamp;
 	private boolean favorite;
 
 	@Component
 	public static class ComicBookModeller extends
-			RepresentationModelAssemblerSupport<ComicBook, ComicBookResource> {
+			RepresentationModelAssemblerSupport<UserComicBookView, ComicBookResource> {
 
-		private final UserService userService;
-
-		public ComicBookModeller(UserService userService) {
+		public ComicBookModeller() {
 			super(ComicBookController.class, ComicBookResource.class);
-			this.userService = userService;
 		}
 
 		@Override
-		public @NotNull ComicBookResource toModel(@NotNull ComicBook entity) {
+		public @NotNull ComicBookResource toModel(@NotNull UserComicBookView entity) {
 
 			ComicBookResource model = instantiateModel(entity);
-			UserPreferences preferences = userService.getUserPreferences();
 
-			model.setId(entity.getId());
+			UUID comicId = entity.getId();
+			model.setId(comicId);
 			model.setTitle(entity.getTitle());
-			model.setTimestamp(entity.getAdded());
+			model.setTimestamp(entity.getTimestamp());
 			model.setTags(entity.getTags());
-			model.setFavorite(preferences.isFavorite(entity));
+			model.setFavorite(entity.isFavorite());
 
 			// attach links
 			model.add(linkTo(methodOn(ComicBookController.class)
-					.getComic(entity.getId()))
+					.getComic(comicId))
 					.withSelfRel());
 			model.add(linkTo(methodOn(ComicBookController.class)
-					.toggleIsComicBookFavorite(entity.getId()))
+					.toggleIsComicBookFavorite(comicId))
 					.withRel("favorite"));
 			List<Image> images = new ArrayList<>(entity.getImages());
 			images.sort(Comparator.comparing(Image::getUri));

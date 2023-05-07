@@ -10,11 +10,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.mp.db.VideoRepository;
-import self.me.mp.model.Image;
-import self.me.mp.model.Tag;
-import self.me.mp.model.UserPreferences;
-import self.me.mp.model.Video;
+import self.me.mp.model.*;
 import self.me.mp.plugin.ffmpeg.FFmpegPlugin;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
 
@@ -32,6 +30,7 @@ import java.util.stream.Collectors;
 import static java.nio.file.StandardWatchEventKinds.*;
 
 @Service
+@Transactional
 public class VideoService {
 
 	private static final Logger logger = LogManager.getLogger(VideoService.class);
@@ -152,16 +151,41 @@ public class VideoService {
 		return videoRepository.findAll(PageRequest.of(page, pageSize));
 	}
 
+	public Page<UserVideoView> getAllUserVideos(int page, int size) {
+		return getAll(page, size).map(this::getUserVideoView);
+	}
+
 	public Page<Video> getLatest(int page, int pageSize) {
 		return videoRepository.findAllByOrderByAddedDesc(PageRequest.of(page, pageSize));
+	}
+
+	public Page<UserVideoView> getLatestUserVideos(int page, int size) {
+		return getLatest(page, size).map(this::getUserVideoView);
+	}
+
+	public UserVideoView getUserVideoView(@NotNull Video video) {
+		return userService.getUserPreferences().isFavorite(video) ?
+				UserVideoView.favorite(video) : UserVideoView.of(video);
+	}
+
+	public Collection<UserVideoView> getUserVideoViews(@NotNull Collection<Video> videos) {
+		return videos.stream().map(this::getUserVideoView).toList();
 	}
 
 	public List<Video> getRandom(int count) {
 		return videoRepository.findRandom(PageRequest.ofSize(count));
 	}
 
+	public List<UserVideoView> getRandomUserVideos(int count) {
+		return getRandom(count).stream().map(this::getUserVideoView).toList();
+	}
+
 	public Optional<Video> getById(@NotNull UUID videoId) {
 		return videoRepository.findById(videoId);
+	}
+
+	public Optional<UserVideoView> getUserVideo(@NotNull UUID videoId) {
+		return getById(videoId).map(this::getUserVideoView);
 	}
 
 	public UrlResource getVideoData(@NotNull UUID videoId) throws MalformedURLException {
@@ -202,18 +226,23 @@ public class VideoService {
 				.orElseThrow();
 	}
 
-	public Video toggleVideoFavorite(@NotNull UUID videoId) {
+	public UserVideoView toggleVideoFavorite(@NotNull UUID videoId) {
 		Optional<Video> optional = getById(videoId);
 		if (optional.isEmpty()) {
 			throw new IllegalArgumentException("Trying to favorite non-existent Video: " + videoId);
 		}
 		Video video = optional.get();
 		UserPreferences preferences = userService.getUserPreferences();
-		preferences.toggleFavorite(video);
-		return video;
+		if (preferences.toggleFavorite(video)) {
+			return UserVideoView.favorite(video);
+		}
+		return UserVideoView.of(video);
 	}
 
-	public Collection<Video> getVideoFavorites() {
-		return userService.getUserPreferences().getFavoriteVideos();
+	public Collection<UserVideoView> getVideoFavorites() {
+		return userService.getUserPreferences()
+				.getFavoriteVideos().stream()
+				.map(this::getUserVideoView)
+				.toList();
 	}
 }

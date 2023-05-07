@@ -10,12 +10,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.mp.db.ComicBookRepository;
 import self.me.mp.db.ImageRepository;
-import self.me.mp.model.ComicBook;
-import self.me.mp.model.Image;
-import self.me.mp.model.Tag;
-import self.me.mp.model.UserPreferences;
+import self.me.mp.model.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -30,6 +28,7 @@ import java.util.*;
 import static java.nio.file.StandardWatchEventKinds.*;
 
 @Service
+@Transactional
 public class ComicBookService {
 
 	private static final Logger logger = LogManager.getLogger(ComicBookService.class);
@@ -198,24 +197,46 @@ public class ComicBookService {
 		}
 	}
 
-	public List<ComicBook> getAllComics() {
-		return comicBookRepo.findAll();
-	}
-
 	public Page<ComicBook> getAllComics(int page, int size) {
 		return comicBookRepo.findAll(PageRequest.of(page, size));
+	}
+
+	public Page<UserComicBookView> getAllUserComics(int page, int size) {
+		return getAllComics(page, size).map(this::getUserComicBookView);
 	}
 
 	public Page<ComicBook> getLatestComics(int page, int size) {
 		return comicBookRepo.findLatest(PageRequest.of(page, size));
 	}
 
+	public Page<UserComicBookView> getLatestUserComics(int page, int size) {
+		return getLatestComics(page, size).map(this::getUserComicBookView);
+	}
+
+	@NotNull
+	private UserComicBookView getUserComicBookView(@NotNull ComicBook comic) {
+		return userService.getUserPreferences().isFavorite(comic) ?
+				UserComicBookView.favorite(comic) : UserComicBookView.of(comic);
+	}
+
+	public Collection<UserComicBookView> getUserComicViews(@NotNull Collection<ComicBook> comics) {
+		return comics.stream().map(this::getUserComicBookView).toList();
+	}
+
 	public List<ComicBook> getRandomComics(int count) {
 		return comicBookRepo.findRandomComics(PageRequest.ofSize(count));
 	}
 
+	public List<UserComicBookView> getRandomUserComics(int count) {
+		return getRandomComics(count).stream().map(this::getUserComicBookView).toList();
+	}
+
 	public Optional<ComicBook> getComicBook(UUID bookId) {
 		return comicBookRepo.findById(bookId);
+	}
+
+	public Optional<UserComicBookView> getUserComicBook(UUID comicId) {
+		return getComicBook(comicId).map(this::getUserComicBookView);
 	}
 
 	public Optional<UrlResource> getPageData(@NotNull UUID pageId) {
@@ -235,18 +256,23 @@ public class ComicBookService {
 		comicBookRepo.delete(comicBook);
 	}
 
-	public ComicBook toggleIsComicFavorite(@NotNull UUID comicId) {
+	public UserComicBookView toggleIsComicFavorite(@NotNull UUID comicId) {
 		Optional<ComicBook> optional = getComicBook(comicId);
 		if (optional.isEmpty()) {
 			throw new IllegalArgumentException("Trying to favorite non-existent Comic Book: " + comicId);
 		}
 		ComicBook comic = optional.get();
 		UserPreferences preferences = userService.getUserPreferences();
-		preferences.toggleFavorite(comic);
-		return comic;
+		if (preferences.toggleFavorite(comic)) {
+			return UserComicBookView.favorite(comic);
+		}
+		return UserComicBookView.of(comic);
 	}
 
-	public Collection<ComicBook> getFavoriteComics() {
-		return userService.getUserPreferences().getFavoriteComics();
+	public Collection<UserComicBookView> getFavoriteComics() {
+		return userService.getUserPreferences()
+				.getFavoriteComics().stream()
+				.map(this::getUserComicBookView)
+				.toList();
 	}
 }

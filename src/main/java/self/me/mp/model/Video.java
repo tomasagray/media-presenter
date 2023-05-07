@@ -39,7 +39,7 @@ public class Video {
 	private final String title;
 	private final Timestamp added = Timestamp.from(Instant.now());
 
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)
 	@IndexedEmbedded
 	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private Set<Tag> tags;

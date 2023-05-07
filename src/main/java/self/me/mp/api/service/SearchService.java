@@ -22,9 +22,19 @@ public class SearchService {
 	private static final Logger logger = LogManager.getLogger(SearchService.class);
 
 	private final EntityManager entityManager;
+	private final VideoService videoService;
+	private final PictureService pictureService;
+	private final ComicBookService comicService;
 
-	public SearchService(EntityManager entityManager) {
+	public SearchService(
+			EntityManager entityManager,
+			VideoService videoService,
+			PictureService pictureService,
+			ComicBookService comicService) {
 		this.entityManager = entityManager;
+		this.videoService = videoService;
+		this.pictureService = pictureService;
+		this.comicService = comicService;
 	}
 
 	public SearchAllResult searchFor(@NotNull String query, int offset, int limit) {
@@ -66,9 +76,9 @@ public class SearchService {
 		logger.info("Found: {} Videos, {} Pictures, {} Comic Books ({} total)",
 				videos.size(), pictures.size(), comics.size(), hitCount);
 		return SearchAllResult.builder()
-				.videos(videos)
-				.pictures(pictures)
-				.comics(comics)
+				.videos(videoService.getUserVideoViews(videos))
+				.pictures(pictureService.getUserImageViews(pictures))
+				.comics(comicService.getUserComicViews(comics))
 				.totalResults(hitCount)
 				.offset(nextOffset)
 				.limit(limit)

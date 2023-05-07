@@ -12,7 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import self.me.mp.api.resource.VideoResource;
 import self.me.mp.api.service.VideoService;
-import self.me.mp.model.Video;
+import self.me.mp.model.UserVideoView;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,7 +48,8 @@ public class VideoController {
 			@RequestParam(name = "page", defaultValue = "0") int page,
 			@RequestParam(name = "pageSize", defaultValue = "15") int pageSize,
 			@NotNull Model model) {
-		final Page<VideoResource> videoPage = videoService.getLatest(page, pageSize).map(modeller::toModel);
+		final Page<VideoResource> videoPage =
+				videoService.getLatestUserVideos(page, pageSize).map(modeller::toModel);
 		setVideoAttributes(model, videoPage);
 		model.addAttribute("page_title", "Latest Videos");
 		return "video/video_list";
@@ -58,7 +59,7 @@ public class VideoController {
 	public CollectionModel<VideoResource> getAllVideosPaged(
 			@RequestParam(name = "page", defaultValue = "0") int page,
 			@RequestParam(name = "size", defaultValue = "15") int size) {
-		Page<Video> videos = videoService.getAll(page, size);
+		Page<UserVideoView> videos = videoService.getAllUserVideos(page, size);
 		return modeller.toCollectionModel(videos);
 	}
 
@@ -66,7 +67,7 @@ public class VideoController {
 	public String getRandomVideos(
 			@RequestParam(name = "count", defaultValue = "15") int count,
 			@NotNull Model model) {
-		List<Video> videos = videoService.getRandom(count);
+		List<UserVideoView> videos = videoService.getRandomUserVideos(count);
 		CollectionModel<VideoResource> resources = modeller.toCollectionModel(videos);
 		model.addAttribute("videos", resources);
 		model.addAttribute("page_title", "Videos");
@@ -76,7 +77,7 @@ public class VideoController {
 	@GetMapping("/video/{videoId}")
 	@ResponseBody
 	public VideoResource getVideo(@PathVariable("videoId") UUID videoId) {
-		return videoService.getById(videoId)
+		return videoService.getUserVideo(videoId)
 				.map(modeller::toModel)
 				.orElseThrow(() -> new IllegalArgumentException("No video with ID: " + videoId));
 	}
@@ -129,7 +130,7 @@ public class VideoController {
 	@PatchMapping(value = "/video/{videoId}/favorite", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public VideoResource toggleVideoFavorite(@PathVariable UUID videoId) {
-		Video video = videoService.toggleVideoFavorite(videoId);
+		UserVideoView video = videoService.toggleVideoFavorite(videoId);
 		return modeller.toModel(video);
 	}
 }

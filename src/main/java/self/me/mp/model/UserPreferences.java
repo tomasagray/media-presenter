@@ -1,14 +1,12 @@
 package self.me.mp.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
@@ -48,27 +46,25 @@ public class UserPreferences {
 		return favoriteComics.contains(comic);
 	}
 
-	public void toggleFavorite(Video video) {
-		if (favoriteVideos.contains(video)) {
-			favoriteVideos.remove(video);
+	private static <T> boolean toggleFavorite(@NotNull Collection<T> favorites, T entity) {
+		if (favorites.contains(entity)) {
+			favorites.remove(entity);
+			return false;
 		} else {
-			favoriteVideos.add(video);
+			favorites.add(entity);
+			return true;
 		}
 	}
 
-	public void toggleFavorite(Picture picture) {
-		if (favoritePictures.contains(picture)) {
-			favoritePictures.remove(picture);
-		} else {
-			favoritePictures.add(picture);
-		}
+	public boolean toggleFavorite(Video video) {
+		return toggleFavorite(favoriteVideos, video);
 	}
 
-	public void toggleFavorite(ComicBook comicBook) {
-		if (favoriteComics.contains(comicBook)) {
-			favoriteComics.remove(comicBook);
-		} else {
-			favoriteComics.add(comicBook);
-		}
+	public boolean toggleFavorite(Picture picture) {
+		return toggleFavorite(favoritePictures, picture);
+	}
+
+	public boolean toggleFavorite(ComicBook comicBook) {
+		return toggleFavorite(favoriteComics, comicBook);
 	}
 }

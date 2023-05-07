@@ -9,14 +9,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import self.me.mp.api.controller.VideoController;
-import self.me.mp.api.service.UserService;
 import self.me.mp.model.Tag;
-import self.me.mp.model.UserPreferences;
-import self.me.mp.model.Video;
-import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
+import self.me.mp.model.UserVideoView;
 
 import java.sql.Timestamp;
-import java.util.Set;
+import java.util.Collection;
 import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -33,35 +30,29 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 	private UUID id;
 	private String title;
 	private Timestamp timestamp;
-	private Set<Tag> tags;
-	private FFmpegMetadata metadata;
+	private Collection<Tag> tags;
 	private boolean isFavorite;
 
 	@Component
 	public static class VideoResourceModeller
-			extends RepresentationModelAssemblerSupport<Video, VideoResource> {
+			extends RepresentationModelAssemblerSupport<UserVideoView, VideoResource> {
 
-		private final UserService userService;
-
-		public VideoResourceModeller(UserService userService) {
+		public VideoResourceModeller() {
 			super(VideoController.class, VideoResource.class);
-			this.userService = userService;
 		}
 
 		@SneakyThrows
 		@Override
-		public @NotNull VideoResource toModel(@NotNull Video entity) {
+		public @NotNull VideoResource toModel(@NotNull UserVideoView entity) {
 
 			VideoResource model = instantiateModel(entity);
-			UserPreferences preferences = userService.getUserPreferences();
 			UUID videoId = entity.getId();
 
 			model.setId(videoId);
 			model.setTitle(entity.getTitle());
-			model.setTimestamp(entity.getAdded());
+			model.setTimestamp(entity.getTimestamp());
 			model.setTags(entity.getTags());
-			model.setMetadata(entity.getMetadata());
-			model.setFavorite(preferences.isFavorite(entity));
+			model.setFavorite(entity.isFavorite());
 
 			// links
 			model.add(
@@ -79,7 +70,6 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 					linkTo(methodOn(VideoController.class)
 							.toggleVideoFavorite(videoId))
 							.withRel("favorite"));
-
 			return model;
 		}
 	}

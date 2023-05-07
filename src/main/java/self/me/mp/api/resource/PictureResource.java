@@ -11,13 +11,10 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.mp.api.controller.PictureController;
-import self.me.mp.api.service.UserService;
-import self.me.mp.model.Picture;
 import self.me.mp.model.Tag;
-import self.me.mp.model.UserPreferences;
+import self.me.mp.model.UserImageView;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -36,24 +33,20 @@ public class PictureResource extends RepresentationModel<PictureResource> {
 	private int height;
 	private int width;
 	private long filesize;
-	private List<Tag> tags;
+	private Collection<Tag> tags;
 	private boolean favorite;
 
 	@Component
 	public static class PictureResourceModeller
-			extends RepresentationModelAssemblerSupport<Picture, PictureResource> {
+			extends RepresentationModelAssemblerSupport<UserImageView, PictureResource> {
 
-		private final UserService userService;
-
-		public PictureResourceModeller(UserService userService) {
+		public PictureResourceModeller() {
 			super(PictureController.class, PictureResource.class);
-			this.userService = userService;
 		}
 
 		@Override
-		public @NotNull PictureResource toModel(@NotNull Picture entity) {
+		public @NotNull PictureResource toModel(@NotNull UserImageView entity) {
 
-			UserPreferences preferences = userService.getUserPreferences();
 			PictureResource model = instantiateModel(entity);
 			UUID id = entity.getId();
 
@@ -62,8 +55,8 @@ public class PictureResource extends RepresentationModel<PictureResource> {
 			model.setWidth(entity.getWidth());
 			model.setHeight(entity.getHeight());
 			model.setFilesize(entity.getFilesize());
-			model.setTags(new ArrayList<>(entity.getTags()));
-			model.setFavorite(preferences.isFavorite(entity));
+			model.setTags(entity.getTags());
+			model.setFavorite(entity.isFavorite());
 
 			// attach links
 			model.add(linkTo(methodOn(PictureController.class)
@@ -78,5 +71,4 @@ public class PictureResource extends RepresentationModel<PictureResource> {
 			return model;
 		}
 	}
-
 }

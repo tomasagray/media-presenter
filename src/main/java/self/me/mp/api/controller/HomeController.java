@@ -14,9 +14,9 @@ import self.me.mp.api.resource.VideoResource.VideoResourceModeller;
 import self.me.mp.api.service.ComicBookService;
 import self.me.mp.api.service.PictureService;
 import self.me.mp.api.service.VideoService;
-import self.me.mp.model.ComicBook;
-import self.me.mp.model.Picture;
-import self.me.mp.model.Video;
+import self.me.mp.model.UserComicBookView;
+import self.me.mp.model.UserImageView;
+import self.me.mp.model.UserVideoView;
 
 import java.util.Collection;
 import java.util.List;
@@ -49,13 +49,13 @@ public class HomeController {
 	}
 
 	@GetMapping({"/", "/home"})
-	public String getHomePage(Model model) {
-		List<Video> videos = videoService.getRandom(DEFAULT_ITEM_COUNT);
+	public String getHomePage(@NotNull Model model) {
+		List<UserVideoView> videos = videoService.getRandomUserVideos(DEFAULT_ITEM_COUNT);
 		CollectionModel<VideoResource> videoResources = videoModeller.toCollectionModel(videos);
-		List<Picture> pictures = pictureService.getRandomPictures(DEFAULT_ITEM_COUNT);
+		List<UserImageView> pictures = pictureService.getRandomUserPictures(DEFAULT_ITEM_COUNT);
 		CollectionModel<PictureResource> pictureResources =
 				pictureModeller.toCollectionModel(pictures);
-		List<ComicBook> comics = comicBookService.getRandomComics(DEFAULT_ITEM_COUNT);
+		List<UserComicBookView> comics = comicBookService.getRandomUserComics(DEFAULT_ITEM_COUNT);
 		CollectionModel<ComicBookResource> comicResources =
 				comicModeller.toCollectionModel(comics);
 		model.addAttribute("videos", videoResources);
@@ -67,11 +67,11 @@ public class HomeController {
 
 	@GetMapping("/favorites")
 	public String getFavorites(@NotNull Model model) {
-		Collection<Video> videos = videoService.getVideoFavorites();
+		Collection<UserVideoView> videos = videoService.getVideoFavorites();
 		CollectionModel<VideoResource> videoResources = videoModeller.toCollectionModel(videos);
-		Collection<Picture> pictures = pictureService.getFavoritePictures();
+		Collection<UserImageView> pictures = pictureService.getFavoritePictures();
 		CollectionModel<PictureResource> pictureResources = pictureModeller.toCollectionModel(pictures);
-		Collection<ComicBook> comics = comicBookService.getFavoriteComics();
+		Collection<UserComicBookView> comics = comicBookService.getFavoriteComics();
 		CollectionModel<ComicBookResource> comicResources = comicModeller.toCollectionModel(comics);
 		model.addAttribute("videos", videoResources);
 		model.addAttribute("pictures", pictureResources);

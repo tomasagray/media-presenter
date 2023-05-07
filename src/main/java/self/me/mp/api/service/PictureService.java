@@ -10,13 +10,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import self.me.mp.db.PictureRepository;
-import self.me.mp.model.Image;
-import self.me.mp.model.Picture;
-import self.me.mp.model.Tag;
-import self.me.mp.model.UserPreferences;
+import self.me.mp.model.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -30,6 +28,7 @@ import java.util.stream.Collectors;
 import static java.nio.file.StandardWatchEventKinds.*;
 
 @Service
+@Transactional
 public class PictureService {
 
 	private static final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
@@ -130,12 +129,33 @@ public class PictureService {
 		return pictureRepo.findLatest(PageRequest.of(page, pageSize));
 	}
 
+	public Page<UserImageView> getLatestUserPictures(int page, int size) {
+		return getLatestPictures(page, size).map(this::getUserImageView);
+	}
+
+	public UserImageView getUserImageView(@NotNull Picture picture) {
+		return userService.getUserPreferences().isFavorite(picture) ?
+				UserImageView.favorite(picture) : UserImageView.of(picture);
+	}
+
+	public Collection<UserImageView> getUserImageViews(@NotNull Collection<Picture> pictures) {
+		return pictures.stream().map(this::getUserImageView).toList();
+	}
+
 	public List<Picture> getRandomPictures(int count) {
 		return pictureRepo.findRandom(PageRequest.ofSize(count));
 	}
 
+	public List<UserImageView> getRandomUserPictures(int count) {
+		return getRandomPictures(count).stream().map(this::getUserImageView).toList();
+	}
+
 	public Optional<Picture> getPicture(@NotNull UUID picId) {
 		return pictureRepo.findById(picId);
+	}
+
+	public Optional<UserImageView> getUserPicture(@NotNull UUID picId) {
+		return getPicture(picId).map(this::getUserImageView);
 	}
 
 	public Optional<UrlResource> getPictureData(@NotNull UUID picId) {
@@ -153,18 +173,23 @@ public class PictureService {
 		pictureRepo.deleteById(picId);
 	}
 
-	public Picture toggleIsPictureFavorite(@NotNull UUID picId) {
+	public UserImageView toggleIsPictureFavorite(@NotNull UUID picId) {
 		Optional<Picture> optional = getPicture(picId);
 		if (optional.isEmpty()) {
 			throw new IllegalArgumentException("Trying to favorite non-existent Picture: " + picId);
 		}
 		Picture picture = optional.get();
 		UserPreferences preferences = userService.getUserPreferences();
-		preferences.toggleFavorite(picture);
-		return picture;
+		if (preferences.toggleFavorite(picture)) {
+			return UserImageView.favorite(picture);
+		}
+		return UserImageView.of(picture);
 	}
 
-	public Collection<Picture> getFavoritePictures() {
-		return userService.getUserPreferences().getFavoritePictures();
+	public Collection<UserImageView> getFavoritePictures() {
+		return userService.getUserPreferences()
+				.getFavoritePictures().stream()
+				.map(this::getUserImageView)
+				.toList();
 	}
 }

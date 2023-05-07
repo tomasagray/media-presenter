@@ -40,7 +40,7 @@ public class ImageSet {
 	@FullTextField
 	private String title;
 
-	@ManyToMany(targetEntity = Tag.class)
+	@ManyToMany(targetEntity = Tag.class, fetch = FetchType.EAGER)
 	@IndexedEmbedded
 	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private Set<Tag> tags;

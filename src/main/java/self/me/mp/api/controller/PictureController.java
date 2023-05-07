@@ -10,7 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import self.me.mp.api.resource.PictureResource;
 import self.me.mp.api.service.PictureService;
-import self.me.mp.model.Picture;
+import self.me.mp.model.UserImageView;
 import self.me.mp.util.JsonParser;
 
 import java.util.List;
@@ -36,13 +36,13 @@ public class PictureController {
 			@RequestParam(name = "size", defaultValue = "15") int size,
 			@NotNull Model model) {
 
-		Page<Picture> pictures = pictureService.getLatestPictures(page, size);
+		Page<UserImageView> pictures = pictureService.getLatestUserPictures(page, size);
 		setAttributes(model, pictures);
 		model.addAttribute("page_title", "Latest pictures");
 		return "image/image_list";
 	}
 
-	private void setAttributes(@NotNull Model model, @NotNull Page<Picture> pictures) {
+	private void setAttributes(@NotNull Model model, @NotNull Page<UserImageView> pictures) {
 		List<PictureResource> resources =
 				pictures
 						.get()
@@ -63,7 +63,7 @@ public class PictureController {
 	public String getRandomPictures(
 			@RequestParam(name = "size", defaultValue = "15") int size,
 			@NotNull Model model) {
-		List<Picture> pictures = pictureService.getRandomPictures(size);
+		List<UserImageView> pictures = pictureService.getRandomUserPictures(size);
 		CollectionModel<PictureResource> resources = modeller.toCollectionModel(pictures);
 		model.addAttribute("images", resources);
 		model.addAttribute("page_title", "Pictures");
@@ -72,7 +72,7 @@ public class PictureController {
 
 	@GetMapping(value = "/picture/{picId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public PictureResource getPicture(@PathVariable("picId") UUID picId) {
-		return pictureService.getPicture(picId)
+		return pictureService.getUserPicture(picId)
 				.map(modeller::toModel)
 				.orElseThrow(() -> new IllegalArgumentException("Picture not found: " + picId));
 	}
@@ -88,7 +88,7 @@ public class PictureController {
 	@PatchMapping(value = "/picture/{picId}/favorite", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public PictureResource togglePictureFavorite(@PathVariable UUID picId) {
-		Picture picture = pictureService.toggleIsPictureFavorite(picId);
+		UserImageView picture = pictureService.toggleIsPictureFavorite(picId);
 		return modeller.toModel(picture);
 	}
 
