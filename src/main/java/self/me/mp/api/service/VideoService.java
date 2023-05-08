@@ -16,6 +16,7 @@ import self.me.mp.model.*;
 import self.me.mp.plugin.ffmpeg.FFmpegPlugin;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
@@ -61,6 +62,7 @@ public class VideoService {
 
 	@Async
 	public void init() throws IOException {
+		initializeVideoLocation();
 		logger.info("Initializing videos in: {}", videoLocation);
 		Set<Path> existing = getExistingVideos();
 		watcherService.watch(
@@ -68,6 +70,16 @@ public class VideoService {
 				file -> scanVideoFile(file, existing),
 				this::handleVideoFileEvent
 		);
+	}
+
+	private void initializeVideoLocation() throws IOException {
+		File file = videoLocation.toFile();
+		if (!file.exists()) {
+			logger.info("Video storage location: {} does not exist; creating...", videoLocation);
+			if (!file.mkdirs()) {
+				throw new IOException("Could not create location for Video storage: " + videoLocation);
+			}
+		}
 	}
 
 	@NotNull

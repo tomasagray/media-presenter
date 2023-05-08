@@ -18,6 +18,7 @@ import self.me.mp.model.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,13 +55,24 @@ public class PictureService {
 
 	@Async
 	public void init() throws IOException {
-
+		initializePictureLocation();
+		logger.info("Scanning Picture files in: {}", pictureLocation);
 		Set<Path> existing = getExistingPictures();
 		watcherService.watch(
 				pictureLocation,
 				picture -> scanPicture(picture, existing),
 				this::handleFileEvent
 		);
+	}
+
+	private void initializePictureLocation() throws IOException {
+		File file = pictureLocation.toFile();
+		if (!file.exists()) {
+			logger.info("Picture storage location: {} does not exist; creating...", pictureLocation);
+			if (!file.mkdirs()) {
+				throw new IOException("Could not create location for Picture storage: " + pictureLocation);
+			}
+		}
 	}
 
 	@NotNull

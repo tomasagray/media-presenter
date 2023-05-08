@@ -69,12 +69,23 @@ public class ComicBookService {
 
 	@Async
 	public void init() throws IOException {
+		initializeComicBookLocation();
 		logger.info("Scanning Comic Books in: {}", comicsLocation);
 		watcherService.watch(
 				comicsLocation,
 				this::scanComicBook,
 				this::handleFileEvent
 		);
+	}
+
+	private void initializeComicBookLocation() throws IOException {
+		File file = comicsLocation.toFile();
+		if (!file.exists()) {
+			logger.info("Comic Book storage location: {} does not exist; creating...", comicsLocation);
+			if (!file.mkdirs()) {
+				throw new IOException("Could not create location for Comic Book storage: " + comicsLocation);
+			}
+		}
 	}
 
 	private synchronized void scanComicBook(@NotNull Path file) {
