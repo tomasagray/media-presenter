@@ -11,6 +11,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import self.me.mp.db.ComicBookRepository;
 import self.me.mp.db.ImageRepository;
 import self.me.mp.model.*;
@@ -38,7 +40,7 @@ public class ComicBookService {
 	private final TagService tagService;
 	private final UserService userService;
 
-	private final Map<String, Path> invalidFiles = new HashMap<>();
+	private static final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
 
 	@Value("${comics.location}")
 	private Path comicsLocation;
@@ -109,7 +111,7 @@ public class ComicBookService {
 		} catch (Throwable e) {
 			logger.error("File could not be added to Comic: {}; {}", file, e.getMessage(), e);
 			String ext = FilenameUtils.getExtension(file.toString());
-			invalidFiles.put(ext, file);
+			invalidFiles.add(ext, file);
 		}
 	}
 
@@ -180,6 +182,15 @@ public class ComicBookService {
 			logger.info("Comic Book image: {} was modified", file);
 		} else if (ENTRY_DELETE.equals(kind)) {
 			logger.info("Comic Book image was deleted: {}", file);
+			String ext = FilenameUtils.getExtension(file.toString());
+			List<Path> invalidPaths = invalidFiles.get(ext);
+			if (invalidPaths != null) {
+				boolean removed = invalidPaths.remove(file);
+				if (removed) {
+					logger.info("Deleted invalid file: {}", file);
+					return;
+				}
+			}
 			handleDeletedImage(file);
 		}
 	}
@@ -255,7 +266,7 @@ public class ComicBookService {
 				.map(image -> UrlResource.from(image.getUri()));
 	}
 
-	public Map<String, Path> getInvalidFiles() {
+	public MultiValueMap<String, Path> getInvalidFiles() {
 		return invalidFiles;
 	}
 

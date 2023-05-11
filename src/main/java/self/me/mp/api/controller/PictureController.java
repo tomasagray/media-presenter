@@ -7,12 +7,13 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import self.me.mp.api.resource.PictureResource;
 import self.me.mp.api.service.PictureService;
 import self.me.mp.model.UserImageView;
-import self.me.mp.util.JsonParser;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -94,7 +95,7 @@ public class PictureController {
 
 	@GetMapping(value = "/invalid", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public String getInvalid() {
-		return JsonParser.toJson(pictureService.getInvalidFiles());
+	public MultiValueMap<String, Path> getInvalid() {
+		return pictureService.getInvalidFiles();
 	}
 }

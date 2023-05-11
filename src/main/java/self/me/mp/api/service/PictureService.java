@@ -105,6 +105,7 @@ public class PictureService {
 				}
 			}
 		} catch (Throwable e) {
+			logger.error("Found invalid Picture file: {}", file);
 			String ext = FilenameUtils.getExtension(file.toString());
 			invalidFiles.add(ext, file);
 		}
@@ -133,6 +134,15 @@ public class PictureService {
 			logger.info("Picture was modified: {}", file);
 		} else if (ENTRY_DELETE.equals(kind)) {
 			logger.info("Deleting Picture at: {}", file);
+			String ext = FilenameUtils.getExtension(file.toString());
+			List<Path> invalidPaths = invalidFiles.get(ext);
+			if (invalidPaths != null) {
+				boolean removed = invalidPaths.remove(file);
+				if (removed) {
+					logger.info("Invalid file: {} deleted", file);
+					return;
+				}
+			}
 			getPictureByPath(file).forEach(pic -> deletePicture(pic.getId()));
 		}
 	}

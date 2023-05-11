@@ -11,6 +11,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import self.me.mp.db.VideoRepository;
 import self.me.mp.model.*;
 import self.me.mp.plugin.ffmpeg.FFmpegPlugin;
@@ -35,6 +37,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 public class VideoService {
 
 	private static final Logger logger = LogManager.getLogger(VideoService.class);
+	private static final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
 
 	private final VideoRepository videoRepository;
 	private final FFmpegPlugin ffmpegPlugin;
@@ -127,7 +130,9 @@ public class VideoService {
 				saveVideo(video);   // save thumbs
 			}
 		} catch (Throwable e) {
-			logger.info("Error scanning video: {}", e.getMessage(), e);
+			logger.error("Error scanning video: {}", e.getMessage(), e);
+			String ext = FilenameUtils.getExtension(file.toString());
+			invalidFiles.add(ext, file);
 		}
 	}
 
@@ -256,5 +261,9 @@ public class VideoService {
 				.getFavoriteVideos().stream()
 				.map(this::getUserVideoView)
 				.toList();
+	}
+
+	public MultiValueMap<String, Path> getInvalidFiles() {
+		return invalidFiles;
 	}
 }
