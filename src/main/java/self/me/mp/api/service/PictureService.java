@@ -123,6 +123,7 @@ public class PictureService {
 				watcherService.walkTreeAndSetWatches(
 						file,
 						path -> scanPicture(path, getExistingPictures()),
+						null,
 						this::handleFileEvent
 				);
 			} else {

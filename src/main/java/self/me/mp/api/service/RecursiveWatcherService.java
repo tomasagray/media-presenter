@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import self.me.mp.Procedure;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,18 +41,28 @@ public class RecursiveWatcherService {
 			@NotNull Path path,
 			@Nullable Consumer<Path> onScanFile,
 			@NotNull BiConsumer<Path, WatchEvent.Kind<?>> eventHandler) throws IOException {
+		watch(path, onScanFile, null, eventHandler);
+	}
+
+	public void watch(
+			@NotNull Path path,
+			@Nullable Consumer<Path> onScanFile,
+			@Nullable Procedure onFinish,
+			@NotNull BiConsumer<Path, WatchEvent.Kind<?>> eventHandler
+	) throws IOException {
 
 		File file = path.toFile();
 		if (!(file.exists()) || !(file.isDirectory())) {
 			throw new IOException("Cannot watch non-existent directory: " + path);
 		}
 		watchRoots.add(path);
-		walkTreeAndSetWatches(path, onScanFile, eventHandler);
+		walkTreeAndSetWatches(path, onScanFile, onFinish, eventHandler);
 	}
 
 	public synchronized void walkTreeAndSetWatches(
 			@NotNull Path path,
 			@Nullable Consumer<Path> onScanFile,
+			@Nullable Procedure onFinish,
 			@NotNull BiConsumer<Path, WatchEvent.Kind<?>> handler) {
 
 		try {
@@ -89,6 +100,10 @@ public class RecursiveWatcherService {
 					});
 		} catch (IOException ignore) {
 			// Don't care
+		} finally {
+			if (onFinish != null) {
+				onFinish.run();
+			}
 		}
 	}
 

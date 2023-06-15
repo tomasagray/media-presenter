@@ -171,6 +171,7 @@ public class ComicBookService {
 				watcherService.walkTreeAndSetWatches(
 						file,
 						this::scanComicBook,
+						null,
 						this::handleFileEvent
 				);
 			} else {

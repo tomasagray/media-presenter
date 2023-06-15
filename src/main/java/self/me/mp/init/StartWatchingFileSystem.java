@@ -3,6 +3,7 @@ package self.me.mp.init;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import self.me.mp.api.service.ComicBookService;
@@ -14,6 +15,7 @@ import java.io.IOException;
 
 @Component
 @Order(2)
+@Profile("!test-volatile")
 public class StartWatchingFileSystem implements CommandLineRunner {
 
 	private static final Logger logger = LogManager.getLogger(StartWatchingFileSystem.class);
@@ -42,7 +44,7 @@ public class StartWatchingFileSystem implements CommandLineRunner {
 
 		// perform initial file scans...
 		logger.info("Performing initial filesystem scans. This may take a while...");
-		videoService.init();
+		videoService.init(null);
 		pictureService.init();
 		comicService.init();
 	}

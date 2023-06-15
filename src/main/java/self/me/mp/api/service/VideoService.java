@@ -4,6 +4,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import self.me.mp.Procedure;
 import self.me.mp.db.VideoRepository;
 import self.me.mp.model.*;
 import self.me.mp.plugin.ffmpeg.FFmpegPlugin;
@@ -64,13 +66,14 @@ public class VideoService {
 	}
 
 	@Async
-	public void init() throws IOException {
-		initializeVideoLocation();
+	public void init(@Nullable Procedure onFinish) throws IOException {
 		logger.info("Initializing videos in: {}", videoLocation);
+		initializeVideoLocation();
 		Set<Path> existing = getExistingVideos();
 		watcherService.watch(
 				videoLocation,
 				file -> scanVideoFile(file, existing),
+				onFinish,
 				this::handleVideoFileEvent
 		);
 	}
@@ -142,6 +145,7 @@ public class VideoService {
 				watcherService.walkTreeAndSetWatches(
 						path,
 						file -> scanVideoFile(file, getExistingVideos()),
+						null,
 						this::handleVideoFileEvent
 				);
 			} else {
