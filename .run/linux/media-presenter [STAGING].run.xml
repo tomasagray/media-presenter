@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="media-presenter [STAGING]" type="SpringBootApplicationConfigurationType"
+                   factoryName="Spring Boot">
+        <envs>
+            <env name="DATA_ROOT" value="/projectdata/mp/staging/data"/>
+            <env name="DB_NAME" value="mp_staging"/>
+            <env name="DB_PASSWORD" value="media"/>
+            <env name="DB_USER" value="mp"/>
+        </envs>
+        <module name="media-presenter.main"/>
+        <option name="SPRING_BOOT_MAIN_CLASS" value="self.me.mp.MpApplication"/>
+        <option name="VM_PARAMETERS" value="-Dspring.profiles.active=staging"/>
+        <method v="2">
+            <option name="Make" enabled="true"/>
+        </method>
+    </configuration>
+</component>

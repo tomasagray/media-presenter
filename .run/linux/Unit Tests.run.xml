@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="Unit Tests" type="JUnit" factoryName="JUnit">
+        <module name="media-presenter.test"/>
+        <option name="PACKAGE_NAME" value="self.me.mp.api.service"/>
+        <option name="MAIN_CLASS_NAME" value=""/>
+        <option name="METHOD_NAME" value=""/>
+        <option name="TEST_OBJECT" value="directory"/>
+        <option name="VM_PARAMETERS"
+                value="-ea -Dwatching=/projectdata/mp/test/test_data -Dspring.profiles.active=test-volatile"/>
+        <envs>
+            <env name="DATA_ROOT" value="/projectdata/mp/test/test_data"/>
+        </envs>
+        <dir value="$PROJECT_DIR$/src/test/java/self/me/mp/unit"/>
+        <method v="2">
+            <option name="Make" enabled="true"/>
+        </method>
+    </configuration>
+</component>
