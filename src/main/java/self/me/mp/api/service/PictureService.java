@@ -53,7 +53,7 @@ public class PictureService {
 		this.userService = userService;
 	}
 
-	@Async
+	@Async("watcher")
 	public void init() throws IOException {
 		initializePictureLocation();
 		logger.info("Scanning Picture files in: {}", pictureLocation);

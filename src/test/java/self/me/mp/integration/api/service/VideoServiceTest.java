@@ -35,14 +35,20 @@ public class VideoServiceTest {
 	@DisplayName("Validate time to scan 5,000+ files")
 	void testScanningManyFilesTime() throws IOException, InterruptedException {
 
+		// given
+		int maxDuration = 500;
 		logger.info("Beginning test scan...");
 		final Instant start = Instant.now();
+
+		// when
 		videoService.init(() -> {
 			Instant end = Instant.now();
 			Duration duration = Duration.between(start, end);
-			logger.info("Scanning took: {}s", duration.toMillis() / 1000);
-			assertFalse(duration.toMillis() > 180_000);
+			logger.info("Scanning took: {}ms", duration.toMillis());
+			// then
+			assertFalse(duration.toMillis() > maxDuration);
+			System.exit(0);
 		});
-		TimeUnit.SECONDS.sleep(180);
+		TimeUnit.SECONDS.sleep(10);
 	}
 }

@@ -69,7 +69,7 @@ public class ComicBookService {
 				.build();
 	}
 
-	@Async
+	@Async("watcher")
 	public void init() throws IOException {
 		initializeComicBookLocation();
 		logger.info("Scanning Comic Books in: {}", comicsLocation);

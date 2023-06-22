@@ -1,6 +1,5 @@
 package self.me.mp.api.service;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -12,13 +11,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import self.me.mp.Procedure;
 import self.me.mp.db.VideoRepository;
-import self.me.mp.model.*;
-import self.me.mp.plugin.ffmpeg.FFmpegPlugin;
-import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
+import self.me.mp.model.Image;
+import self.me.mp.model.UserPreferences;
+import self.me.mp.model.UserVideoView;
+import self.me.mp.model.Video;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,13 +38,10 @@ import static java.nio.file.StandardWatchEventKinds.*;
 public class VideoService {
 
 	private static final Logger logger = LogManager.getLogger(VideoService.class);
-	private static final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
 
 	private final VideoRepository videoRepository;
-	private final FFmpegPlugin ffmpegPlugin;
 	private final RecursiveWatcherService watcherService;
-	private final ThumbnailService thumbnailService;
-	private final TagService tagService;
+	private final VideoScanningService videoScanningService;
 	private final UserService userService;
 
 	@Value("${videos.location}")
@@ -53,26 +49,22 @@ public class VideoService {
 
 	public VideoService(
 			VideoRepository videoRepository,
-			FFmpegPlugin ffmpegPlugin,
 			RecursiveWatcherService watcherService,
-			ThumbnailService thumbnailService,
-			TagService tagService, UserService userService) {
+			VideoScanningService videoScanningService, UserService userService) {
 		this.videoRepository = videoRepository;
-		this.ffmpegPlugin = ffmpegPlugin;
 		this.watcherService = watcherService;
-		this.thumbnailService = thumbnailService;
-		this.tagService = tagService;
+		this.videoScanningService = videoScanningService;
 		this.userService = userService;
 	}
 
-	@Async
+	@Async("watcher")
 	public void init(@Nullable Procedure onFinish) throws IOException {
 		logger.info("Initializing videos in: {}", videoLocation);
 		initializeVideoLocation();
 		Set<Path> existing = getExistingVideos();
 		watcherService.watch(
 				videoLocation,
-				file -> scanVideoFile(file, existing),
+				file -> videoScanningService.scanVideoFile(file, existing, this::saveVideo),
 				onFinish,
 				this::handleVideoFileEvent
 		);
@@ -105,52 +97,18 @@ public class VideoService {
 		}
 	}
 
-	private static void renameToSafeFilename(@NotNull Path file)
-			throws IOException {
-		String name = file.toString();
-		String newName = name.replace(" ", "_");
-		logger.info("Renaming file: {} to: {}", file, newName);
-		Files.move(file, file.resolveSibling(newName));
-	}
-
-	private void scanVideoFile(@NotNull Path file, @NotNull Collection<Path> existing) {
-
-		try {
-			if (!existing.contains(file)) {
-				String name = FilenameUtils.getBaseName(file.toString());
-				if (name.contains(" ")) {
-					renameToSafeFilename(file);
-					return;     // change will be picked up by watcher
-				}
-				logger.info("Adding new video: {}", file);
-				String correctedName = name.replace("_", " ");
-				Video video = new Video(correctedName, file);
-				updateVideoMetadata(video);
-				List<Tag> tags = tagService.getTags(videoLocation.relativize(file));
-				video.setTags(new HashSet<>(tags));
-				saveVideo(video);   // ensure ID set
-				thumbnailService.generateVideoThumbnails(video);
-				saveVideo(video);   // save thumbs
-			}
-		} catch (Throwable e) {
-			logger.error("Error scanning video: {}", e.getMessage(), e);
-			String ext = FilenameUtils.getExtension(file.toString());
-			invalidFiles.add(ext, file);
-		}
-	}
-
 	private void handleVideoFileEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
 		if (ENTRY_CREATE.equals(kind)) {
 			if (Files.isDirectory(path)) {
 				watcherService.walkTreeAndSetWatches(
 						path,
-						file -> scanVideoFile(file, getExistingVideos()),
+						file -> videoScanningService.scanVideoFile(file, getExistingVideos(), this::saveVideo),
 						null,
 						this::handleVideoFileEvent
 				);
 			} else {
 				logger.info("Adding new video: {}", path);
-				scanVideoFile(path, new ArrayList<>());
+				videoScanningService.scanVideoFile(path, new ArrayList<>(), this::saveVideo);
 			}
 		} else if (ENTRY_MODIFY.equals(kind)) {
 			logger.info("Video was modified: {}", path);
@@ -231,11 +189,6 @@ public class VideoService {
 		videoRepository.delete(video);
 	}
 
-	public void updateVideoMetadata(@NotNull Video video) throws IOException {
-		final URI videoUri = video.getFile().toUri();
-		final FFmpegMetadata metadata = ffmpegPlugin.readFileMetadata(videoUri);
-		video.setMetadata(metadata);
-	}
 
 	public UrlResource getVideoThumb(@NotNull UUID videoId, @NotNull UUID thumbId) {
 		return getById(videoId)
@@ -268,6 +221,6 @@ public class VideoService {
 	}
 
 	public MultiValueMap<String, Path> getInvalidFiles() {
-		return invalidFiles;
+		return videoScanningService.getInvalidFiles();
 	}
 }
