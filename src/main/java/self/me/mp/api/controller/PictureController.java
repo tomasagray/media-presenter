@@ -10,8 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import self.me.mp.api.resource.PictureResource;
-import self.me.mp.api.service.PictureService;
-import self.me.mp.model.UserImageView;
+import self.me.mp.api.service.user.UserPictureService;
+import self.me.mp.user.UserImageView;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -23,10 +23,10 @@ import static self.me.mp.api.resource.PictureResource.PictureResourceModeller;
 @RequestMapping("pictures")
 public class PictureController {
 
-	private final PictureService pictureService;
+	private final UserPictureService pictureService;
 	private final PictureResourceModeller modeller;
 
-	public PictureController(PictureService pictureService, PictureResourceModeller modeller) {
+	public PictureController(UserPictureService pictureService, PictureResourceModeller modeller) {
 		this.pictureService = pictureService;
 		this.modeller = modeller;
 	}

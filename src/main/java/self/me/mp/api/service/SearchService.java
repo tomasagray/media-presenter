@@ -8,6 +8,9 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import self.me.mp.api.service.user.UserComicService;
+import self.me.mp.api.service.user.UserPictureService;
+import self.me.mp.api.service.user.UserVideoService;
 import self.me.mp.model.ComicBook;
 import self.me.mp.model.Picture;
 import self.me.mp.model.SearchAllResult;
@@ -22,15 +25,15 @@ public class SearchService {
 	private static final Logger logger = LogManager.getLogger(SearchService.class);
 
 	private final EntityManager entityManager;
-	private final VideoService videoService;
-	private final PictureService pictureService;
-	private final ComicBookService comicService;
+	private final UserVideoService videoService;
+	private final UserPictureService pictureService;
+	private final UserComicService comicService;
 
 	public SearchService(
 			EntityManager entityManager,
-			VideoService videoService,
-			PictureService pictureService,
-			ComicBookService comicService) {
+			UserVideoService videoService,
+			UserPictureService pictureService,
+			UserComicService comicService) {
 		this.entityManager = entityManager;
 		this.videoService = videoService;
 		this.pictureService = pictureService;

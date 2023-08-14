@@ -25,8 +25,8 @@ public class AsyncConfig {
 		return executor;
 	}
 
-	@Bean(name = "videoScanner")
-	public Executor getVideoScannerExecutor() {
+	@Bean(name = "fileScanner")
+	public Executor getFileScannerExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(SCAN_TASKS);
 		executor.setMaxPoolSize(MAX_SCAN_TASKS);

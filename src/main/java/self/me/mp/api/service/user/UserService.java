@@ -1,4 +1,4 @@
-package self.me.mp.api.service;
+package self.me.mp.api.service.user;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

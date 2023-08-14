@@ -10,8 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import self.me.mp.api.resource.ComicBookResource;
-import self.me.mp.api.service.ComicBookService;
-import self.me.mp.model.UserComicBookView;
+import self.me.mp.api.service.user.UserComicService;
+import self.me.mp.user.UserComicBookView;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -23,10 +23,10 @@ import static self.me.mp.api.resource.ComicBookResource.ComicBookModeller;
 @RequestMapping("/comics")
 public class ComicBookController {
 
-	private final ComicBookService comicBookService;
+	private final UserComicService comicBookService;
 	private final ComicBookModeller modeller;
 
-	public ComicBookController(ComicBookService comicBookService, ComicBookModeller modeller) {
+	public ComicBookController(UserComicService comicBookService, ComicBookModeller modeller) {
 		this.comicBookService = comicBookService;
 		this.modeller = modeller;
 	}

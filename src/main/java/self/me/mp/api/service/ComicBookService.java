@@ -11,21 +11,21 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import self.me.mp.db.ComicBookRepository;
 import self.me.mp.db.ImageRepository;
-import self.me.mp.model.*;
+import self.me.mp.model.ComicBook;
+import self.me.mp.model.Image;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -35,12 +35,9 @@ public class ComicBookService {
 
 	private static final Logger logger = LogManager.getLogger(ComicBookService.class);
 	private final ComicBookRepository comicBookRepo;
+	private final FileScanningService<ComicBook> scanningService;
 	private final ImageRepository imageRepository;
 	private final RecursiveWatcherService watcherService;
-	private final TagService tagService;
-	private final UserService userService;
-
-	private static final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
 
 	@Value("${comics.location}")
 	private Path comicsLocation;
@@ -49,33 +46,21 @@ public class ComicBookService {
 			ComicBookRepository comicBookRepo,
 			ImageRepository imageRepository,
 			RecursiveWatcherService watcherService,
-			TagService tagService, UserService userService) {
+			ComicScanningService scanningService) {
 		this.comicBookRepo = comicBookRepo;
 		this.imageRepository = imageRepository;
 		this.watcherService = watcherService;
-		this.tagService = tagService;
-		this.userService = userService;
-	}
-
-	private static Image createImage(@NotNull Path file) throws IOException {
-		File input = file.toFile();
-		BufferedImage image = ImageIO.read(input);
-		return Image.builder()
-				.width(image.getWidth())
-				.height(image.getHeight())
-				.filesize(input.length())
-				.title(FilenameUtils.getBaseName(file.toString()))
-				.uri(file.toUri())
-				.build();
+		this.scanningService = scanningService;
 	}
 
 	@Async("watcher")
 	public void init() throws IOException {
 		initializeComicBookLocation();
 		logger.info("Scanning Comic Books in: {}", comicsLocation);
+		List<ComicBook> existing = comicBookRepo.findAll();
 		watcherService.watch(
 				comicsLocation,
-				this::scanComicBook,
+				file -> scanningService.scanFile(file, existing, this::save),
 				this::handleFileEvent
 		);
 	}
@@ -90,93 +75,20 @@ public class ComicBookService {
 		}
 	}
 
-	private synchronized void scanComicBook(@NotNull Path file) {
-		try {
-			logger.info("Found Comic Book page: {}", file);
-			List<ComicBook> existing = comicBookRepo.findAll();
-			Path parent = file.getParent();
-			if (!isPathWithin(comicsLocation, parent)) {
-				throw new UncheckedIOException(new IOException("Path is not within a Comic Book: " + file));
-			}
-			Optional<ComicBook> comicOpt = existing.stream()
-					.filter(comic -> comic.getLocation().equals(parent))
-					.findFirst();
-			if (comicOpt.isPresent()) {
-				ComicBook comic = comicOpt.get();
-				addPageToComic(file, comic);
-			} else {
-				ComicBook comic = createComic(file);
-				logger.info("Created new Comic Book: {}", comic);
-			}
-		} catch (Throwable e) {
-			logger.error("File could not be added to Comic: {}; {}", file, e.getMessage(), e);
-			String ext = FilenameUtils.getExtension(file.toString());
-			invalidFiles.add(ext, file);
-		}
-	}
-
-	private void addPageToComic(@NotNull Path file, @NotNull ComicBook comic)
-			throws IOException {
-
-		logger.info("Adding page: {} to Comic Book: {}", file, comic);
-		Optional<Image> imgOpt = comic.getImages()
-				.stream()
-				.filter(img -> img.getUri().equals(file.toUri()))
-				.findFirst();
-		if (imgOpt.isEmpty()) {
-			Image img = createImage(file);
-			comic.addImage(img);
-			save(comic);
-		} else {
-			logger.info("Page: {} is already in Comic Book: {}", file, comic);
-		}
-	}
-
-	private ComicBook createComic(@NotNull Path file) throws IOException {
-		Path parent = file.getParent();
-		LinkedList<String> names = getComicNames(parent);
-		String comicName = names.removeLast();
-		Set<Image> images = new HashSet<>();
-		images.add(createImage(file));
-		List<Tag> tags = tagService.getTags(comicsLocation.relativize(file));
-		ComicBook comic = ComicBook.builder()
-				.location(parent)
-				.title(comicName)
-				.images(images)
-				.tags(new HashSet<>(tags))  // ensure mutable
-				.build();
-		return save(comic);
-	}
-
-	@NotNull
-	private LinkedList<String> getComicNames(Path parent) {
-		Path relativized = comicsLocation.relativize(parent);
-		LinkedList<String> names = new LinkedList<>();
-		for (int i = 0; i < relativized.getNameCount(); i++) {
-			names.add(relativized.getName(i).toString());
-		}
-		return names;
-	}
-
-	public boolean isPathWithin(@NotNull Path parent, @NotNull Path child) {
-		Path absParent = parent.toAbsolutePath();
-		Path absChild = child.toAbsolutePath();
-		return absChild.startsWith(absParent) && !absChild.equals(absParent);
-	}
-
 	private void handleFileEvent(@NotNull Path file, WatchEvent.Kind<?> kind) {
 		if (ENTRY_CREATE.equals(kind)) {
 			if (Files.isDirectory(file)) {
 				logger.info("Detected new Comic Book: {}", file);
 				watcherService.walkTreeAndSetWatches(
 						file,
-						this::scanComicBook,
+						page -> scanningService.scanFile(page, new ArrayList<>(), this::save),
 						null,
 						this::handleFileEvent
 				);
 			} else {
 				logger.info("Found new Comic Book page: {}", file);
-				scanComicBook(file);
+				List<ComicBook> existing = comicBookRepo.findAll();
+				scanningService.scanFile(file, existing, this::save);
 			}
 		} else if (ENTRY_MODIFY.equals(kind)) {
 			// TODO: handle modify comic...
@@ -184,7 +96,7 @@ public class ComicBookService {
 		} else if (ENTRY_DELETE.equals(kind)) {
 			logger.info("Comic Book image was deleted: {}", file);
 			String ext = FilenameUtils.getExtension(file.toString());
-			List<Path> invalidPaths = invalidFiles.get(ext);
+			List<Path> invalidPaths = scanningService.getInvalidFiles().get(ext);
 			if (invalidPaths != null) {
 				boolean removed = invalidPaths.remove(file);
 				if (removed) {
@@ -224,42 +136,16 @@ public class ComicBookService {
 		return comicBookRepo.findAll(PageRequest.of(page, size));
 	}
 
-	public Page<UserComicBookView> getAllUserComics(int page, int size) {
-		return getAllComics(page, size).map(this::getUserComicBookView);
-	}
-
 	public Page<ComicBook> getLatestComics(int page, int size) {
 		return comicBookRepo.findLatest(PageRequest.of(page, size));
-	}
-
-	public Page<UserComicBookView> getLatestUserComics(int page, int size) {
-		return getLatestComics(page, size).map(this::getUserComicBookView);
-	}
-
-	@NotNull
-	private UserComicBookView getUserComicBookView(@NotNull ComicBook comic) {
-		return userService.getUserPreferences().isFavorite(comic) ?
-				UserComicBookView.favorite(comic) : UserComicBookView.of(comic);
-	}
-
-	public Collection<UserComicBookView> getUserComicViews(@NotNull Collection<ComicBook> comics) {
-		return comics.stream().map(this::getUserComicBookView).toList();
 	}
 
 	public List<ComicBook> getRandomComics(int count) {
 		return comicBookRepo.findRandomComics(PageRequest.ofSize(count));
 	}
 
-	public List<UserComicBookView> getRandomUserComics(int count) {
-		return getRandomComics(count).stream().map(this::getUserComicBookView).toList();
-	}
-
 	public Optional<ComicBook> getComicBook(UUID bookId) {
 		return comicBookRepo.findById(bookId);
-	}
-
-	public Optional<UserComicBookView> getUserComicBook(UUID comicId) {
-		return getComicBook(comicId).map(this::getUserComicBookView);
 	}
 
 	public Optional<UrlResource> getPageData(@NotNull UUID pageId) {
@@ -268,7 +154,7 @@ public class ComicBookService {
 	}
 
 	public MultiValueMap<String, Path> getInvalidFiles() {
-		return invalidFiles;
+		return scanningService.getInvalidFiles();
 	}
 
 	public ComicBook save(@NotNull ComicBook comicBook) {
@@ -277,25 +163,5 @@ public class ComicBookService {
 
 	public void delete(@NotNull ComicBook comicBook) {
 		comicBookRepo.delete(comicBook);
-	}
-
-	public UserComicBookView toggleIsComicFavorite(@NotNull UUID comicId) {
-		Optional<ComicBook> optional = getComicBook(comicId);
-		if (optional.isEmpty()) {
-			throw new IllegalArgumentException("Trying to favorite non-existent Comic Book: " + comicId);
-		}
-		ComicBook comic = optional.get();
-		UserPreferences preferences = userService.getUserPreferences();
-		if (preferences.toggleFavorite(comic)) {
-			return UserComicBookView.favorite(comic);
-		}
-		return UserComicBookView.of(comic);
-	}
-
-	public Collection<UserComicBookView> getFavoriteComics() {
-		return userService.getUserPreferences()
-				.getFavoriteComics().stream()
-				.map(this::getUserComicBookView)
-				.toList();
 	}
 }

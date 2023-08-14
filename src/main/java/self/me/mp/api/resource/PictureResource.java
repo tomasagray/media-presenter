@@ -12,7 +12,7 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component;
 import self.me.mp.api.controller.PictureController;
 import self.me.mp.model.Tag;
-import self.me.mp.model.UserImageView;
+import self.me.mp.user.UserImageView;
 
 import java.util.Collection;
 import java.util.UUID;

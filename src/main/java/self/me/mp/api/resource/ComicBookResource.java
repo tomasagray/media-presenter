@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import self.me.mp.api.controller.ComicBookController;
 import self.me.mp.model.Image;
 import self.me.mp.model.Tag;
-import self.me.mp.model.UserComicBookView;
+import self.me.mp.user.UserComicBookView;
 
 import java.sql.Timestamp;
 import java.util.*;

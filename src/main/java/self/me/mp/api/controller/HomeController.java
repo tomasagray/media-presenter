@@ -11,12 +11,12 @@ import self.me.mp.api.resource.PictureResource;
 import self.me.mp.api.resource.PictureResource.PictureResourceModeller;
 import self.me.mp.api.resource.VideoResource;
 import self.me.mp.api.resource.VideoResource.VideoResourceModeller;
-import self.me.mp.api.service.ComicBookService;
-import self.me.mp.api.service.PictureService;
-import self.me.mp.api.service.VideoService;
-import self.me.mp.model.UserComicBookView;
-import self.me.mp.model.UserImageView;
-import self.me.mp.model.UserVideoView;
+import self.me.mp.api.service.user.UserComicService;
+import self.me.mp.api.service.user.UserPictureService;
+import self.me.mp.api.service.user.UserVideoService;
+import self.me.mp.user.UserComicBookView;
+import self.me.mp.user.UserImageView;
+import self.me.mp.user.UserVideoView;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,19 +26,19 @@ public class HomeController {
 
 	private static final int DEFAULT_ITEM_COUNT = 6;
 
-	private final VideoService videoService;
+	private final UserVideoService videoService;
 	private final VideoResourceModeller videoModeller;
-	private final PictureService pictureService;
+	private final UserPictureService pictureService;
 	private final PictureResourceModeller pictureModeller;
-	private final ComicBookService comicBookService;
+	private final UserComicService comicBookService;
 	private final ComicBookModeller comicModeller;
 
 	public HomeController(
-			VideoService videoService,
+			UserVideoService videoService,
 			VideoResourceModeller videoModeller,
-			PictureService pictureService,
+			UserPictureService pictureService,
 			PictureResourceModeller pictureModeller,
-			ComicBookService comicBookService,
+			UserComicService comicBookService,
 			ComicBookModeller comicModeller) {
 		this.videoService = videoService;
 		this.videoModeller = videoModeller;

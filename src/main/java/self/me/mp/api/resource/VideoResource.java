@@ -10,7 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import self.me.mp.api.controller.VideoController;
 import self.me.mp.model.Tag;
-import self.me.mp.model.UserVideoView;
+import self.me.mp.user.UserVideoView;
 
 import java.sql.Timestamp;
 import java.util.Collection;

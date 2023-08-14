@@ -15,8 +15,6 @@ import org.springframework.util.MultiValueMap;
 import self.me.mp.Procedure;
 import self.me.mp.db.VideoRepository;
 import self.me.mp.model.Image;
-import self.me.mp.model.UserPreferences;
-import self.me.mp.model.UserVideoView;
 import self.me.mp.model.Video;
 
 import java.io.File;
@@ -28,8 +26,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -41,8 +41,7 @@ public class VideoService {
 
 	private final VideoRepository videoRepository;
 	private final RecursiveWatcherService watcherService;
-	private final VideoScanningService videoScanningService;
-	private final UserService userService;
+	private final FileScanningService<Video> videoScanningService;
 
 	@Value("${videos.location}")
 	private Path videoLocation;
@@ -50,21 +49,20 @@ public class VideoService {
 	public VideoService(
 			VideoRepository videoRepository,
 			RecursiveWatcherService watcherService,
-			VideoScanningService videoScanningService, UserService userService) {
+			FileScanningService<Video> videoScanningService) {
 		this.videoRepository = videoRepository;
 		this.watcherService = watcherService;
 		this.videoScanningService = videoScanningService;
-		this.userService = userService;
 	}
 
 	@Async("watcher")
 	public void init(@Nullable Procedure onFinish) throws IOException {
 		logger.info("Initializing videos in: {}", videoLocation);
 		initializeVideoLocation();
-		Set<Path> existing = getExistingVideos();
+		List<Video> existing = videoRepository.findAll();
 		watcherService.watch(
 				videoLocation,
-				file -> videoScanningService.scanVideoFile(file, existing, this::saveVideo),
+				file -> videoScanningService.scanFile(file, existing, this::save),
 				onFinish,
 				this::handleVideoFileEvent
 		);
@@ -81,14 +79,6 @@ public class VideoService {
 	}
 
 	@NotNull
-	private Set<Path> getExistingVideos() {
-		return videoRepository.findAll()
-				.stream()
-				.map(Video::getFile)
-				.collect(Collectors.toSet());
-	}
-
-	@NotNull
 	private static URL toUrl(@NotNull URI uri) {
 		try {
 			return uri.toURL();
@@ -100,15 +90,16 @@ public class VideoService {
 	private void handleVideoFileEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
 		if (ENTRY_CREATE.equals(kind)) {
 			if (Files.isDirectory(path)) {
+				List<Video> existing = videoRepository.findAll();
 				watcherService.walkTreeAndSetWatches(
 						path,
-						file -> videoScanningService.scanVideoFile(file, getExistingVideos(), this::saveVideo),
+						file -> videoScanningService.scanFile(file, existing, this::save),
 						null,
 						this::handleVideoFileEvent
 				);
 			} else {
 				logger.info("Adding new video: {}", path);
-				videoScanningService.scanVideoFile(path, new ArrayList<>(), this::saveVideo);
+				videoScanningService.scanFile(path, new ArrayList<>(), this::save);
 			}
 		} else if (ENTRY_MODIFY.equals(kind)) {
 			logger.info("Video was modified: {}", path);
@@ -122,49 +113,24 @@ public class VideoService {
 		}
 	}
 
-	public void saveVideo(@NotNull Video video) {
-		videoRepository.save(video);
+	public Video save(@NotNull Video video) {
+		return videoRepository.save(video);
 	}
 
 	public Page<Video> getAll(int page, int pageSize) {
 		return videoRepository.findAll(PageRequest.of(page, pageSize));
 	}
 
-	public Page<UserVideoView> getAllUserVideos(int page, int size) {
-		return getAll(page, size).map(this::getUserVideoView);
-	}
-
 	public Page<Video> getLatest(int page, int pageSize) {
 		return videoRepository.findAllByOrderByAddedDesc(PageRequest.of(page, pageSize));
-	}
-
-	public Page<UserVideoView> getLatestUserVideos(int page, int size) {
-		return getLatest(page, size).map(this::getUserVideoView);
-	}
-
-	public UserVideoView getUserVideoView(@NotNull Video video) {
-		return userService.getUserPreferences().isFavorite(video) ?
-				UserVideoView.favorite(video) : UserVideoView.of(video);
-	}
-
-	public Collection<UserVideoView> getUserVideoViews(@NotNull Collection<Video> videos) {
-		return videos.stream().map(this::getUserVideoView).toList();
 	}
 
 	public List<Video> getRandom(int count) {
 		return videoRepository.findRandom(PageRequest.ofSize(count));
 	}
 
-	public List<UserVideoView> getRandomUserVideos(int count) {
-		return getRandom(count).stream().map(this::getUserVideoView).toList();
-	}
-
 	public Optional<Video> getById(@NotNull UUID videoId) {
 		return videoRepository.findById(videoId);
-	}
-
-	public Optional<UserVideoView> getUserVideo(@NotNull UUID videoId) {
-		return getById(videoId).map(this::getUserVideoView);
 	}
 
 	public UrlResource getVideoData(@NotNull UUID videoId) throws MalformedURLException {
@@ -189,7 +155,6 @@ public class VideoService {
 		videoRepository.delete(video);
 	}
 
-
 	public UrlResource getVideoThumb(@NotNull UUID videoId, @NotNull UUID thumbId) {
 		return getById(videoId)
 				.map(Video::getThumbnails)
@@ -198,26 +163,6 @@ public class VideoService {
 				.map(VideoService::toUrl)
 				.map(UrlResource::new)
 				.orElseThrow();
-	}
-
-	public UserVideoView toggleVideoFavorite(@NotNull UUID videoId) {
-		Optional<Video> optional = getById(videoId);
-		if (optional.isEmpty()) {
-			throw new IllegalArgumentException("Trying to favorite non-existent Video: " + videoId);
-		}
-		Video video = optional.get();
-		UserPreferences preferences = userService.getUserPreferences();
-		if (preferences.toggleFavorite(video)) {
-			return UserVideoView.favorite(video);
-		}
-		return UserVideoView.of(video);
-	}
-
-	public Collection<UserVideoView> getVideoFavorites() {
-		return userService.getUserPreferences()
-				.getFavoriteVideos().stream()
-				.map(this::getUserVideoView)
-				.toList();
 	}
 
 	public MultiValueMap<String, Path> getInvalidFiles() {

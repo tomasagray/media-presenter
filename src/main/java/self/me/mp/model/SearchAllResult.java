@@ -2,6 +2,9 @@ package self.me.mp.model;
 
 import lombok.Builder;
 import lombok.Data;
+import self.me.mp.user.UserComicBookView;
+import self.me.mp.user.UserImageView;
+import self.me.mp.user.UserVideoView;
 
 import java.util.Collection;
 

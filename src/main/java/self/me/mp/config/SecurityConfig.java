@@ -14,7 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import self.me.mp.api.service.UserService;
+import self.me.mp.api.service.user.UserService;
 import self.me.mp.model.UserPreferences;
 
 import javax.sql.DataSource;
