@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @Service
-public class VideoScanningService {
+public class VideoScanningService implements FileScanningService<Video> {
 
 	private static final Logger logger = LogManager.getLogger(VideoScanningService.class);
 
@@ -54,18 +54,21 @@ public class VideoScanningService {
 		Files.move(file, file.resolveSibling(newName));
 	}
 
+	@Override
 	public MultiValueMap<String, Path> getInvalidFiles() {
 		return new LinkedMultiValueMap<>(invalidFiles).deepCopy();
 	}
 
-	@Async("videoScanner")
-	public void scanVideoFile(
+	@Async("fileScanner")
+	@Override
+	public void scanFile(
 			@NotNull Path file,
-			@NotNull Collection<Path> existing,
+			@NotNull Collection<Video> existing,
 			@NotNull Consumer<Video> onSave) {
 
 		try {
-			if (!existing.contains(file)) {
+			List<Path> existingPaths = existing.stream().map(Video::getFile).toList();
+			if (!existingPaths.contains(file)) {
 				String name = FilenameUtils.getBaseName(file.toString());
 				if (name.contains(" ")) {
 					renameToSafeFilename(file);
@@ -88,7 +91,7 @@ public class VideoScanningService {
 		}
 	}
 
-	public void updateVideoMetadata(@NotNull Video video) throws IOException {
+	private void updateVideoMetadata(@NotNull Video video) throws IOException {
 		final URI videoUri = video.getFile().toUri();
 		final FFmpegMetadata metadata = ffmpegPlugin.readFileMetadata(videoUri);
 		video.setMetadata(metadata);
