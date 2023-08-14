@@ -13,7 +13,6 @@ import self.me.mp.api.service.VideoService;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -33,7 +32,7 @@ public class VideoServiceTest {
 
 	@Test
 	@DisplayName("Validate time to scan 5,000+ files")
-	void testScanningManyFilesTime() throws IOException, InterruptedException {
+	void testScanningManyFilesTime() throws IOException {
 
 		// given
 		int maxDuration = 500;
@@ -47,8 +46,6 @@ public class VideoServiceTest {
 			logger.info("Scanning took: {}ms", duration.toMillis());
 			// then
 			assertFalse(duration.toMillis() > maxDuration);
-			System.exit(0);
 		});
-		TimeUnit.SECONDS.sleep(10);
 	}
 }

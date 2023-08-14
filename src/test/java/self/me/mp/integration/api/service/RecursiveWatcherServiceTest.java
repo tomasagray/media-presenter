@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,22 +82,31 @@ class RecursiveWatcherServiceTest {
 	}
 
 	@Test
-	@Disabled
+//	@Disabled
 	@DisplayName("Ensure ignored paths are actually ignored")
 	void ignore() throws IOException {
 
-		Path ignoreDir = watchDir.resolve("xY4gHT3s").resolve("e45t8Ynm");
+		// given
+		assert watchDir != null;
+		File[] subDirs = watchDir.toFile().listFiles();
+		assert subDirs != null && subDirs.length >= 1;
+		Path ignoreDir = subDirs[0].toPath();
 		logger.info("Ignoring: {}", ignoreDir);
 
+		// when
 		watcherService.watch(watchDir,
 				(path, kind) -> {
+					// then
 					logger.error("Ignored directory: {} triggered WatchEvent: {}", path, kind);
-					throw new RuntimeException("This should not have been thrown!");
+					throw new RuntimeException("This code should not have executed!");
 				});
 		watcherService.ignore(ignoreDir);
 
 		Path testFile = createTestFile(ignoreDir);
 		logger.info("Created test file in ignored directory: {}", testFile);
+
+		// then we should reach here
+		assert true;
 
 		// reset for other tests
 		watcherService.unwatch(watchDir);

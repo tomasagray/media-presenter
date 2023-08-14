@@ -10,7 +10,7 @@
         <envs>
             <env name="DATA_ROOT" value="/projectdata/mp/test/test_data"/>
         </envs>
-        <dir value="$PROJECT_DIR$/src/test/java/self/me/mp/unit"/>
+        <dir value="$PROJECT_DIR$/src/test/java/self/me/mp/integration"/>
         <method v="2">
             <option name="Make" enabled="true"/>
         </method>
