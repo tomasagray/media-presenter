@@ -8,6 +8,7 @@
         <option name="VM_PARAMETERS"
                 value="-ea -Dwatching=/projectdata/mp/test/test_data -Dspring.profiles.active=test-volatile"/>
         <envs>
+            <env name="CONFIG_ROOT" value="/projectdata/mp/test/test_config"/>
             <env name="DATA_ROOT" value="/projectdata/mp/test/test_data"/>
         </envs>
         <dir value="$PROJECT_DIR$/src/test/java/self/me/mp/integration"/>

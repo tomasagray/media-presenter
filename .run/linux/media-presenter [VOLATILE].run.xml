@@ -3,6 +3,7 @@
                    factoryName="Spring Boot">
         <envs>
             <env name="DATA_ROOT" value="/projectdata/mp/volatile/data"/>
+            <env name="CONFIG_ROOT" value="/projectdata/mp/volatile/config"/>
         </envs>
         <module name="media-presenter.main"/>
         <option name="SPRING_BOOT_MAIN_CLASS" value="self.me.mp.MpApplication"/>

@@ -2,6 +2,7 @@
     <configuration default="false" name="media-presenter [STAGING]" type="SpringBootApplicationConfigurationType"
                    factoryName="Spring Boot">
         <envs>
+            <env name="CONFIG_ROOT" value="/projectdata/mp/staging/config"/>
             <env name="DATA_ROOT" value="/projectdata/mp/staging/data"/>
             <env name="DB_NAME" value="mp_staging"/>
             <env name="DB_PASSWORD" value="media"/>

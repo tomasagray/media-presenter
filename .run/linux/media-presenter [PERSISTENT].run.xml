@@ -6,6 +6,7 @@
             <env name="DB_NAME" value="mp_dev"/>
             <env name="DB_PASSWORD" value="media"/>
             <env name="DB_USER" value="mp"/>
+            <env name="CONFIG_ROOT" value="/projectdata/mp/persistent/config"/>
         </envs>
         <module name="media-presenter.main"/>
         <option name="SPRING_BOOT_MAIN_CLASS" value="self.me.mp.MpApplication"/>
