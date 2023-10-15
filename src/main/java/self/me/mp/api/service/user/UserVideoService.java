@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import self.me.mp.api.service.VideoService;
 import self.me.mp.model.UserPreferences;
@@ -20,6 +21,7 @@ import java.util.UUID;
 import static self.me.mp.user.UserVideoView.UserVideoModeller;
 
 @Service
+@Transactional
 public class UserVideoService {
 
 	private final VideoService videoService;

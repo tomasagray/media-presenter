@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import self.me.mp.api.service.PictureService;
 import self.me.mp.model.Picture;
@@ -19,6 +20,7 @@ import java.util.UUID;
 import static self.me.mp.user.UserImageView.UserImageModeller;
 
 @Service
+@Transactional
 public class UserPictureService {
 
 	private final UserService userService;
