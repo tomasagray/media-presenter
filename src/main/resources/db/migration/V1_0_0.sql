@@ -219,3 +219,4 @@ ALTER TABLE user_preferences_favorite_pictures
     ADD CONSTRAINT FKtqrdrha6nknv0dya6p91nbhq9
         FOREIGN KEY (user_preferences_id) REFERENCES user_preferences (id)
             ON UPDATE RESTRICT ON DELETE RESTRICT;
+
