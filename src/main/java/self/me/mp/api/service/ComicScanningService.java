@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -48,6 +49,7 @@ public class ComicScanningService implements FileScanningService<ComicBook> {
 				.build();
 	}
 
+	@Async("fileScanner")
 	@Override
 	public void scanFile(
 			@NotNull Path file,

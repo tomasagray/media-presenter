@@ -24,10 +24,11 @@ public class TagService {
 	}
 
 	public Tag addNewTag(@NotNull String name) {
-		return tagRepository.save(new Tag(name));
+		Tag tag = new Tag(name);
+		return tagRepository.saveAndFlush(tag);
 	}
 
-	public Tag getOrCreateTag(@NotNull String name) {
+	public synchronized Tag getOrCreateTag(@NotNull String name) {
 		return fetchByName(name).orElseGet(() -> addNewTag(name));
 	}
 
