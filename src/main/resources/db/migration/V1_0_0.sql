@@ -29,7 +29,7 @@ CREATE TABLE users
 (
     username VARCHAR(50)  NOT NULL,
     password VARCHAR(500) NOT NULL,
-    enabled  TINYINT(3)   NOT NULL,
+    enabled  TINYINT      NOT NULL,
     CONSTRAINT PK_USERS PRIMARY KEY (username)
 );
 
