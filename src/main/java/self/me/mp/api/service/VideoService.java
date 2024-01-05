@@ -41,41 +41,21 @@ public class VideoService {
 
 	private final VideoRepository videoRepository;
 	private final RecursiveWatcherService watcherService;
-	private final FileScanningService<Video> videoScanningService;
+	private final VideoScanningService videoScanningService;
 
-	@Value("${videos.location}")
-	private Path videoLocation;
+	@Value("${videos.add-location}")
+	private Path addVideoLocation;
+
+	@Value("${videos.storage-location}")
+	private Path videoStorageLocation;
 
 	public VideoService(
 			VideoRepository videoRepository,
 			RecursiveWatcherService watcherService,
-			FileScanningService<Video> videoScanningService) {
+			VideoScanningService videoScanningService) {
 		this.videoRepository = videoRepository;
 		this.watcherService = watcherService;
 		this.videoScanningService = videoScanningService;
-	}
-
-	@Async("watcher")
-	public void init(@Nullable Procedure onFinish) throws IOException {
-		logger.info("Initializing videos in: {}", videoLocation);
-		initializeVideoLocation();
-		List<Video> existing = videoRepository.findAll();
-		watcherService.watch(
-				videoLocation,
-				file -> videoScanningService.scanFile(file, existing, this::save),
-				onFinish,
-				this::handleVideoFileEvent
-		);
-	}
-
-	private void initializeVideoLocation() throws IOException {
-		File file = videoLocation.toFile();
-		if (!file.exists()) {
-			logger.info("Video storage location: {} does not exist; creating...", videoLocation);
-			if (!file.mkdirs()) {
-				throw new IOException("Could not create location for Video storage: " + videoLocation);
-			}
-		}
 	}
 
 	@NotNull
@@ -87,7 +67,62 @@ public class VideoService {
 		}
 	}
 
-	private void handleVideoFileEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
+	@Async("watcher")
+	public void initAddVideoDirectory(@Nullable Procedure onFinish) throws IOException {
+		logger.info("Initializing add video watcher in: {}", addVideoLocation);
+		initializeVideoLocation(addVideoLocation);
+		watcherService.watch(
+				addVideoLocation,
+				videoScanningService::scanAddFile,
+				onFinish,
+				this::handleAddVideoEvent
+		);
+	}
+
+	@Async("watcher")
+	public void initVideoStorageLocation(@Nullable Procedure onFinish) throws IOException {
+		logger.info("Initializing video storage watcher at: {}", videoStorageLocation);
+		initializeVideoLocation(videoStorageLocation);
+		List<Video> existing = videoRepository.findAll();
+		watcherService.watch(
+				videoStorageLocation,
+				file -> videoScanningService.scanFile(file, existing, this::save),
+				onFinish,
+				this::handleVideoStorageEvent
+		);
+	}
+
+	private void initializeVideoLocation(@NotNull Path location) throws IOException {
+		File file = location.toFile();
+		if (!file.exists()) {
+			logger.info("Video storage location: {} does not exist; creating...", location);
+			if (!file.mkdirs()) {
+				throw new IOException("Could not create location for Video storage: " + location);
+			}
+		}
+	}
+
+	private void handleAddVideoEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
+		if (ENTRY_CREATE.equals(kind)) {
+			if (Files.isDirectory(path)) {
+				watcherService.walkTreeAndSetWatches(
+						path,
+						videoScanningService::scanAddFile,
+						null,
+						this::handleAddVideoEvent
+				);
+			} else {
+				logger.info("Found video to add: {}", path);
+				videoScanningService.scanAddFile(path);
+			}
+		} else if (ENTRY_MODIFY.equals(kind)) {
+			logger.info("File in video add directory was modified: {}", path);
+		} else if (ENTRY_DELETE.equals(kind)) {
+			logger.info("File deleted from video add directory: {}", path);
+		}
+	}
+
+	private void handleVideoStorageEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
 		if (ENTRY_CREATE.equals(kind)) {
 			if (Files.isDirectory(path)) {
 				List<Video> existing = videoRepository.findAll();
@@ -95,7 +130,7 @@ public class VideoService {
 						path,
 						file -> videoScanningService.scanFile(file, existing, this::save),
 						null,
-						this::handleVideoFileEvent
+						this::handleVideoStorageEvent
 				);
 			} else {
 				logger.info("Adding new video: {}", path);
@@ -113,8 +148,8 @@ public class VideoService {
 		}
 	}
 
-	public Video save(@NotNull Video video) {
-		return videoRepository.save(video);
+	public void save(@NotNull Video video) {
+		videoRepository.save(video);
 	}
 
 	public Page<Video> getAll(int page, int pageSize) {

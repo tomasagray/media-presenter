@@ -40,7 +40,7 @@ public class VideoServiceTest {
 		final Instant start = Instant.now();
 
 		// when
-		videoService.init(() -> {
+		videoService.initVideoStorageLocation(() -> {
 			Instant end = Instant.now();
 			Duration duration = Duration.between(start, end);
 			logger.info("Scanning took: {}ms", duration.toMillis());

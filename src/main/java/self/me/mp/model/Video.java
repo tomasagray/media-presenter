@@ -37,7 +37,7 @@ public class Video {
 	private UUID id;
 
 	@FullTextField
-	private final String title;
+	private String title;
 	private final Timestamp added = Timestamp.from(Instant.now());
 
 	@ManyToMany(fetch = FetchType.EAGER)
