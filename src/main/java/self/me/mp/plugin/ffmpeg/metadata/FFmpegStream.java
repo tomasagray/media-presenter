@@ -8,14 +8,14 @@ import java.util.Map;
 @Setter
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor
+@Builder
 public class FFmpegStream {
 
 	private int index;
 	private String codec_name;
 	private String codec_long_name;
 	private String profile;
-	private CodecType codec_type;
+	private String codec_type;
 	private String codec_time_base;
 	private String codec_tag_string;
 	private String codec_tag;
@@ -48,12 +48,8 @@ public class FFmpegStream {
 	private FFmpegDisposition disposition;
 	private Map<String, String> tags;
 
-	public enum CodecType {
-		VIDEO,
-		AUDIO
-	}
-
 	@Data
+	@Builder
 	public static class FFmpegDisposition {
 
 		private int _default;

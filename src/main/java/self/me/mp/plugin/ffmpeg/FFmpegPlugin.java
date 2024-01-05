@@ -35,26 +35,44 @@ public class FFmpegPlugin {
 	 * @param playlistPath The output location for stream data
 	 * @return The path of the playlist file produced by FFMPEG
 	 */
-	public FFmpegStreamTask streamUris(@NotNull final Path playlistPath, @NotNull final URI... uris) {
+	public LoggableThread streamUris(@NotNull final Path playlistPath, @NotNull final URI... uris) {
 
 		// Get absolute path for task key
 		final Path absolutePath = playlistPath.toAbsolutePath();
 		checkTaskAlreadyExecuting(absolutePath);
 		// Create the streaming task
-		final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(playlistPath, uris);
+		// todo - make a real request
+		SimpleTranscodeRequest request = SimpleTranscodeRequest.builder().build();
+		final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(request);
 		// Add to collection
 		streamingTasks.put(absolutePath, streamTask);
 		// Return playlist file path
 		return streamTask;
 	}
 
+	public LoggableThread transcode(
+			@NotNull URI from,
+			@NotNull Path to,
+			@NotNull String videoCodec,
+			@NotNull String audioCodec) {
+		SimpleTranscodeRequest request = SimpleTranscodeRequest.builder()
+				.from(from)
+				.to(to)
+				.videoCodec(videoCodec)
+				.audioCodec(audioCodec)
+				.build();
+		return ffmpeg.getTranscodeTask(request);
+	}
+
+	public LoggableThread transcode(@NotNull TranscodeRequest request) {
+		return ffmpeg.getTranscodeTask(request);
+	}
+
 	/**
 	 * Cancels all streaming tasks running in the background
 	 */
 	public void interruptAllStreamTasks() {
-		ProcessHandle.allProcesses()
-				.filter(p -> p.info().command().map(c -> c.contains("ffmpeg")).orElse(false))
-				.forEach(ProcessHandle::destroyForcibly);
+		ProcessHandle.allProcesses().filter(p -> p.info().command().map(c -> c.contains("ffmpeg")).orElse(false)).forEach(ProcessHandle::destroyForcibly);
 		streamingTasks.clear();
 	}
 
@@ -102,11 +120,7 @@ public class FFmpegPlugin {
 		return ffmpeg.getVersion();
 	}
 
-	public Path createThumbnail(
-			@NotNull Path video,
-			@NotNull Path thumb,
-			@NotNull LocalTime time,
-			int w, int h) throws IOException {
+	public Path createThumbnail(@NotNull Path video, @NotNull Path thumb, @NotNull LocalTime time, int w, int h) throws IOException {
 		return ffmpeg.createThumbnail(video, thumb, time, w, h);
 	}
 
@@ -133,8 +147,7 @@ public class FFmpegPlugin {
 				prevTask.kill();
 				streamingTasks.remove(absolutePath);
 			} else {
-				throw new IllegalThreadStateException(
-						"FFmpeg has already started streaming to path: " + absolutePath);
+				throw new IllegalThreadStateException("FFmpeg has already started streaming to path: " + absolutePath);
 			}
 		}
 	}

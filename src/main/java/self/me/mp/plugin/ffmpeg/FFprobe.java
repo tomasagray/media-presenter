@@ -15,16 +15,16 @@ import java.util.stream.Collectors;
 
 public class FFprobe {
 
+	private final String execPath;
 	private final List<String> baseArgs;
 
 	public FFprobe(@NotNull final String execPath) {
-
 		// Setup global CLI arguments
+		this.execPath = execPath;
 		baseArgs =
 				List.of(
-						execPath,
 						"-hide_banner",
-						"-print_format json",
+						"-print_format", "json",
 						"-show_streams",
 						"-show_format",
 						"-show_chapters");
@@ -50,12 +50,13 @@ public class FFprobe {
 	private String readFileMetadata(@NotNull final URI uri) throws IOException {
 
 		// Assemble args for this job
-		List<String> processArgs = new ArrayList<>(baseArgs);
+		final List<String> processArgs = new ArrayList<>(this.baseArgs);
+		processArgs.add(0, this.execPath);
 		// Add remote URL to job args
-		processArgs.add(uri.toString());
+		final String normalizedPath = Utilities.getNormalizedPath(uri);
+		processArgs.add(normalizedPath);
 		// Create process for job
-		final String cmd = String.join(" ", processArgs);
-		Process process = Runtime.getRuntime().exec(cmd);
+		final Process process = new ProcessBuilder().command(processArgs).start();
 		// Fetch remote data
 		try (InputStream is = process.getInputStream();
 		     BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
