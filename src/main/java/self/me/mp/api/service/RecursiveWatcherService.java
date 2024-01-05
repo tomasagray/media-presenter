@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -158,8 +159,8 @@ public class RecursiveWatcherService {
 	@Async("watcher")
 	public void doWatch() {
 		try {
-			WatchKey key;
-			while ((key = watchService.take()) != null) {
+			WatchKey key = null;
+			while ((key = getNext(key)) != null) {
 				WatchHandler handler = watches.get(key);
 				if (handler == null) {
 					throw new IllegalStateException("WatchHandler missing for WatchKey: " + key);
@@ -177,9 +178,16 @@ public class RecursiveWatcherService {
 				key.reset();
 			}
 		} catch (InterruptedException ignore) {
+			logger.info("{} watcher was interrupted", this.getClass().getSimpleName());
 		} finally {
 			logger.info("{} has been shutdown.", this.getClass().getSimpleName());
 		}
+	}
+
+	private WatchKey getNext(WatchKey key) throws InterruptedException {
+		return key == null ?
+				watchService.take() :
+				watchService.poll(100, TimeUnit.MILLISECONDS);
 	}
 
 	public synchronized void unregisterStaleWatches() {

@@ -12,9 +12,11 @@ import java.util.concurrent.Executor;
 public class AsyncConfig {
 
 	private static final int WATCH_THREADS = 5;
-	private static final int WATCH_QUEUE_CAPACITY = 1000;
+	private static final int WATCH_QUEUE_CAPACITY = 1_000;
 	private static final int SCAN_TASKS = 9;
 	private static final int MAX_SCAN_TASKS = 12;
+	private static final int TRANSCODE_TASKS = 4;
+	private static final int TRANSCODE_QUEUE_SIZE = 1_000;
 
 	@Bean(name = "watcher")
 	public Executor threadPoolTaskExecutor() {
@@ -30,6 +32,15 @@ public class AsyncConfig {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(SCAN_TASKS);
 		executor.setMaxPoolSize(MAX_SCAN_TASKS);
+		executor.setQueueCapacity(Integer.MAX_VALUE);
+		return executor;
+	}
+
+	@Bean(name = "transcoder")
+	public Executor getVideoTranscodeExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(TRANSCODE_TASKS);
+		executor.setMaxPoolSize(TRANSCODE_QUEUE_SIZE);
 		executor.setQueueCapacity(Integer.MAX_VALUE);
 		return executor;
 	}
