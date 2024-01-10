@@ -13,8 +13,8 @@ public class AsyncConfig {
 
 	private static final int WATCH_THREADS = 5;
 	private static final int WATCH_QUEUE_CAPACITY = 1_000;
-	private static final int SCAN_TASKS = 9;
-	private static final int MAX_SCAN_TASKS = 12;
+	private static final int SCAN_TASKS = 50;
+	private static final int MAX_SCAN_TASKS = 125;
 	private static final int TRANSCODE_TASKS = 4;
 	private static final int TRANSCODE_QUEUE_SIZE = 1_000;
 
