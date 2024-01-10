@@ -4,6 +4,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
+import self.me.mp.Procedure;
 import self.me.mp.db.PictureRepository;
 import self.me.mp.model.Picture;
 
@@ -49,13 +51,14 @@ public class PictureService {
 	}
 
 	@Async("watcher")
-	public void init() throws IOException {
+	public void init(@Nullable Procedure onFinish) throws IOException {
 		initializePictureLocation();
 		logger.info("Scanning Picture files in: {}", pictureLocation);
 		List<Picture> existing = pictureRepo.findAll();
 		watcherService.watch(
 				pictureLocation,
 				picture -> scanningService.scanFile(picture, existing, this::save),
+				onFinish,
 				this::handleFileEvent
 		);
 	}

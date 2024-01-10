@@ -44,9 +44,9 @@ public class StartWatchingFileSystem implements CommandLineRunner {
 
 		// perform initial file scans...
 		logger.info("Performing initial filesystem scans. This may take a while...");
-		videoService.initAddVideoDirectory(null);
-		videoService.initVideoStorageLocation(null);
-		pictureService.init();
-		comicService.init();
+		videoService.initAddVideoDirectory(() -> logger.info("Finished initial scan of video 'add' directory..."));
+		videoService.initVideoStorageLocation(() -> logger.info("Finished initial scan of video 'storage' directory..."));
+		pictureService.init(() -> logger.info("Finished initial scan of Pictures..."));
+		comicService.init(() -> logger.info("Finished initial scan of Comic Books..."));
 	}
 }

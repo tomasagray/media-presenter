@@ -4,6 +4,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
+import self.me.mp.Procedure;
 import self.me.mp.db.ComicBookRepository;
 import self.me.mp.db.ImageRepository;
 import self.me.mp.model.ComicBook;
@@ -54,13 +56,14 @@ public class ComicBookService {
 	}
 
 	@Async("watcher")
-	public void init() throws IOException {
+	public void init(@Nullable Procedure onFinish) throws IOException {
 		initializeComicBookLocation();
 		logger.info("Scanning Comic Books in: {}", comicsLocation);
 		List<ComicBook> existing = comicBookRepo.findAll();
 		watcherService.watch(
 				comicsLocation,
 				file -> scanningService.scanFile(file, existing, this::save),
+				onFinish,
 				this::handleFileEvent
 		);
 	}
