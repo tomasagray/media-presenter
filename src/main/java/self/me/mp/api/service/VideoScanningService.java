@@ -25,7 +25,10 @@ import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 @Service
@@ -158,9 +161,9 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 	}
 
 	private void moveVideoToStorage(@NotNull Path file) throws IOException {
-		final Path filename = getRandomVideoFilename("mp4");
+		final Path filename = file.getFileName();
 		final File videoFile = videoStorageLocation.resolve(filename).toFile();
-		logger.info("Renaming video file to: {}", videoFile);
+		logger.info("Renaming video file {} to: {}", file, videoFile);
 		final boolean renamed = file.toFile().renameTo(videoFile);
 		if (!renamed) {
 			throw new IOException("Could not move video from 'add' to 'storage'");
@@ -174,10 +177,9 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 			@NotNull Consumer<? super Path> onFail) throws InterruptedException {
 		// prepare arguments
 		final FFmpegMetadata metadata = video.getMetadata();
-		final String container = getTranscodeContainer(metadata);
 		final String videoCodec = getTranscodeVideoCodec(metadata);
 		final String audioCodec = getTranscodeAudioCodec(metadata);
-		final Path filename = getRandomVideoFilename(container);
+		final Path filename = getFilenameFromTitle(video);
 		final Path convertPath = convertLocation.resolve(filename);
 		final String title = getVideoTitleFromFilename(video);
 
@@ -204,19 +206,16 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 	}
 
 	@NotNull
-	private Path getRandomVideoFilename(@Nullable String container) {
-		if (container == null || "".equals(container)) {
-			container = SUPPORTED_CONTAINERS.get(0);
+	private Path getFilenameFromTitle(@NotNull Video video) {
+		String filename;
+		String title = getTitle(video.getMetadata());
+		if (title != null) {
+			filename = String.format("%s.%s", title, SUPPORTED_CONTAINERS.get(0));
+		} else {
+			String baseName = FilenameUtils.getBaseName(video.getFile().toString());
+			filename = String.format("%s.%s", baseName, SUPPORTED_CONTAINERS.get(0));
 		}
-		final String filename = String.format("%s.%s", UUID.randomUUID(), container.toLowerCase());
 		return Path.of(filename);
-	}
-
-	private String getTranscodeContainer(FFmpegMetadata metadata) {
-		String container = getContainer(metadata);
-		return container != null && SUPPORTED_CONTAINERS.contains(container) ?
-				"mp4" :
-				SUPPORTED_CONTAINERS.get(0);
 	}
 
 	private String getTranscodeVideoCodec(FFmpegMetadata metadata) {
