@@ -2,8 +2,8 @@
     <configuration default="false" name="media-presenter [VOLATILE]" type="SpringBootApplicationConfigurationType"
                    factoryName="Spring Boot">
         <envs>
-            <env name="DATA_ROOT" value="/projectdata/mp/volatile/data"/>
-            <env name="CONFIG_ROOT" value="/projectdata/mp/volatile/config"/>
+            <env name="CONFIG_ROOT" value="/projectdata/mp/dev/volatile/config"/>
+            <env name="DATA_ROOT" value="/projectdata/mp/dev/volatile/data"/>
         </envs>
         <module name="media-presenter.main"/>
         <option name="SPRING_BOOT_MAIN_CLASS" value="self.me.mp.MpApplication"/>
