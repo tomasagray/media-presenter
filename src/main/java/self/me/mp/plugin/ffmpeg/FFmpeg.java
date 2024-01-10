@@ -2,7 +2,6 @@ package self.me.mp.plugin.ffmpeg;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -108,8 +107,8 @@ public class FFmpeg {
 			@NotNull Path thumb,
 			@NotNull LocalTime time,
 			int w, int h) throws IOException {
-		ArrayList<String> args = marshallThumbArgs(video, thumb, time, w, h);
-		Process process = Runtime.getRuntime().exec(Strings.join(args, ' '));
+		List<String> args = marshallThumbArgs(video, thumb, time, w, h);
+		Process process = new ProcessBuilder().command(args).start();
 		try (InputStreamReader in = new InputStreamReader(process.getErrorStream());
 		     BufferedReader reader = new BufferedReader(in)
 		) {
@@ -131,7 +130,8 @@ public class FFmpeg {
 		args.add(video.toString());
 		args.add("-vf");
 		args.add(String.format("scale=%d:%d", w, h));
-		args.add("-vframes 1");
+		args.add("-vframes");
+		args.add("1");
 		args.add(thumb.toString());
 		return args;
 	}
