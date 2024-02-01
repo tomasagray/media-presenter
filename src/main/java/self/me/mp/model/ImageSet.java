@@ -1,7 +1,10 @@
 package self.me.mp.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -22,7 +25,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
 @Entity
@@ -37,7 +39,7 @@ public class ImageSet {
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@ToString.Exclude
-	private final Set<Image> images;
+	private Set<Image> images;
 
 	@FullTextField
 	private String title;

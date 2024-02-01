@@ -1,5 +1,6 @@
 package self.me.mp.api.service;
 
+import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +24,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 public class RecursiveWatcherService {
 
 	private static final Logger logger = LogManager.getLogger(RecursiveWatcherService.class);
+	@Getter
 	private final List<Path> watchRoots = new ArrayList<>();
 	private final List<Path> ignorePaths = new ArrayList<>();
 	private final Map<WatchKey, WatchHandler> watches = new HashMap<>();
@@ -42,14 +44,14 @@ public class RecursiveWatcherService {
 			@NotNull Path path,
 			@Nullable Consumer<Path> onScanFile,
 			@NotNull BiConsumer<Path, WatchEvent.Kind<?>> eventHandler) throws IOException {
-		watch(path, onScanFile, null, eventHandler);
+		watch(path, onScanFile, eventHandler, null);
 	}
 
 	public void watch(
 			@NotNull Path path,
 			@Nullable Consumer<Path> onScanFile,
-			@Nullable Procedure onFinish,
-			@NotNull BiConsumer<Path, WatchEvent.Kind<?>> eventHandler
+			@NotNull BiConsumer<Path, WatchEvent.Kind<?>> eventHandler,
+			@Nullable Procedure onFinish
 	) throws IOException {
 
 		File file = path.toFile();
@@ -57,17 +59,17 @@ public class RecursiveWatcherService {
 			throw new IOException("Cannot watch non-existent directory: " + path);
 		}
 		watchRoots.add(path);
-		walkTreeAndSetWatches(path, onScanFile, onFinish, eventHandler);
+		walkTreeAndSetWatches(path, onScanFile, eventHandler, onFinish);
 	}
 
 	public synchronized void walkTreeAndSetWatches(
 			@NotNull Path path,
 			@Nullable Consumer<Path> onScanFile,
-			@Nullable Procedure onFinish,
-			@NotNull BiConsumer<Path, WatchEvent.Kind<?>> handler) {
+			@NotNull BiConsumer<Path, WatchEvent.Kind<?>> handler,
+			@Nullable Procedure onFinish) {
 
 		try {
-			logger.info("Now watching recursively: {}", path);
+			logger.trace("Now watching recursively: {}", path);
 			Files.walkFileTree(
 					path,
 					new FileVisitor<>() {
@@ -91,6 +93,7 @@ public class RecursiveWatcherService {
 
 						@Override
 						public FileVisitResult visitFileFailed(Path file, IOException exc) {
+							logger.error("Visiting file {} failed: {}", file, exc.getMessage(), exc);
 							return FileVisitResult.CONTINUE;
 						}
 
@@ -99,8 +102,9 @@ public class RecursiveWatcherService {
 							return FileVisitResult.CONTINUE;
 						}
 					});
-		} catch (IOException ignore) {
-			// Don't care
+			logger.info("Finished scan of: {}", path);
+		} catch (IOException e) {
+			logger.error("Error walking directory: {}; {}", path, e.getMessage(), e);
 		} finally {
 			if (onFinish != null) {
 				onFinish.run();
@@ -130,8 +134,7 @@ public class RecursiveWatcherService {
 	}
 
 	private synchronized void registerWatch(Path path, BiConsumer<Path, WatchEvent.Kind<?>> handler) {
-
-		logger.info("Now watching: {}", path);
+		logger.trace("Now watching: {}", path);
 		Optional<Map.Entry<WatchKey, WatchHandler>> watchOptional = getWatchForPath(path);
 		if (watchOptional.isEmpty()) {
 			try {
@@ -211,10 +214,6 @@ public class RecursiveWatcherService {
 			Path path = entry.getValue().path();
 			logger.info("Stopped watching directory: {}", path);
 		});
-	}
-
-	public List<Path> getWatchRoots() {
-		return watchRoots;
 	}
 
 	@NotNull

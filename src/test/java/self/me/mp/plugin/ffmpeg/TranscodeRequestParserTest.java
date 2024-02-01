@@ -45,7 +45,7 @@ class TranscodeRequestParserTest {
 		logger.info("Expected:\n\t{}", expected);
 
 		// then
-		assert cli != null && !"".equals(cli);
+		assert cli != null && !cli.isEmpty();
 		assert cli.equals(expected);
 	}
 }

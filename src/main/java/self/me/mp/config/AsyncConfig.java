@@ -11,10 +11,11 @@ import java.util.concurrent.Executor;
 @EnableAsync(proxyTargetClass = true)
 public class AsyncConfig {
 
+	private static final int STARTUP_TASKS = 5;
 	private static final int WATCH_THREADS = 5;
 	private static final int WATCH_QUEUE_CAPACITY = 1_000;
-	private static final int SCAN_TASKS = 9;
-	private static final int MAX_SCAN_TASKS = 12;
+	private static final int SCAN_TASKS = 50;
+	private static final int MAX_SCAN_TASKS = 125;
 	private static final int TRANSCODE_TASKS = 4;
 	private static final int TRANSCODE_QUEUE_SIZE = 1_000;
 
@@ -41,6 +42,15 @@ public class AsyncConfig {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(TRANSCODE_TASKS);
 		executor.setMaxPoolSize(TRANSCODE_QUEUE_SIZE);
+		executor.setQueueCapacity(Integer.MAX_VALUE);
+		return executor;
+	}
+
+	@Bean(name = "startup")
+	public Executor getStartupExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(STARTUP_TASKS);
+		executor.setMaxPoolSize(STARTUP_TASKS * 2);
 		executor.setQueueCapacity(Integer.MAX_VALUE);
 		return executor;
 	}

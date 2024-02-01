@@ -4,10 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
+@Setter
+@Getter
 public abstract class UserView {
 
-	@Getter
-	@Setter
 	private boolean isFavorite;
 
 	public static abstract class UserViewModeller<U, S extends UserView> {

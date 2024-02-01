@@ -1,5 +1,8 @@
 package self.me.mp.config;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -7,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,16 +18,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import self.me.mp.api.service.user.UserService;
 import self.me.mp.model.UserPreferences;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-	private final Logger logger = LogManager.getLogger(SecurityConfig.class);
+	private final Logger LOGGER = LogManager.getLogger(SecurityConfig.class);
+
 	private final UserService userService;
 
 	public SecurityConfig(UserService userService) {
@@ -58,11 +66,11 @@ public class SecurityConfig {
 	public UserDetails createUserIfNotExists(String username, String password, Roles role) {
 		try {
 			UserPreferences preferences = userService.getUserPreferences(username);
-			logger.info("Found existing User Preferences: {}", preferences);
-			logger.info("User: {} already exists; skipping creation...", username);
+			LOGGER.info("Found existing User Preferences: {}", preferences);
+			LOGGER.info("User: {} already exists; skipping creation...", username);
 			return null;
 		} catch (IllegalStateException ignore) {
-			logger.info("User: {} does not exist; creating...", username);
+			LOGGER.info("User: {} does not exist; creating...", username);
 			return createNewUser(username, password, role);
 		}
 	}
@@ -77,8 +85,24 @@ public class SecurityConfig {
 				.roles(role.name())
 				.build();
 		UserDetails preferences = userService.createUserPreferences(user);
-		logger.info("Created User Preferences: {}", preferences);
+		LOGGER.info("Created User Preferences: {}", preferences);
 		return user;
+	}
+
+	@Bean
+	public AuthenticationFailureHandler getFailureHandler() {
+		return new SimpleUrlAuthenticationFailureHandler() {
+			@Override
+			public void onAuthenticationFailure(
+					HttpServletRequest request,
+					HttpServletResponse response,
+					AuthenticationException e) throws IOException, ServletException {
+				String[] username = request.getParameterMap().get("username");
+				LOGGER.error("Login with (username={}, password=*****) failed; {}",
+						username, e.getMessage());
+				request.getRequestDispatcher("/login?error=true").forward(request, response);
+			}
+		};
 	}
 
 	@Bean
@@ -104,6 +128,7 @@ public class SecurityConfig {
 				.loginProcessingUrl("/request_login")
 				.defaultSuccessUrl("/home", true)
 				.failureUrl("/login?error=true")
+				.failureHandler(getFailureHandler())
 				.and()
 				.logout()
 				.logoutUrl("/logout")

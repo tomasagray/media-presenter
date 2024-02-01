@@ -41,6 +41,11 @@ dependencies {
     implementation 'org.hibernate.search:hibernate-search-backend-lucene:6.1.8.Final'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+    // AOP
+    implementation 'org.springframework:spring-instrument'
+    implementation 'org.springframework:spring-aspects'
+    implementation 'org.aspectj:aspectjweaver:1.9.19'
+
     // Database
     runtimeOnly 'com.mysql:mysql-connector-j'
     implementation 'org.flywaydb:flyway-core'

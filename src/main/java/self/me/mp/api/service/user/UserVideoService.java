@@ -5,14 +5,12 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.MultiValueMap;
 import self.me.mp.api.service.VideoService;
 import self.me.mp.model.UserPreferences;
 import self.me.mp.model.Video;
 import self.me.mp.user.UserVideoView;
 
 import java.net.MalformedURLException;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -88,9 +86,5 @@ public class UserVideoService {
 
 	public UrlResource getVideoThumb(@NotNull UUID videoId, @NotNull UUID thumbId) {
 		return videoService.getVideoThumb(videoId, thumbId);
-	}
-
-	public MultiValueMap<String, Path> getInvalidFiles() {
-		return videoService.getInvalidFiles();
 	}
 }

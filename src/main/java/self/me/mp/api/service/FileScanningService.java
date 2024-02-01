@@ -4,15 +4,16 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.util.MultiValueMap;
 
 import java.nio.file.Path;
+import java.nio.file.WatchEvent;
 import java.util.Collection;
-import java.util.function.Consumer;
 
-public interface FileScanningService<T> {
+public interface FileScanningService {
 
-	void scanFile(
-			@NotNull Path file,
-			@NotNull Collection<T> existing,
-			@NotNull Consumer<T> onSave);
+	void scanFile(@NotNull Path file, @NotNull Collection<Path> existing);
+
+	void handleFileEvent(@NotNull Path file, @NotNull WatchEvent.Kind<?> kind);
+
+	void saveScannedData();
 
 	MultiValueMap<String, Path> getInvalidFiles();
 }
