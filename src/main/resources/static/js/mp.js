@@ -195,7 +195,6 @@ export const getPageImages = (comic) => {
         })
 }
 
-// TODO: move to mp.js
 let listener = null
 export const onShowSearchModal = () => {
     $('#search-modal-container').css('display', 'block')
