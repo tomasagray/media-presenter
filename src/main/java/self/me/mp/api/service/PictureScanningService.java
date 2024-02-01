@@ -27,7 +27,7 @@ import java.util.Objects;
 import static java.nio.file.StandardWatchEventKinds.*;
 
 @Service
-public class PictureScanningService implements FileScanningService<Picture> {
+public class PictureScanningService implements FileScanningService {
 
 	private static final Logger logger = LogManager.getLogger(PictureScanningService.class);
 

@@ -44,7 +44,7 @@ public class FFmpegSingleStreamTask extends FFmpegStreamTask {
 		arguments.add(request.getTo().toString());
 		return arguments.stream()
 				.filter(Objects::nonNull)
-				.filter(s -> !"".equals(s))
+				.filter(s -> !s.isEmpty())
 				.toList();
 	}
 

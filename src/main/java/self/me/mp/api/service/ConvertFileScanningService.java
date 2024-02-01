@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
-public interface ConvertFileScanningService<T> extends FileScanningService<T> {
+public interface ConvertFileScanningService<T> extends FileScanningService {
 
 	void scanAddFile(@NotNull Path file);
 

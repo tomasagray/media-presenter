@@ -31,7 +31,7 @@ import java.util.*;
 import static java.nio.file.StandardWatchEventKinds.*;
 
 @Service
-public class ComicScanningService implements FileScanningService<ComicBook> {
+public class ComicScanningService implements FileScanningService {
 
 	private static final Logger logger = LogManager.getLogger(ComicScanningService.class);
 	private static final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();

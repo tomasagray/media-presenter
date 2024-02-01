@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.Collection;
 
-public interface FileScanningService<T> {
+public interface FileScanningService {
 
 	void scanFile(@NotNull Path file, @NotNull Collection<Path> existing);
 
