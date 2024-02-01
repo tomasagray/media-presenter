@@ -2,6 +2,7 @@ package self.me.mp.api.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.mp.db.TagRepository;
 import self.me.mp.model.Tag;
 
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class TagService {
 
 	private final TagRepository tagRepository;
@@ -23,7 +25,7 @@ public class TagService {
 		return tagRepository.findByName(name);
 	}
 
-	public Tag addNewTag(@NotNull String name) {
+	public synchronized Tag addNewTag(@NotNull String name) {
 		Tag tag = new Tag(name);
 		return tagRepository.saveAndFlush(tag);
 	}
@@ -32,7 +34,7 @@ public class TagService {
 		return fetchByName(name).orElseGet(() -> addNewTag(name));
 	}
 
-	public @NotNull List<Tag> getTags(@NotNull Path resolved) {
+	public synchronized @NotNull List<Tag> getTags(@NotNull Path resolved) {
 		final List<Tag> tags = new ArrayList<>();
 		int names = resolved.getNameCount() - 1;    // skip filename
 		for (int i = 0; i < names; i++) {

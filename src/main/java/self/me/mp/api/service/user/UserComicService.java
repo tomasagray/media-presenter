@@ -5,14 +5,12 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.MultiValueMap;
 import self.me.mp.api.service.ComicBookService;
 import self.me.mp.model.ComicBook;
 import self.me.mp.model.UserPreferences;
 import self.me.mp.user.UserComicBookView;
 import self.me.mp.user.UserComicBookView.UserComicModeller;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -83,9 +81,5 @@ public class UserComicService {
 
 	public Optional<UrlResource> getPageData(UUID pageId) {
 		return comicService.getPageData(pageId);
-	}
-
-	public MultiValueMap<String, Path> getInvalidFiles() {
-		return comicService.getInvalidFiles();
 	}
 }

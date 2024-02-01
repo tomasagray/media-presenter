@@ -5,13 +5,11 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.MultiValueMap;
 import self.me.mp.api.service.PictureService;
 import self.me.mp.model.Picture;
 import self.me.mp.model.UserPreferences;
 import self.me.mp.user.UserImageView;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -79,9 +77,5 @@ public class UserPictureService {
 
 	public Optional<UrlResource> getPictureData(UUID picId) {
 		return pictureService.getPictureData(picId);
-	}
-
-	public MultiValueMap<String, Path> getInvalidFiles() {
-		return pictureService.getInvalidFiles();
 	}
 }

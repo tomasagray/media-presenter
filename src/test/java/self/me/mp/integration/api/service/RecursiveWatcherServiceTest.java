@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -63,7 +64,7 @@ class RecursiveWatcherServiceTest {
 		);
 		List<Path> roots = watcherService.getWatchRoots();
 		logger.info("WatchRoots are now: {}", roots);
-		assertTrue(roots.size() != 0);
+		assertFalse(roots.isEmpty());
 	}
 
 	private @NotNull Path createTestFile(@NotNull Path location) throws IOException {

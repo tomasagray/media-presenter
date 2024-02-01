@@ -42,7 +42,7 @@ public class ThumbnailService {
 
 		Path thumb = createThumbDir(video);
 		List<FFmpegStream> streams = video.getMetadata().getStreams();
-		if (streams == null || streams.size() == 0) {
+		if (streams == null || streams.isEmpty()) {
 			throw new IOException("Video has no streams: " + video);
 		}
 

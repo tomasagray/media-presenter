@@ -7,13 +7,11 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import self.me.mp.api.resource.ComicBookResource;
 import self.me.mp.api.service.user.UserComicService;
 import self.me.mp.user.UserComicBookView;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -95,11 +93,5 @@ public class ComicBookController {
 	public ComicBookResource toggleIsComicBookFavorite(@PathVariable UUID comicId) {
 		UserComicBookView comic = comicBookService.toggleIsComicFavorite(comicId);
 		return modeller.toModel(comic);
-	}
-
-	@GetMapping(value = "/invalid", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public MultiValueMap<String, Path> getInvalidFiles() {
-		return comicBookService.getInvalidFiles();
 	}
 }

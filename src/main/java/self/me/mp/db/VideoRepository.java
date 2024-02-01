@@ -17,4 +17,7 @@ public interface VideoRepository extends JpaRepository<Video, UUID> {
 
 	@Query("SELECT v FROM Video v ORDER BY rand()")
 	List<Video> findRandom(Pageable request);
+
+	@Query("SELECT v FROM Video v WHERE v.title IS NULL")
+	List<Video> findUnprocessedVideos();
 }

@@ -25,11 +25,11 @@ import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.WatchEvent;
+import java.util.*;
 import java.util.function.Consumer;
+
+import static java.nio.file.StandardWatchEventKinds.*;
 
 @Service
 public class VideoScanningService implements ConvertFileScanningService<Video> {
@@ -40,10 +40,14 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 	private static final List<String> SUPPORTED_ACODECS = List.of("aac");
 	private static final List<String> SUPPORTED_CONTAINERS = List.of("mp4");
 
-	private final FFmpegPlugin ffmpegPlugin;
+	private final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
+
+	private final VideoService videoService;
 	private final ThumbnailService thumbnailService;
 	private final TagService tagService;
-	private final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
+	private final FileUtilitiesService fileUtilitiesService;
+	private final RecursiveWatcherService watcherService;
+	private final FFmpegPlugin ffmpegPlugin;        // TODO: refactor transcoding to its own service
 
 	@Value("${videos.storage-location}")
 	private Path videoStorageLocation;
@@ -51,13 +55,21 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 	@Value("${videos.convert-location}")
 	private Path convertLocation;
 
-	public VideoScanningService(
-			FFmpegPlugin ffmpegPlugin,
+	private final List<Video> scannedVideos = new ArrayList<>();
+
+	VideoScanningService(
+			VideoService videoService,
 			ThumbnailService thumbnailService,
-			TagService tagService) {
-		this.ffmpegPlugin = ffmpegPlugin;
+			TagService tagService,
+			RecursiveWatcherService watcherService,
+			FFmpegPlugin ffmpegPlugin,
+			FileUtilitiesService fileUtilitiesService) {
+		this.videoService = videoService;
 		this.thumbnailService = thumbnailService;
 		this.tagService = tagService;
+		this.fileUtilitiesService = fileUtilitiesService;
+		this.watcherService = watcherService;
+		this.ffmpegPlugin = ffmpegPlugin;
 	}
 
 	@NotNull
@@ -95,30 +107,17 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 		return new LinkedMultiValueMap<>(invalidFiles).deepCopy();
 	}
 
-	@Async("fileScanner")
 	@Override
-	public void scanFile(
-			@NotNull Path file,
-			@NotNull Collection<Video> existing,
-			@NotNull Consumer<Video> onSave) {
+	public void scanFile(@NotNull Path file, @NotNull Collection<Path> existing) {
 		try {
-			List<Path> existingPaths = existing.stream().map(Video::getFile).toList();
-			if (!existingPaths.contains(file)) {
+			fileUtilitiesService.repairFilename(file);
+			logger.trace("Attempting to scan video file: {}", file);
+			if (!existing.contains(file)) {
 				logger.info("Adding new video: {}", file);
-
 				final Video video = new Video(file);
-				FFmpegMetadata metadata = getVideoMetadata(video);
-				video.setMetadata(metadata);
-				final String title = getTitle(metadata);
-				if (title != null) video.setTitle(title);
-				else video.setTitle(FilenameUtils.getBaseName(file.toString()));
-
-				final List<Tag> tags = tagService.getTags(videoStorageLocation.relativize(file));
-				video.setTags(new HashSet<>(tags));
-
-				onSave.accept(video);   // ensure ID set
-				thumbnailService.generateVideoThumbnails(video);
-				onSave.accept(video);   // save thumbs
+				scannedVideos.add(video);
+			} else {
+				logger.trace("Video file: {} has already been scanned", file);
 			}
 		} catch (Throwable e) {
 			logger.error("Error scanning video: {}", e.getMessage(), e);
@@ -127,10 +126,11 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 		}
 	}
 
-	@Async("fileScanner")
 	@Override
 	public void scanAddFile(@NotNull Path file) {
+		logger.info("Attempting to add new video file: {}", file);
 		try {
+			fileUtilitiesService.repairFilename(file);
 			final Video video = new Video(file);
 			final FFmpegMetadata metadata = getVideoMetadata(video);
 			video.setMetadata(metadata);
@@ -144,6 +144,39 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 			}
 		} catch (Throwable e) {
 			logger.error("Error scanning video file to add: {}", e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public synchronized void saveScannedData() {
+		List<Video> savable = scannedVideos.stream().filter(Objects::nonNull).toList();
+		logger.info("Saving {} Videos to database...", savable.size());
+		videoService.saveAll(savable);
+		scannedVideos.clear();
+	}
+
+	@Async("transcoder")
+	public void scanVideoMetadata(@NotNull Video video) {
+		try {
+			// metadata
+			final FFmpegMetadata metadata = getVideoMetadata(video);
+			video.setMetadata(metadata);
+
+			// title
+			final Path file = video.getFile();
+			final String title = getTitle(metadata);
+			if (title != null) video.setTitle(title);
+			else video.setTitle(FilenameUtils.getBaseName(file.toString()));
+
+			// set tags
+			final List<Tag> tags = tagService.getTags(videoStorageLocation.relativize(file));
+			video.setTags(new HashSet<>(tags));
+
+			// thumbnails
+			thumbnailService.generateVideoThumbnails(video);
+			videoService.save(video);
+		} catch (IOException e) {
+			logger.error("Could not scan Video metadata: {}", e.getMessage(), e);
 		}
 	}
 
@@ -205,6 +238,61 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 		}
 	}
 
+	public void handleAddVideoEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
+		if (ENTRY_CREATE.equals(kind)) {
+			if (Files.isDirectory(path)) {
+				watcherService.walkTreeAndSetWatches(
+						path,
+						this::scanAddFile,
+						this::handleAddVideoEvent,
+						null
+				);
+			} else {
+				logger.info("Found video to add: {}", path);
+				this.scanAddFile(path);
+			}
+		} else if (ENTRY_MODIFY.equals(kind)) {
+			logger.info("File in video add directory was modified: {}", path);
+		} else if (ENTRY_DELETE.equals(kind)) {
+			logger.info("File deleted from video add directory: {}", path);
+		}
+	}
+
+	@Override
+	public void handleFileEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
+		if (ENTRY_CREATE.equals(kind)) {
+			if (Files.isDirectory(path)) {
+				watcherService.walkTreeAndSetWatches(
+						path,
+						dir -> this.scanFile(dir, new ArrayList<>()),
+						this::handleFileEvent,
+						this::processScannedVideos
+				);
+			} else {
+				logger.info("Adding new video: {}", path);
+				scanFile(path, new ArrayList<>());
+				processScannedVideos();
+			}
+		} else if (ENTRY_MODIFY.equals(kind)) {
+			logger.info("Video was modified: {}", path);
+			// TODO: handle modify video
+		} else if (ENTRY_DELETE.equals(kind)) {
+			videoService.getVideoByPath(path)
+					.ifPresentOrElse(
+							videoService::deleteVideo,
+							() -> logger.info("Deleted video that was not in DB: {}", path)
+					);
+		}
+	}
+
+	private void processScannedVideos() {
+		List<Video> videos = new ArrayList<>(scannedVideos);
+		saveScannedData();
+		for (Video video : videos) {
+			scanVideoMetadata(video);
+		}
+	}
+
 	@NotNull
 	private Path getFilenameFromTitle(@NotNull Video video) {
 		String filename;
@@ -237,7 +325,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 		final String container = getContainer(metadata);
 		final String videoCodec = getCodec(metadata, "video");
 		final String audioCodec = getCodec(metadata, "audio");
-		return title != null && !"".equals(title) &&
+		return title != null && !title.isEmpty() &&
 				container != null && SUPPORTED_CONTAINERS.contains(container) &&
 				videoCodec != null && SUPPORTED_VCODECS.contains(videoCodec) &&
 				audioCodec != null && SUPPORTED_ACODECS.contains(audioCodec);
@@ -269,7 +357,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 	private @Nullable String getCodec(FFmpegMetadata metadata, @NotNull String type) {
 		if (metadata == null) return null;
 		final List<FFmpegStream> streams = metadata.getStreams();
-		if (streams == null || streams.size() == 0) return null;
+		if (streams == null || streams.isEmpty()) return null;
 		return streams.stream()
 				.filter(stream -> isCorrectType(stream, type))
 				.map(FFmpegStream::getCodec_name)

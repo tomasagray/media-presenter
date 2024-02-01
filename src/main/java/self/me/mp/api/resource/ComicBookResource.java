@@ -64,19 +64,19 @@ public class ComicBookResource extends RepresentationModel<ComicBookResource> {
 					.withRel("favorite"));
 			List<Image> images = new ArrayList<>(entity.getImages());
 			images.sort(Comparator.comparing(Image::getUri));
-			Image cover = images.get(0);
-			if (cover != null) {
+			if (!images.isEmpty()) {
+				Image cover = images.get(0);
 				model.add(
 						linkTo(methodOn(ComicBookController.class)
 								.getPageData(cover.getId()))
 								.withRel("data"));
-			}
-			for (int i = 0; i < images.size(); i++) {
-				model.add(
-						linkTo(methodOn(ComicBookController.class)
-								.getPageData(images.get(i).getId()))
-								.withRel("page_" + i)
-				);
+				for (int i = 0; i < images.size(); i++) {
+					model.add(
+							linkTo(methodOn(ComicBookController.class)
+									.getPageData(images.get(i).getId()))
+									.withRel("page_" + i)
+					);
+				}
 			}
 			return model;
 		}

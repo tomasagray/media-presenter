@@ -7,13 +7,11 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import self.me.mp.api.resource.PictureResource;
 import self.me.mp.api.service.user.UserPictureService;
 import self.me.mp.user.UserImageView;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -91,11 +89,5 @@ public class PictureController {
 	public PictureResource togglePictureFavorite(@PathVariable UUID picId) {
 		UserImageView picture = pictureService.toggleIsPictureFavorite(picId);
 		return modeller.toModel(picture);
-	}
-
-	@GetMapping(value = "/invalid", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public MultiValueMap<String, Path> getInvalid() {
-		return pictureService.getInvalidFiles();
 	}
 }

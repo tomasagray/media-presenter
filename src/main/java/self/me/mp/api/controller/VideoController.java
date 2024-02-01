@@ -9,14 +9,12 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import self.me.mp.api.resource.VideoResource;
 import self.me.mp.api.service.user.UserVideoService;
 import self.me.mp.user.UserVideoView;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -134,11 +132,5 @@ public class VideoController {
 	public VideoResource toggleVideoFavorite(@PathVariable UUID videoId) {
 		UserVideoView video = videoService.toggleVideoFavorite(videoId);
 		return modeller.toModel(video);
-	}
-
-	@GetMapping(value = "/invalid", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public MultiValueMap<String, Path> getInvalidFiles() {
-		return videoService.getInvalidFiles();
 	}
 }

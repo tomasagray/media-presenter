@@ -13,10 +13,10 @@ import java.util.UUID;
 @ToString(callSuper = true)
 @Entity
 @NoArgsConstructor
-public class Picture extends Image {
+public class ComicPage extends Image {
 
-	@Builder(builderMethodName = "pictureBuilder")
-	public Picture(UUID id, String title, int height, int width, long filesize, URI uri) {
+	@Builder(builderMethodName = "pageBuilder")
+	public ComicPage(UUID id, String title, int height, int width, long filesize, URI uri) {
 		super(id, title, height, width, filesize, uri);
 	}
 
@@ -26,8 +26,7 @@ public class Picture extends Image {
 			return true;
 		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o))
 			return false;
-		Picture picture = (Picture) o;
-		return getId() != null && Objects.equals(getId(), picture.getId());
+		ComicPage page = (ComicPage) o;
+		return getId() != null && Objects.equals(getId(), page.getId());
 	}
 }
-
