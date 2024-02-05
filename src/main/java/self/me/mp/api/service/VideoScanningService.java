@@ -47,6 +47,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 	private final TagService tagService;
 	private final FileUtilitiesService fileUtilitiesService;
 	private final RecursiveWatcherService watcherService;
+	private final FileTransferWatcher transferWatcher;
 	private final FFmpegPlugin ffmpegPlugin;        // TODO: refactor transcoding to its own service
 
 	@Value("${videos.storage-location}")
@@ -58,18 +59,16 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 	private final List<Video> scannedVideos = new ArrayList<>();
 
 	VideoScanningService(
-			VideoService videoService,
-			ThumbnailService thumbnailService,
-			TagService tagService,
-			RecursiveWatcherService watcherService,
-			FFmpegPlugin ffmpegPlugin,
-			FileUtilitiesService fileUtilitiesService) {
+			VideoService videoService, ThumbnailService thumbnailService,
+			TagService tagService, RecursiveWatcherService watcherService, FFmpegPlugin ffmpegPlugin,
+			FileUtilitiesService fileUtilitiesService, FileTransferWatcher transferWatcher) {
 		this.videoService = videoService;
 		this.thumbnailService = thumbnailService;
 		this.tagService = tagService;
 		this.fileUtilitiesService = fileUtilitiesService;
 		this.watcherService = watcherService;
 		this.ffmpegPlugin = ffmpegPlugin;
+		this.transferWatcher = transferWatcher;
 	}
 
 	@NotNull
@@ -207,7 +206,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 	public void transcodeVideo(
 			@NotNull Video video,
 			@NotNull Consumer<? super Path> onSucceed,
-			@NotNull Consumer<? super Path> onFail) throws InterruptedException {
+			@NotNull Consumer<? super Path> onFail) {
 		// prepare arguments
 		final FFmpegMetadata metadata = video.getMetadata();
 		final String videoCodec = getTranscodeVideoCodec(metadata);
@@ -226,16 +225,16 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 
 		// perform transcode
 		final LoggableThread streamTask = ffmpegPlugin.transcode(request);
-		// todo - handle logging
-		streamTask.onLoggableEvent(e -> System.out.println("transcode: " + e));
-		streamTask.start();
-		int exitCode = streamTask.getProcess().waitFor();
-		logger.info("Transcoding completed with exit code: {}", exitCode);
-		if (exitCode == 0) {
-			onSucceed.accept(convertPath);
-		} else {
-			onFail.accept(convertPath);
-		}
+		streamTask.onLoggableEvent(logger::trace)
+				.onError(logger::error)
+				.onComplete(exitCode -> {
+					if (exitCode == 0) {
+						onSucceed.accept(convertPath);
+					} else {
+						onFail.accept(convertPath);
+					}
+				})
+				.start();
 	}
 
 	public void handleAddVideoEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
@@ -249,10 +248,9 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 				);
 			} else {
 				logger.info("Found video to add: {}", path);
-				this.scanAddFile(path);
 			}
 		} else if (ENTRY_MODIFY.equals(kind)) {
-			logger.info("File in video add directory was modified: {}", path);
+			transferWatcher.watchFileTransfer(path, this::scanAddFile);
 		} else if (ENTRY_DELETE.equals(kind)) {
 			logger.info("File deleted from video add directory: {}", path);
 		}
@@ -270,12 +268,12 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 				);
 			} else {
 				logger.info("Adding new video: {}", path);
-				scanFile(path, new ArrayList<>());
-				processScannedVideos();
 			}
 		} else if (ENTRY_MODIFY.equals(kind)) {
-			logger.info("Video was modified: {}", path);
-			// TODO: handle modify video
+			transferWatcher.watchFileTransfer(path, doneFile -> {
+				scanFile(doneFile, new ArrayList<>());
+				processScannedVideos();
+			});
 		} else if (ENTRY_DELETE.equals(kind)) {
 			videoService.getVideoByPath(path)
 					.ifPresentOrElse(
@@ -338,7 +336,8 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 		return findTitle(format.getTags());
 	}
 
-	private @Nullable String findTitle(@NotNull Map<String, String> tags) {
+	private @Nullable String findTitle(@Nullable Map<String, String> tags) {
+		if (tags == null) return null;
 		final List<String> variations = List.of("TITLE", "title");
 		for (String variant : variations) {
 			String tag = tags.get(variant);

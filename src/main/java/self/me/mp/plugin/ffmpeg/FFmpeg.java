@@ -76,11 +76,12 @@ public class FFmpeg {
 	}
 
 	public FFmpegStreamTask getTranscodeTask(@NotNull TranscodeRequest request) {
-		ArrayList<String> args = new ArrayList<>(baseArgs);
+		List<String> args = new ArrayList<>(baseArgs);
 		request.setBaseArgs(args);
 		return FFmpegSingleStreamTask.builder()
 				.execCommand(execPath)
 				.request(request)
+				.loggingEnabled(true)
 				.build();
 	}
 

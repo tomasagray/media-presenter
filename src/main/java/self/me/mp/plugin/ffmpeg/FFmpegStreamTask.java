@@ -2,7 +2,6 @@ package self.me.mp.plugin.ffmpeg;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
@@ -29,22 +28,28 @@ public abstract class FFmpegStreamTask extends LoggableThread {
 
 	protected String execCommand;
 	protected TranscodeRequest request;
-	protected int exitCode;
 
-	@SneakyThrows
 	@Override
 	public void start() {
-		prepareStream();
-		final List<String> command = createExecCommand();
-		logger.info("Beginning transcode with command:\n\t{}", Strings.join(command, ' '));
-		this.process = new ProcessBuilder().command(command).start();
-		if (loggingEnabled) {
-			final Path logFile = getLogFile();
-			final OpenOption[] options = {StandardOpenOption.CREATE, StandardOpenOption.WRITE};
-			final AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(logFile, options);
-			this.logPublisher = new FFmpegLogger()
-					.beginLogging(this.process, fileChannel)
-					.publish();
+		try {
+			prepareStream();
+			final List<String> command = createExecCommand();
+			logger.debug("Beginning transcode with command:\n\t{}", Strings.join(command, ' '));
+
+			this.process = new ProcessBuilder().command(command).start();
+			if (loggingEnabled) {
+				final Path logFile = getLogFile();
+				final OpenOption[] options = {StandardOpenOption.CREATE, StandardOpenOption.WRITE};
+				final AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(logFile, options);
+				logPublisher = new FFmpegLogger()
+						.beginLogging(this.process, fileChannel)
+						.doOnNext(this.onEvent)
+						.doOnError(e -> this.onError.accept(e))
+						.doOnComplete(() -> process.onExit().thenAccept(p1 -> onComplete.accept(p1.exitValue())));
+				logPublisher.subscribe();
+			}
+		} catch (Throwable e) {
+			logger.error(e.getMessage(), e);
 		}
 	}
 
