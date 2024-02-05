@@ -120,7 +120,7 @@ public class ComicScanningService implements FileScanningService {
 
 	@Async("fileScanner")
 	@Transactional
-	public void addPageOrCreateComic(@NotNull Image page) throws IOException {
+	public void addPageOrCreateComic(@NotNull Image page) {
 		try {
 			if (imageRequiresParsing(page)) {
 				parseImage(page);
@@ -228,14 +228,10 @@ public class ComicScanningService implements FileScanningService {
 
 	@SuppressWarnings("SpringTransactionalMethodCallsInspection")
 	private void processScannedImages() {
-		try {
-			List<Image> images = new ArrayList<>(scannedImages);
-			saveScannedData();
-			for (Image image : images) {
-				addPageOrCreateComic(image);
-			}
-		} catch (IOException e) {
-			logger.error("Error processing Comic Page: {}", e.getMessage(), e);
+		List<Image> images = new ArrayList<>(scannedImages);
+		saveScannedData();
+		for (Image image : images) {
+			addPageOrCreateComic(image);
 		}
 	}
 
