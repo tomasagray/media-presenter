@@ -9,9 +9,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import self.me.mp.api.service.ComicBookService;
 import self.me.mp.api.service.ComicScanningService;
 import self.me.mp.api.service.RecursiveWatcherService;
-import self.me.mp.db.ImageRepository;
 import self.me.mp.model.Image;
 
 import java.io.File;
@@ -20,7 +20,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @Order(2)
@@ -31,18 +32,17 @@ public class WatchComicBooks implements CommandLineRunner {
 
 	private final RecursiveWatcherService watcherService;
 	private final ComicScanningService scanningService;
-	private final ImageRepository imageRepository;
+	private final ComicBookService comicBookService;
 
 	@Value("${comics.location}")
 	private Path comicsLocation;
 
 	public WatchComicBooks(
-			RecursiveWatcherService watcherService,
-			ComicScanningService scanningService,
-			ImageRepository imageRepository) {
+			RecursiveWatcherService watcherService, ComicScanningService scanningService,
+			ComicBookService comicBookService) {
 		this.watcherService = watcherService;
 		this.scanningService = scanningService;
-		this.imageRepository = imageRepository;
+		this.comicBookService = comicBookService;
 	}
 
 	private void initializeComicBookLocation() throws IOException {
@@ -67,11 +67,8 @@ public class WatchComicBooks implements CommandLineRunner {
 			Duration jobDuration = Duration.between(jobStart, Instant.now());
 			logger.info("Initial scan of Comic Book files finished in {}ms", jobDuration.toMillis());
 
-			// todo: change to get unassigned images from DB
-			Collection<? extends Image> pages = scanningService.getScannedImages();
 			scanningService.saveScannedData();
-
-			logger.info("Assigning Comic Pages to Comic Books...");
+			Collection<? extends Image> pages = comicBookService.getLoosePages();
 			addPagesToComics(pages);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -83,11 +80,11 @@ public class WatchComicBooks implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		initializeComicBookLocation();
 
-		List<Path> existing = imageRepository.findAll()
+		Set<Path> existing = comicBookService.getAllPages()
 				.stream()
 				.map(Image::getUri)
 				.map(Path::of)
-				.toList();
+				.collect(Collectors.toSet());
 		logger.info("At scan init, there are: {} Comic Book pages in the database...", existing.size());
 
 		logger.info("Scanning Comic Books in: {} ...", comicsLocation);

@@ -21,6 +21,8 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @Order(2)
@@ -57,11 +59,11 @@ public class WatchPictures implements CommandLineRunner {
 	@Async("startup")
 	public void run(String... args) throws Exception {
 		initializePictureLocation();
-		List<Path> existing = pictureService.getAll(0, Integer.MAX_VALUE)
+		Set<Path> existing = pictureService.getAll(0, Integer.MAX_VALUE)
 				.stream()
 				.map(Picture::getUri)
 				.map(Paths::get)
-				.toList();
+				.collect(Collectors.toSet());
 
 		logger.info("Scanning Picture files in: {}", pictureLocation);
 		final Instant jobStart = Instant.now();

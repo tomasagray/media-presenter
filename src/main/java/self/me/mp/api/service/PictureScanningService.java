@@ -38,6 +38,7 @@ public class PictureScanningService implements FileScanningService {
 	private final TagService tagService;
 	private final FileUtilitiesService fileUtilitiesService;
 	private final RecursiveWatcherService watcherService;
+	private final FileTransferWatcher transferWatcher;
 
 	@Value("${pictures.location}")
 	private Path pictureLocation;
@@ -45,14 +46,14 @@ public class PictureScanningService implements FileScanningService {
 	private final List<Picture> scannedPictures = new ArrayList<>();
 
 	public PictureScanningService(
-			PictureService pictureService,
-			TagService tagService,
-			FileUtilitiesService fileUtilitiesService,
-			RecursiveWatcherService watcherService) {
+			PictureService pictureService, TagService tagService,
+			FileUtilitiesService fileUtilitiesService, RecursiveWatcherService watcherService,
+			FileTransferWatcher transferWatcher) {
 		this.pictureService = pictureService;
 		this.tagService = tagService;
 		this.fileUtilitiesService = fileUtilitiesService;
 		this.watcherService = watcherService;
+		this.transferWatcher = transferWatcher;
 	}
 
 	@Override
@@ -116,12 +117,12 @@ public class PictureScanningService implements FileScanningService {
 				);
 			} else {
 				logger.info("Found new Picture: {}", file);
-				scanFile(file, new ArrayList<>());
-				processScannedPictures();
 			}
 		} else if (ENTRY_MODIFY.equals(kind)) {
-			// TODO: handle modify picture
-			logger.info("Picture was modified: {}", file);
+			transferWatcher.watchFileTransfer(file, doneFile -> {
+				scanFile(doneFile, new ArrayList<>());
+				processScannedPictures();
+			});
 		} else if (ENTRY_DELETE.equals(kind)) {
 			logger.info("Deleting Picture at: {}", file);
 			String ext = FilenameUtils.getExtension(file.toString());

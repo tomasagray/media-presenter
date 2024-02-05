@@ -8,6 +8,7 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import self.me.mp.api.service.user.UserComicService;
 import self.me.mp.api.service.user.UserPictureService;
 import self.me.mp.api.service.user.UserVideoService;
@@ -40,6 +41,7 @@ public class SearchService {
 		this.comicService = comicService;
 	}
 
+	@Transactional
 	public SearchAllResult searchFor(@NotNull String query, int offset, int limit) {
 		logger.info("Searching all Entities for: {}", query);
 		logger.trace("Search offset: {}; limit: {}", offset, limit);
