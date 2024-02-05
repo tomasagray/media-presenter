@@ -46,7 +46,7 @@ class FFmpegTest {
 				.build();
 		final FFmpegStreamTask transcodeTask = ffmpeg.getTranscodeTask(request);
 		transcodeTask.start();
-		transcodeTask.onLoggableEvent(line -> System.out.println("log: " + line)).dispose();
+		transcodeTask.onLoggableEvent(line -> System.out.println("log: " + line));
 		int exitCode = transcodeTask.getProcess().waitFor();
 		logger.info("Transcode ended with exit code: {}", exitCode);
 

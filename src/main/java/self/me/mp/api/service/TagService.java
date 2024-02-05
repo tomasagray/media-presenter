@@ -38,7 +38,7 @@ public class TagService {
 		final List<Tag> tags = new ArrayList<>();
 		int names = resolved.getNameCount() - 1;    // skip filename
 		for (int i = 0; i < names; i++) {
-			String name = resolved.getName(i).toString();
+			String name = resolved.getName(i).toString().trim();
 			Tag tag = getOrCreateTag(name);
 			tags.add(tag);
 		}

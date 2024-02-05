@@ -7,10 +7,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.mp.db.ComicBookRepository;
-import self.me.mp.db.ImageRepository;
+import self.me.mp.db.ComicPageRepository;
 import self.me.mp.model.ComicBook;
+import self.me.mp.model.ComicPage;
 import self.me.mp.model.Image;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,11 +22,11 @@ import java.util.UUID;
 public class ComicBookService {
 
 	private final ComicBookRepository comicBookRepo;
-	private final ImageRepository imageRepository;
+	private final ComicPageRepository pageRepository;
 
-	public ComicBookService(ComicBookRepository comicBookRepo, ImageRepository imageRepository) {
+	public ComicBookService(ComicBookRepository comicBookRepo, ComicPageRepository pageRepository) {
 		this.comicBookRepo = comicBookRepo;
-		this.imageRepository = imageRepository;
+		this.pageRepository = pageRepository;
 	}
 
 	public Page<ComicBook> getAllComics(int page, int size) {
@@ -43,12 +45,20 @@ public class ComicBookService {
 		return comicBookRepo.findById(bookId);
 	}
 
+	public List<ComicPage> getAllPages() {
+		return pageRepository.findAll();
+	}
+
+	public Collection<ComicPage> getLoosePages() {
+		return pageRepository.findLoosePages();
+	}
+
 	public Optional<ComicBook> getComicBookForPage(@NotNull Image page) {
 		return comicBookRepo.findComicBookByImagesContaining(page);
 	}
 
 	public Optional<UrlResource> getPageData(@NotNull UUID pageId) {
-		return imageRepository.findById(pageId)
+		return pageRepository.findById(pageId)
 				.map(image -> UrlResource.from(image.getUri()));
 	}
 

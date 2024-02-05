@@ -13,6 +13,8 @@ import java.time.Instant;
 @Aspect
 public class ScanningMonitor {
 
+	// TODO: Do something with this class
+
 	private static final Logger logger = LogManager.getLogger(ScanningMonitor.class);
 
 	@Around("execution(* self.me.mp.api.service.ComicScanningService.scanFile(..))")

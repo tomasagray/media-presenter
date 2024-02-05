@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,9 +38,10 @@ public class ComicScanningService implements FileScanningService {
 	private static final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
 	private final ComicBookRepository comicRepo;
 	private final ImageRepository imageRepository;
-	private final RecursiveWatcherService watcherService;
 	private final ComicBookService comicService;
 	private final TagService tagService;
+	private final RecursiveWatcherService watcherService;
+	private final FileTransferWatcher transferWatcher;
 	private final FileUtilitiesService fileUtilitiesService;
 
 	private final Set<Image> scannedImages = new HashSet<>();
@@ -48,17 +50,16 @@ public class ComicScanningService implements FileScanningService {
 	private Path comicsLocation;
 
 	public ComicScanningService(
-			ComicBookRepository comicRepo,
-			ImageRepository imageRepository,
-			ComicBookService comicService,
-			TagService tagService,
-			RecursiveWatcherService watcherService,
+			ComicBookRepository comicRepo, ImageRepository imageRepository,
+			ComicBookService comicService, TagService tagService,
+			RecursiveWatcherService watcherService, FileTransferWatcher transferWatcher,
 			FileUtilitiesService fileUtilitiesService) {
 		this.comicRepo = comicRepo;
 		this.imageRepository = imageRepository;
 		this.comicService = comicService;
 		this.tagService = tagService;
 		this.watcherService = watcherService;
+		this.transferWatcher = transferWatcher;
 		this.fileUtilitiesService = fileUtilitiesService;
 	}
 
@@ -89,7 +90,6 @@ public class ComicScanningService implements FileScanningService {
 
 	@Override
 	public synchronized void saveScannedData() {
-		// todo: can this be done using Spring transactions?
 		List<Image> savable = scannedImages
 				.stream()
 				.filter(Objects::nonNull)
@@ -99,32 +99,20 @@ public class ComicScanningService implements FileScanningService {
 		scannedImages.clear();
 	}
 
-	public synchronized Collection<? extends Image> getScannedImages() {
-		List<Image> pages = new ArrayList<>(scannedImages.size());
-		scannedImages.spliterator().forEachRemaining(img -> {
-			if (img != null) {
-				pages.add(img);
-			} else {
-				logger.error("Images was null");
-			}
-		});
-		return pages;
-	}
-
 	private boolean imageRequiresParsing(@NotNull Image image) {
 		return image.getHeight() == 0 || image.getWidth() == 0 || image.getFilesize() == 0;
 	}
 
-	private void parseImage(@NotNull Image image) throws IOException {
-		URI uri = image.getUri();
-		BufferedImage data = ImageIO.read(uri.toURL());
-		if (data != null) {
+	private void parseImage(@NotNull Image image) {
+		final URI uri = image.getUri();
+		try {
+			BufferedImage data = ImageIO.read(uri.toURL());
 			image.setHeight(data.getHeight());
 			image.setWidth(data.getWidth());
 			image.setFilesize(new File(uri).length());
-		} else {
-			logger.error("Could not read image data: {}", image);
-			Path path = Path.of(image.getUri());
+		} catch (Throwable e) {
+			Path path = Path.of(uri);
+			logger.error("Could not read image data for {}: {}", path, e.getMessage());
 			String ext = FilenameUtils.getExtension(path.toString());
 			invalidFiles.add(ext, path);
 		}
@@ -132,16 +120,20 @@ public class ComicScanningService implements FileScanningService {
 
 	@Async("fileScanner")
 	@Transactional
-	public void addPageOrCreateComic(@NotNull Image page) throws IOException {
-		if (imageRequiresParsing(page)) {
-			parseImage(page);
+	public void addPageOrCreateComic(@NotNull Image page) {
+		try {
+			if (imageRequiresParsing(page)) {
+				parseImage(page);
+			}
+			Path parent = Path.of(page.getUri()).getParent();
+			comicRepo.findComicBookIn(parent)
+					.ifPresentOrElse(
+							comic -> addPageToComic(page, comic),
+							() -> createComic(page)
+					);
+		} catch (IncorrectResultSizeDataAccessException e) {
+			logger.error("Duplicate comic book: {}, {}", page, e.getMessage());
 		}
-		Path parent = Path.of(page.getUri()).getParent();
-		comicRepo.findComicBookIn(parent)
-				.ifPresentOrElse(
-						comic -> addPageToComic(page, comic),
-						() -> createComic(page)
-				);
 	}
 
 	private boolean isPathWithin(@NotNull Path parent, @NotNull Path child) {
@@ -213,12 +205,12 @@ public class ComicScanningService implements FileScanningService {
 				);
 			} else {
 				logger.info("Found new Comic Book page: {}", file);
-				scanFile(file, new ArrayList<>());
-				processScannedImages();
 			}
 		} else if (ENTRY_MODIFY.equals(kind)) {
-			// TODO: handle modify comic...
-			logger.info("Comic Book image: {} was modified", file);
+			transferWatcher.watchFileTransfer(file, doneFile -> {
+				scanFile(doneFile, new ArrayList<>());
+				processScannedImages();
+			});
 		} else if (ENTRY_DELETE.equals(kind)) {
 			logger.info("Comic Book image was deleted: {}", file);
 			String ext = FilenameUtils.getExtension(file.toString());
@@ -236,14 +228,10 @@ public class ComicScanningService implements FileScanningService {
 
 	@SuppressWarnings("SpringTransactionalMethodCallsInspection")
 	private void processScannedImages() {
-		try {
-			List<Image> images = new ArrayList<>(scannedImages);
-			saveScannedData();
-			for (Image image : images) {
-				addPageOrCreateComic(image);
-			}
-		} catch (IOException e) {
-			logger.error("Error processing Comic Page: {}", e.getMessage(), e);
+		List<Image> images = new ArrayList<>(scannedImages);
+		saveScannedData();
+		for (Image image : images) {
+			addPageOrCreateComic(image);
 		}
 	}
 
