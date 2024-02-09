@@ -12,6 +12,7 @@ import self.me.mp.api.resource.ComicBookResource;
 import self.me.mp.api.service.user.UserComicService;
 import self.me.mp.user.UserComicBookView;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +38,7 @@ public class ComicBookController {
 		Page<UserComicBookView> comics = comicBookService.getLatestUserComics(page, size);
 		setAttributes(model, comics);
 		model.addAttribute("page_title", "Latest Comics");
+		addSortLinks(model);
 		return "image/image_list";
 	}
 
@@ -52,6 +54,14 @@ public class ComicBookController {
 			model.addAttribute("next_page", page.nextPageable().getPageNumber());
 		}
 	}
+
+
+	private static void addSortLinks(@NotNull Model model) {
+		model.addAttribute("latest_link", "/comics/latest");
+		model.addAttribute("random_link", "/comics/random");
+		model.addAttribute("fav_link", "/comics/favorites");
+	}
+
 
 	@GetMapping(value = "/all/paged", produces = MediaType.APPLICATION_JSON_VALUE)
 	public CollectionModel<ComicBookResource> getAllComicsPaged(
@@ -69,6 +79,17 @@ public class ComicBookController {
 		CollectionModel<ComicBookResource> resources = modeller.toCollectionModel(comics);
 		model.addAttribute("images", resources);
 		model.addAttribute("page_title", "Comic Books");
+		addSortLinks(model);
+		return "image/image_list";
+	}
+
+	@GetMapping("/favorites")
+	public String getFavoriteComics(@NotNull Model model) {
+		Collection<UserComicBookView> favorites = comicBookService.getFavoriteComics();
+		CollectionModel<ComicBookResource> resources = modeller.toCollectionModel(favorites);
+		model.addAttribute("images", resources);
+		model.addAttribute("page_title", "Favorite Comic Books");
+		addSortLinks(model);
 		return "image/image_list";
 	}
 

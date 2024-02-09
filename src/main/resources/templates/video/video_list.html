@@ -5,6 +5,7 @@
 </head>
 <body>
 <div class="Page-container">
+    <div data-th-replace="~{components/sort_bar::sort-bar}"></div>
     <div class="Video-card-container">
         <div data-th-each="video : ${videos}" data-th-insert="~{video/video_card::video-card}">
         </div>
