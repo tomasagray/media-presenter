@@ -50,7 +50,8 @@ public class UserPreferences {
 	}
 
 	public boolean isFavorite(Video video) {
-		return favoriteVideos.contains(video);
+		return favoriteVideos.stream().map(Video::getId)
+				.anyMatch(id -> id.equals(video.getId()));
 	}
 
 	public boolean isFavorite(Picture picture) {

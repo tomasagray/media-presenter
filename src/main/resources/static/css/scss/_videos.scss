@@ -19,6 +19,10 @@
 
     .Video-thumbnail-container {
       @include swipe-image(100%, unset);
+
+      .Video-duration {
+        @include card-data;
+      }
     }
   }
 }

@@ -9,8 +9,9 @@
     <div data-th-insert="~{image/image_viewer::image-viewer}"></div>
     <div>
         <div class="Picture-card-container">
-            <div data-th-each="image : ${images}"
-                 data-th-insert="~{image/image_card::imageCard(extraText = null)}">
+            <!--/*@thymesVar id="image" type="self.me.mp.api.resource.ComicBookResource"*/-->
+            <div data-th-each="image : ${images}">
+                <div data-th-replace="~{image/image_card::imageCard(extraText = ${image.pageCount})}"></div>
             </div>
         </div>
     </div>

@@ -6,17 +6,18 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 import self.me.mp.api.controller.ComicBookController;
 import self.me.mp.model.Image;
-import self.me.mp.model.Tag;
 import self.me.mp.user.UserComicBookView;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -27,13 +28,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "comic")
 @Relation(collectionRelation = "comics")
-public class ComicBookResource extends RepresentationModel<ComicBookResource> {
+public class ComicBookResource extends ImageResource<ComicBookResource> {
 
-	private UUID id;
-	private String title;
-	private Collection<Tag> tags;
 	private Timestamp timestamp;
-	private boolean favorite;
+	private int pageCount;
 
 	@Component
 	public static class ComicBookModeller extends
@@ -54,6 +52,7 @@ public class ComicBookResource extends RepresentationModel<ComicBookResource> {
 			model.setTimestamp(entity.getTimestamp());
 			model.setTags(entity.getTags());
 			model.setFavorite(entity.isFavorite());
+			model.setPageCount(entity.getImages().size());
 
 			// attach links
 			model.add(linkTo(methodOn(ComicBookController.class)

@@ -23,6 +23,7 @@ div > .Picture-card {
   }
 
   .Picture-container {
+    position: relative;
     width: 20vw;
     height: 50vh;
     display: flex;
@@ -42,6 +43,10 @@ div > .Picture-card {
     img {
       width: 100%;
       object-fit: cover;
+    }
+
+    span {
+      @include card-data;
     }
   }
 

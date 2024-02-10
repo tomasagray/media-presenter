@@ -7,7 +7,26 @@
   }
 }
 
+@mixin card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  grid-row-gap: 2rem;
+  grid-column-gap: 6rem;
+
+  @include screen-size($tablet_landscape_max) {
+    grid-gap: 2rem;
+  }
+  @include screen-size($tablet_portrait_max) {
+    grid-gap: 2rem;
+    justify-content: center;
+  }
+  width: 100%;
+  overflow: hidden;
+}
+
 @mixin swipe-image($width, $height) {
+  position: relative;
   width: $width;
   height: $height;
 
@@ -31,23 +50,12 @@
   }
 }
 
-@mixin card-container {
-  display: inline-grid;
-  grid-row-gap: 5%;
-  grid-template: auto / auto auto auto auto;
-  @include screen-size($small_desktop_max) {
-    grid-template: auto / 30% 30% 30%;
-  }
-  @include screen-size($tablet_landscape_max) {
-    grid-template: auto / auto auto auto;
-    grid-row-gap: 2rem;
-  }
-  @include screen-size($tablet_portrait_max) {
-    grid-template: auto / auto auto;
-    grid-row-gap: 2rem;
-  }
-  grid-column-gap: 4rem;
-  justify-content: center;
-  width: 100%;
-  overflow: hidden;
+@mixin card-data {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 3px 5px;
+  border-radius: 3px;
+  color: #ccc;
+  background-color: rgba(0, 0, 0, .6);
 }

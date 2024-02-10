@@ -87,6 +87,20 @@ input {
   margin: 0 0.25rem;
   opacity: 0.65;
 }
+.Card-metadata .Card-tags .Card-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  max-height: 35px;
+}
+.Card-metadata .Card-tags .Card-tag-list .Card-tag {
+  border: 1px solid #888;
+  border-radius: 5px;
+  padding: 3px 5px;
+  margin: 5px;
+}
 
 .Viewer-button.Favorite-button .Favorite {
   display: none;
@@ -156,13 +170,12 @@ input {
 }
 .Page-container {
   width: 90%;
-  padding-bottom: 2rem;
 }
 .Page-container .Page-navigation-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: 6rem;
 }
 .Page-container .Page-navigation-container .Page-navigation-button {
   padding: 1rem;
@@ -364,29 +377,23 @@ input {
 }
 
 .Video-card-container {
-  display: inline-grid;
-  grid-row-gap: 5%;
-  grid-template: auto/auto auto auto auto;
-  grid-column-gap: 4rem;
-  justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  grid-row-gap: 2rem;
+  grid-column-gap: 6rem;
   width: 100%;
   overflow: hidden;
 }
-@media (max-width: 1799px) {
-  .Video-card-container {
-    grid-template: auto/30% 30% 30%;
-  }
-}
 @media (max-width: 1199px) {
   .Video-card-container {
-    grid-template: auto/auto auto auto;
-    grid-row-gap: 2rem;
+    grid-gap: 2rem;
   }
 }
 @media (max-width: 899px) {
   .Video-card-container {
-    grid-template: auto/auto auto;
-    grid-row-gap: 2rem;
+    grid-gap: 2rem;
+    justify-content: center;
   }
 }
 .Video-card-container .Video-card {
@@ -406,6 +413,7 @@ input {
   cursor: pointer;
 }
 .Video-card-container .Video-card .Video-thumbnail-container {
+  position: relative;
   width: 100%;
   height: unset;
   border-radius: 10px;
@@ -421,6 +429,15 @@ input {
 .Video-card-container .Video-card .Video-thumbnail-container .Display-image img {
   height: unset;
   width: 100%;
+}
+.Video-card-container .Video-card .Video-thumbnail-container .Video-duration {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 3px 5px;
+  border-radius: 3px;
+  color: #ccc;
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 #Video-player-container {
@@ -439,29 +456,23 @@ input {
 }
 
 .Picture-card-container {
-  display: inline-grid;
-  grid-row-gap: 5%;
-  grid-template: auto/auto auto auto auto;
-  grid-column-gap: 4rem;
-  justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  grid-row-gap: 2rem;
+  grid-column-gap: 6rem;
   width: 100%;
   overflow: hidden;
 }
-@media (max-width: 1799px) {
-  .Picture-card-container {
-    grid-template: auto/30% 30% 30%;
-  }
-}
 @media (max-width: 1199px) {
   .Picture-card-container {
-    grid-template: auto/auto auto auto;
-    grid-row-gap: 2rem;
+    grid-gap: 2rem;
   }
 }
 @media (max-width: 899px) {
   .Picture-card-container {
-    grid-template: auto/auto auto;
-    grid-row-gap: 2rem;
+    grid-gap: 2rem;
+    justify-content: center;
   }
 }
 @media (max-width: 899px) {
@@ -482,6 +493,7 @@ div > .Picture-card:hover .Picture-container {
   opacity: 1;
 }
 div > .Picture-card .Picture-container {
+  position: relative;
   width: 20vw;
   height: 50vh;
   display: flex;
@@ -506,6 +518,15 @@ div > .Picture-card .Picture-container img {
   width: 100%;
   object-fit: cover;
 }
+div > .Picture-card .Picture-container span {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 3px 5px;
+  border-radius: 3px;
+  color: #ccc;
+  background-color: rgba(0, 0, 0, 0.6);
+}
 div > .Picture-card p {
   margin: 0.5rem 0 0 0.25rem;
 }
@@ -527,6 +548,7 @@ div > .Picture-card p {
   display: flex;
   position: relative;
   overflow: hidden;
+  position: relative;
   width: 100vw;
   height: 100vh;
   border-radius: 10px;

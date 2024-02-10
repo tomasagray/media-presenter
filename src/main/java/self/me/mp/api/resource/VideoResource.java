@@ -13,6 +13,7 @@ import self.me.mp.model.Tag;
 import self.me.mp.user.UserVideoView;
 
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -32,6 +33,7 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 	private Timestamp timestamp;
 	private Collection<Tag> tags;
 	private boolean isFavorite;
+	private String duration;
 
 	@Component
 	public static class VideoResourceModeller
@@ -39,6 +41,14 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 
 		public VideoResourceModeller() {
 			super(VideoController.class, VideoResource.class);
+		}
+
+		private @NotNull String getDuration(@NotNull UserVideoView video) {
+			long millis = (long) (video.getDuration() * 1_000);
+			Duration duration = Duration.ofMillis(millis);
+			int hours = duration.toHoursPart();
+			String hoursPart = hours > 0 ? String.format("%02d", hours) :  "";
+			return hoursPart + String.format("%02d:%02d", duration.toMinutesPart(), duration.toSecondsPart());
 		}
 
 		@SneakyThrows
@@ -53,6 +63,7 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 			model.setTimestamp(entity.getTimestamp());
 			model.setTags(entity.getTags());
 			model.setFavorite(entity.isFavorite());
+			model.setDuration(getDuration(entity));
 
 			// links
 			model.add(
