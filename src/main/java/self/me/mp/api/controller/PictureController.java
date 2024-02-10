@@ -12,6 +12,7 @@ import self.me.mp.api.resource.PictureResource;
 import self.me.mp.api.service.user.UserPictureService;
 import self.me.mp.user.UserImageView;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,15 +30,21 @@ public class PictureController {
 		this.modeller = modeller;
 	}
 
+	private static void addSortLinks(@NotNull Model model) {
+		model.addAttribute("latest_link", "/pictures/latest");
+		model.addAttribute("random_link", "/pictures/random");
+		model.addAttribute("fav_link", "/pictures/favorites");
+	}
+
 	@GetMapping({"", "/", "/latest"})
 	public String getLatestPictures(
 			@RequestParam(name = "page", defaultValue = "0") int page,
 			@RequestParam(name = "size", defaultValue = "15") int size,
 			@NotNull Model model) {
-
 		Page<UserImageView> pictures = pictureService.getLatestUserPictures(page, size);
-		setAttributes(model, pictures);
 		model.addAttribute("page_title", "Latest pictures");
+		setAttributes(model, pictures);
+		addSortLinks(model);
 		return "image/image_list";
 	}
 
@@ -66,6 +73,17 @@ public class PictureController {
 		CollectionModel<PictureResource> resources = modeller.toCollectionModel(pictures);
 		model.addAttribute("images", resources);
 		model.addAttribute("page_title", "Pictures");
+		addSortLinks(model);
+		return "image/image_list";
+	}
+
+	@GetMapping("/favorites")
+	public String getFavoritePictures(@NotNull Model model) {
+		Collection<UserImageView> favorites = pictureService.getFavoritePictures();
+		CollectionModel<PictureResource> resources = modeller.toCollectionModel(favorites);
+		model.addAttribute("images", resources);
+		model.addAttribute("page_title", "Favorite Pictures");
+		addSortLinks(model);
 		return "image/image_list";
 	}
 

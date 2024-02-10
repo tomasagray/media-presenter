@@ -5,7 +5,7 @@
     <title>Image Card</title>
 </head>
 <body>
-<div class="Picture-card" data-th-fragment="image-card">
+<div class="Picture-card" data-th-fragment="imageCard(extraText)">
     <script data-th-inline="javascript" type="module">
         import {
             onShowImageViewer,
@@ -26,12 +26,13 @@
             }
         })
     </script>
+    <!--/*@thymesVar id="image" type="self.me.mp.api.resource.ImageResource<T>"*/-->
     <div class="Display-image Picture-container" data-th-id="${image.id}">
-        <img
-                src=""
-                alt="Picture"
-                th:if="${image.links.getLink('data').isPresent()}"
-                data-th-src="${image.links.getLink('data').get().href}"
+        <span th:if="${extraText != null  }"
+              data-th-text="${extraText} + ' pgs.'"></span>
+        <img src="" alt="Picture"
+             th:if="${image.getLink('data').isPresent()}"
+             data-th-src="${image.getLink('data').get().href}"
         />
     </div>
     <div class="Card-metadata">
@@ -46,10 +47,11 @@
                      th:unless="${image.favorite}"/>
                 <img alt="Tags" src="/img/icon/tags/tags_32.png"/>
             </div>
-            <span class="Card-tags"
-                  data-th-each="tag : ${image.tags}"
-                  data-th-text="${tag.name}">
-                Tags
+            <span class="Card-tag-list">
+                  <span class="Card-tag" data-th-each="tag : ${image.tags}"
+                        data-th-text="${tag.name}">
+                      Tags
+                  </span>
             </span>
             <span class="Card-tag" th:if="${#lists.isEmpty(image.tags)}">
                 (none)

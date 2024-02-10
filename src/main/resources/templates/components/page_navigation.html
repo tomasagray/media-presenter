@@ -1,4 +1,8 @@
 <div class="Page-navigation-container" data-th-fragment="page-navigation">
+    <!--/*@thymesVar id="prev_page" type="java.lang.Integer"*/-->
+    <!--/*@thymesVar id="current_page" type="java.lang.Integer"*/-->
+    <!--/*@thymesVar id="total_pages" type="java.lang.Integer"*/-->
+    <!--/*@thymesVar id="next_page" type="java.lang.Integer"*/-->
     <a class="Page-navigation-button"
        data-th-href="'?page=' + ${prev_page}"
        data-th-unless="${prev_page == null}"

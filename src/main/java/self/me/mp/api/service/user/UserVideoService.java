@@ -52,7 +52,8 @@ public class UserVideoService {
 	}
 
 	private UserVideoView getUserVideoView(@NotNull Video video) {
-		return userService.getUserPreferences().isFavorite(video) ?
+		UserPreferences preferences = userService.getUserPreferences();
+		return preferences.isFavorite(video) ?
 				videoModeller.toFavorite(video) : videoModeller.toView(video);
 	}
 

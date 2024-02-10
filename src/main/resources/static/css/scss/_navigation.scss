@@ -4,16 +4,12 @@
 
 .Page-container {
   width: 90%;
-  @include screen-size($tablet_landscape_max) {
-    width: 100%;
-  }
-  padding-bottom: 2rem;
 
   .Page-navigation-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 2rem;
+    padding: 6rem;
 
     .Page-navigation-button {
       padding: 1rem;
@@ -212,5 +208,32 @@
 
   p {
     color: #aaa;
+  }
+}
+
+.Sort-bar {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+
+  .Sort-button {
+    width: 100px;
+    border-radius: 5px;
+    background-color: rgba(180, 180, 180, .4);
+    font-weight: bold;
+    margin-right: 2rem;
+    padding: 4px;
+    text-decoration: none;
+    text-align: center;
+    color: black;
+
+    &.current {
+      background-color: rgba(180, 180, 180, .8);
+      background-color: white;
+    }
+
+    &:hover {
+      background-color: rgba(180, 180, 180, .8);
+    }
   }
 }

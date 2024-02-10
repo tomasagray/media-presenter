@@ -58,6 +58,22 @@
         opacity: .65;
       }
     }
+
+    .Card-tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      max-height: 35px;
+
+      .Card-tag {
+        border: 1px solid #888;
+        border-radius: 5px;
+        padding: 3px 5px;
+        margin: 5px;
+      }
+    }
   }
 }
 

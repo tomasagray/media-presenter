@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sort Button</title>
+</head>
+<body>
+<a data-th-fragment="sortButton(link, text)"
+   data-th-href="${link}"
+   data-th-text="${text}"
+   th:class="'Sort-button'  + (${link == #ctx.springRequestContext.requestUri} ? ' current': '')">
+    Button text.
+</a>
+</body>
+</html>

@@ -26,15 +26,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "picture")
 @Relation(collectionRelation = "pictures")
-public class PictureResource extends RepresentationModel<PictureResource> {
+public class PictureResource extends ImageResource<PictureResource> {
 
-	private UUID id;
-	private String title;
 	private int height;
 	private int width;
 	private long filesize;
-	private Collection<Tag> tags;
-	private boolean favorite;
 
 	@Component
 	public static class PictureResourceModeller
