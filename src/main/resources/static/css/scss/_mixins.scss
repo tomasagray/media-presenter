@@ -8,16 +8,18 @@
 }
 
 @mixin card-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  grid-row-gap: 2rem;
+  display: grid;
+  grid-template-columns: 25vw 25vw 25vw;
+  grid-row-gap: 3rem;
   grid-column-gap: 6rem;
 
   @include screen-size($tablet_landscape_max) {
-    grid-gap: 2rem;
+    grid-gap: 3rem;
   }
+
   @include screen-size($tablet_portrait_max) {
+    display: flex;
+    flex-wrap: wrap;
     grid-gap: 2rem;
     justify-content: center;
   }

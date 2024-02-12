@@ -105,6 +105,10 @@
           width: 30vw;
           color: #aaa;
           font-size: x-large;
+
+          &::placeholder {
+            color: #444;
+          }
         }
 
         button[type=submit] {
