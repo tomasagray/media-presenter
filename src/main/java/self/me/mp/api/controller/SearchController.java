@@ -46,6 +46,11 @@ public class SearchController {
 			@RequestParam(value = "limit", defaultValue = "12") int limit) {
 
 		SearchAllResult results = searchService.searchFor(query, offset, limit);
+		if (results.isEmpty()) {
+			model.addAttribute("query", query);
+			return "empty_search";
+		}
+
 		CollectionModel<VideoResource> videos = videoModeller.toCollectionModel(results.getVideos());
 		CollectionModel<PictureResource> pictures = pictureModeller.toCollectionModel(results.getPictures());
 		CollectionModel<ComicBookResource> comics = comicModeller.toCollectionModel(results.getComics());
