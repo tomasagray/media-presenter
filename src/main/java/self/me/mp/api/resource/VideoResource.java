@@ -47,7 +47,7 @@ public class VideoResource extends RepresentationModel<VideoResource> {
 			long millis = (long) (video.getDuration() * 1_000);
 			Duration duration = Duration.ofMillis(millis);
 			int hours = duration.toHoursPart();
-			String hoursPart = hours > 0 ? String.format("%02d", hours) :  "";
+			String hoursPart = hours > 0 ? String.format("%02d:", hours) : "";
 			return hoursPart + String.format("%02d:%02d", duration.toMinutesPart(), duration.toSecondsPart());
 		}
 

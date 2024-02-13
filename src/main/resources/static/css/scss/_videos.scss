@@ -7,7 +7,7 @@
   .Video-card {
     width: 20vw;
     @include screen-size($small_desktop_max) {
-      width: 25vw;
+      width: 24vw;
     }
     @include screen-size($tablet_portrait_max) {
       width: 40vw;

@@ -12,12 +12,16 @@ import java.util.Collection;
 @Builder
 public class SearchAllResult {
 
-	private Collection<UserVideoView> videos;
-	private Collection<UserImageView> pictures;
-	private Collection<UserComicBookView> comics;
+    private Collection<UserVideoView> videos;
+    private Collection<UserImageView> pictures;
+    private Collection<UserComicBookView> comics;
 
-	private long totalResults;
-	private int offset;
-	private int limit;
+    private long totalResults;
+    private int offset;
+    private int limit;
+
+    public boolean isEmpty() {
+        return videos.isEmpty() && pictures.isEmpty() && comics.isEmpty();
+    }
 
 }

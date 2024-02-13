@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head data-th-insert="~{components/header_includes::header-includes}">
+    <title data-th-text="${page_title}">Search Results</title>
+</head>
+<body>
+<div class="Page-container">
+    <div class="Empty-search-result">
+        <span>Nothing was found for query:</span>
+        <span data-th-text="${query}" style="font-weight: bold">query</span>
+    </div>
+    <div data-th-insert="~{components/footer_menu::footer-menu}"></div>
+</div>
+</body>
+</html>

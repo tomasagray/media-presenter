@@ -105,6 +105,10 @@
           width: 30vw;
           color: #aaa;
           font-size: x-large;
+
+          &::placeholder {
+            color: #444;
+          }
         }
 
         button[type=submit] {
@@ -127,6 +131,20 @@
         }
       }
     }
+  }
+}
+
+.Empty-search-result {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #666;
+
+  span {
+    padding: .5rem;
   }
 }
 

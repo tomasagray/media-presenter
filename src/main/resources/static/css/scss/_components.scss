@@ -61,8 +61,6 @@
 
     .Card-tag-list {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
       align-items: center;
       overflow: hidden;
       max-height: 35px;
@@ -72,6 +70,10 @@
         border-radius: 5px;
         padding: 3px 5px;
         margin: 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100px;
       }
     }
   }
