@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.2.3] - 2024-02-12
+
+### Added
+
+- Empty search result handler
+
+### Fixed
+
+- Broken card display for long file & tag names
+
+## [0.2.2] - 2024-02-09
+
+### Added
+
+- Sort by... bar
+- Video times to thumbnails
+- Comic Book page count
+
+### Fixed
+
+- Bottom of page clipped
+- GUI improvements
+
 ## [0.1.1] - 2024-01-09
 
 ### Added
