@@ -29,10 +29,11 @@
                      th:unless="${video.favorite}"/>
                 <img alt="Tags" src="/img/icon/tags/tags_32.png"/>
             </div>
-            <span class="Card-tags"
-                  data-th-each="tag : ${video.tags}"
-                  data-th-text="${tag.name}">
-                Tags
+            <span class="Card-tag-list">
+                  <span class="Card-tag" data-th-each="tag : ${video.tags}"
+                        data-th-text="${tag.name}">
+                      Tags
+                  </span>
             </span>
             <span class="Card-tag" th:if="${#lists.isEmpty(video.tags)}">
                 (none)

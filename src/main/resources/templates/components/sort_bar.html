@@ -7,11 +7,11 @@
 <body>
 <div data-th-fragment="sort-bar" class="Sort-bar">
     <!--/*@thymesVar id="latest_link" type="java.lang.String"*/-->
-    <a data-th-replace="components/sort_button::sortButton(link=${latest_link}, text='Latest')"></a>
+    <a data-th-replace="~{components/sort_button::sortButton(link=${latest_link}, text='Latest')}"></a>
     <!--/*@thymesVar id="random_link" type="java.lang.String"*/-->
-    <a data-th-replace="components/sort_button::sortButton(link=${random_link}, text='Random')"></a>
+    <a data-th-replace="~{components/sort_button::sortButton(link=${random_link}, text='Random')}"></a>
     <!--/*@thymesVar id="fav_link" type="java.lang.String"*/-->
-    <a data-th-replace="components/sort_button::sortButton(link=${fav_link}, text='Favorites')"></a>
+    <a data-th-replace="~{components/sort_button::sortButton(link=${fav_link}, text='Favorites')}"></a>
 </div>
 </body>
 </html>
