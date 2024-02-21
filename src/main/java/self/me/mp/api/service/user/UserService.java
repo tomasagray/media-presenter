@@ -41,7 +41,7 @@ public class UserService {
 	}
 
 	public UserPreferences getUserPreferences(@NotNull String username) {
-		logger.info("Getting User Preferences for: {}", username);
+		logger.trace("Getting User Preferences for: {}", username);
 		Optional<UserPreferences> optional = repository.findByUsername(username);
 		if (optional.isEmpty()) {
 			throw new IllegalStateException("Could not find UserPreferences for User: " + username);

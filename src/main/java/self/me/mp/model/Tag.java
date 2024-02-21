@@ -25,13 +25,13 @@ import java.util.Objects;
 public class Tag {
 
 	@FullTextField
-	private final String name;
+	protected final String name;
 
 	@EmbeddedId
 	@DocumentId(identifierBridge = @IdentifierBridgeRef(type = Md5IdBridge.class))
 	@GenericGenerator(name = "tag_id_gen", strategy = "self.me.mp.db.Md5IdGenerator")
 	@GeneratedValue(generator = "tag_id_gen")
-	private Md5Id tagId;
+	protected Md5Id tagId;
 
 	public Tag() {
 		this.name = null;
