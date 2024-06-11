@@ -1,5 +1,13 @@
 package self.me.mp.api.service;
 
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -11,15 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import self.me.mp.db.VideoRepository;
 import self.me.mp.model.Image;
 import self.me.mp.model.Video;
-
-import java.io.UncheckedIOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -71,7 +70,7 @@ public class VideoService {
 	}
 
 	public UrlResource getVideoData(@NotNull UUID videoId) throws MalformedURLException {
-		logger.info("Reading video data for: {}", videoId);
+    logger.trace("Reading video data for: {}", videoId);
 		Optional<Video> videoOptional = getById(videoId);
 		if (videoOptional.isPresent()) {
 			Video video = videoOptional.get();

@@ -1,5 +1,9 @@
 package self.me.mp.api.service;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -10,13 +14,7 @@ import org.springframework.stereotype.Service;
 import self.me.mp.db.PictureRepository;
 import self.me.mp.model.Picture;
 
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 @Service
-//@Transactional
 public class PictureService {
 
 	private static final Logger logger = LogManager.getLogger(PictureService.class);
