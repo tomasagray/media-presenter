@@ -1,5 +1,8 @@
 package self.me.mp.api.controller;
 
+import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
+import java.util.NoSuchElementException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -8,10 +11,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
-import java.util.NoSuchElementException;
 
 @ControllerAdvice
 public class _GlobalExceptionHandler {

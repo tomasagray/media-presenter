@@ -4,6 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,11 +18,6 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -49,19 +48,6 @@ public class UserPreferences {
 		this.username = username;
 	}
 
-	public boolean isFavorite(Video video) {
-		return favoriteVideos.stream().map(Video::getId)
-				.anyMatch(id -> id.equals(video.getId()));
-	}
-
-	public boolean isFavorite(Picture picture) {
-		return favoritePictures.contains(picture);
-	}
-
-	public boolean isFavorite(ComicBook comic) {
-		return favoriteComics.contains(comic);
-	}
-
 	private static <T> boolean toggleFavorite(@NotNull Collection<T> favorites, T entity) {
 		if (favorites.contains(entity)) {
 			favorites.remove(entity);
@@ -71,6 +57,18 @@ public class UserPreferences {
 			return true;
 		}
 	}
+
+  public boolean isFavorite(Video video) {
+    return favoriteVideos.stream().map(Video::getId).anyMatch(id -> id.equals(video.getId()));
+  }
+
+  public boolean isFavorite(Picture picture) {
+    return favoritePictures.contains(picture);
+  }
+
+  public boolean isFavorite(ComicBook comic) {
+    return favoriteComics.contains(comic);
+  }
 
 	public boolean toggleFavorite(Video video) {
 		return toggleFavorite(favoriteVideos, video);

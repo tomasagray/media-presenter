@@ -1,14 +1,12 @@
 package self.me.mp.plugin.ffmpeg;
 
+import java.net.URI;
+import java.nio.file.Path;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.net.URI;
-import java.nio.file.Path;
-
 
 @DisplayName("Validation tests for TranscodeRequestParser")
 class TranscodeRequestParserTest {

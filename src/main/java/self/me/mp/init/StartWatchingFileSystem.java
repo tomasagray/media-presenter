@@ -11,18 +11,18 @@ import self.me.mp.api.service.RecursiveWatcherService;
 @Order(1)
 public class StartWatchingFileSystem implements CommandLineRunner {
 
-	private static final Logger logger = LogManager.getLogger(StartWatchingFileSystem.class);
+  private static final Logger logger = LogManager.getLogger(StartWatchingFileSystem.class);
 
-	private final RecursiveWatcherService watcherService;
+  private final RecursiveWatcherService watcherService;
 
-	public StartWatchingFileSystem(RecursiveWatcherService watcherService) {
-		this.watcherService = watcherService;
-	}
+  public StartWatchingFileSystem(RecursiveWatcherService watcherService) {
+    this.watcherService = watcherService;
+  }
 
-	@Override
-	public void run(String... args) {
-		logger.info("Starting filesystem WatchService...");
-		watcherService.doWatch();
-		logger.info("Filesystem WatchService successfully started.");
-	}
+  @Override
+  public void run(String... args) {
+    logger.info("Starting filesystem WatchService...");
+    watcherService.doWatch();
+    logger.info("Filesystem WatchService successfully started.");
+  }
 }

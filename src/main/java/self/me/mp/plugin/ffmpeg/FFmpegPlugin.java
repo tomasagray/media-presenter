@@ -1,14 +1,13 @@
 package self.me.mp.plugin.ffmpeg;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
-import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.LocalTime;
 import java.util.concurrent.ConcurrentSkipListMap;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
 
 @Component
 public class FFmpegPlugin {

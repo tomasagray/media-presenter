@@ -10,15 +10,15 @@ import self.me.mp.api.service.ApplicationInfoService.ApplicationInfo;
 @RestController
 public class ApplicationInfoController {
 
-	private final ApplicationInfoService infoService;
+  private final ApplicationInfoService infoService;
 
-	public ApplicationInfoController(ApplicationInfoService infoService) {
-		this.infoService = infoService;
-	}
+  public ApplicationInfoController(ApplicationInfoService infoService) {
+    this.infoService = infoService;
+  }
 
-	@GetMapping(value = "/application/info", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ApplicationInfo getAppInfo() {
-		return infoService.getApplicationInfo();
-	}
+  @GetMapping(value = "/application/info", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  public ApplicationInfo getAppInfo() {
+    return infoService.getApplicationInfo();
+  }
 }

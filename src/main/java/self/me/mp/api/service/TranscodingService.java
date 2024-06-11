@@ -1,5 +1,11 @@
 package self.me.mp.api.service;
 
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,13 +21,6 @@ import self.me.mp.plugin.ffmpeg.SimpleTranscodeRequest;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegFormat;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegStream;
-
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 
 @Service
 public class TranscodingService {

@@ -2,7 +2,6 @@ package self.me.mp.db.converter;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-
 import java.net.URI;
 
 @Converter

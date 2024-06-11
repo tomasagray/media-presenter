@@ -1,10 +1,9 @@
 package self.me.mp.plugin.ffmpeg;
 
+import java.util.function.Consumer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import reactor.core.publisher.Flux;
-
-import java.util.function.Consumer;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

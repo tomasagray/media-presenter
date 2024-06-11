@@ -1,5 +1,10 @@
 package self.me.mp.api.controller;
 
+import static self.me.mp.api.resource.PictureResource.PictureResourceModeller;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -11,12 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import self.me.mp.api.resource.PictureResource;
 import self.me.mp.api.service.user.UserPictureService;
 import self.me.mp.user.UserImageView;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
-import static self.me.mp.api.resource.PictureResource.PictureResourceModeller;
 
 @Controller
 @RequestMapping("pictures")

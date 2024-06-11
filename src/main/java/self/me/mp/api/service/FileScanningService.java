@@ -1,19 +1,18 @@
 package self.me.mp.api.service;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.util.MultiValueMap;
-
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.Collection;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.util.MultiValueMap;
 
 public interface FileScanningService {
 
-	void scanFile(@NotNull Path file, @NotNull Collection<Path> existing);
+  void scanFile(@NotNull Path file, @NotNull Collection<Path> existing);
 
-	void handleFileEvent(@NotNull Path file, @NotNull WatchEvent.Kind<?> kind);
+  void handleFileEvent(@NotNull Path file, @NotNull WatchEvent.Kind<?> kind);
 
-	void saveScannedData();
+  void saveScannedData();
 
-	MultiValueMap<String, Path> getInvalidFiles();
+  MultiValueMap<String, Path> getInvalidFiles();
 }

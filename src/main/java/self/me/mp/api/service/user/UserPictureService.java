@@ -1,5 +1,11 @@
 package self.me.mp.api.service.user;
 
+import static self.me.mp.user.UserImageView.UserImageModeller;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -9,13 +15,6 @@ import self.me.mp.api.service.PictureService;
 import self.me.mp.model.Picture;
 import self.me.mp.model.UserPreferences;
 import self.me.mp.user.UserImageView;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static self.me.mp.user.UserImageView.UserImageModeller;
 
 @Service
 @Transactional

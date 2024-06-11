@@ -8,13 +8,13 @@ import self.me.mp.util.JsonParser;
 @Converter
 public class FFmpegMetadataConverter implements AttributeConverter<FFmpegMetadata, String> {
 
-	@Override
-	public String convertToDatabaseColumn(FFmpegMetadata attribute) {
-		return JsonParser.toJson(attribute);
-	}
+  @Override
+  public String convertToDatabaseColumn(FFmpegMetadata attribute) {
+    return JsonParser.toJson(attribute);
+  }
 
-	@Override
-	public FFmpegMetadata convertToEntityAttribute(String dbData) {
-		return JsonParser.fromJson(dbData, FFmpegMetadata.class);
-	}
+  @Override
+  public FFmpegMetadata convertToEntityAttribute(String dbData) {
+    return JsonParser.fromJson(dbData, FFmpegMetadata.class);
+  }
 }

@@ -8,18 +8,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class ApplicationInfoService {
 
-	@Value("${application.info.version}")
-	private String appVersion;
+  @Value("${application.info.version}")
+  private String appVersion;
 
-	public ApplicationInfo getApplicationInfo() {
-		Long pid = Long.parseLong(System.getProperty("PID"));
-		return new ApplicationInfo(this.appVersion, pid);
-	}
+  public ApplicationInfo getApplicationInfo() {
+    Long pid = Long.parseLong(System.getProperty("PID"));
+    return new ApplicationInfo(this.appVersion, pid);
+  }
 
-	@Data
-	@AllArgsConstructor
-	public static class ApplicationInfo {
-		private String appVersion;
-		private Long pid;
-	}
+  @Data
+  @AllArgsConstructor
+  public static class ApplicationInfo {
+    private String appVersion;
+    private Long pid;
+  }
 }

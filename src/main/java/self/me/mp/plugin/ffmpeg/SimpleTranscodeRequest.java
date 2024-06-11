@@ -1,16 +1,14 @@
 package self.me.mp.plugin.ffmpeg;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import self.me.mp.plugin.ffmpeg.metadata.FFmpegStream;
-
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import self.me.mp.plugin.ffmpeg.metadata.FFmpegStream;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

@@ -1,5 +1,9 @@
 package self.me.mp.api.service.user;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -10,11 +14,6 @@ import self.me.mp.model.ComicBook;
 import self.me.mp.model.UserPreferences;
 import self.me.mp.user.UserComicBookView;
 import self.me.mp.user.UserComicBookView.UserComicModeller;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Transactional

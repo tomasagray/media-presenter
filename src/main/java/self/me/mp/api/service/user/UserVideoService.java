@@ -1,5 +1,12 @@
 package self.me.mp.api.service.user;
 
+import static self.me.mp.user.UserVideoView.UserVideoModeller;
+
+import java.net.MalformedURLException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -9,14 +16,6 @@ import self.me.mp.api.service.VideoService;
 import self.me.mp.model.UserPreferences;
 import self.me.mp.model.Video;
 import self.me.mp.user.UserVideoView;
-
-import java.net.MalformedURLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static self.me.mp.user.UserVideoView.UserVideoModeller;
 
 @Service
 @Transactional

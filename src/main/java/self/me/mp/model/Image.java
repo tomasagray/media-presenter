@@ -1,6 +1,13 @@
 package self.me.mp.model;
 
 import jakarta.persistence.*;
+import java.net.URI;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -12,14 +19,6 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDe
 import org.hibernate.type.SqlTypes;
 import self.me.mp.db.converter.UriConverter;
 
-import java.net.URI;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-
 @Getter
 @Setter
 @ToString
@@ -29,28 +28,27 @@ import java.util.UUID;
 @Indexed
 public class Image {
 
-	@Id
-	@GeneratedValue(generator = "uuid2")
-	@GenericGenerator(name = "uuid2", strategy = "uuid2")
-	@JdbcTypeCode(SqlTypes.VARCHAR)
-	private UUID id;
-
 	@ManyToMany(fetch = FetchType.EAGER)
 	@IndexedEmbedded
 	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private final Set<Tag> tags = new HashSet<>();
-
 	private final Timestamp added = Timestamp.from(Instant.now());
+
+  @Column(columnDefinition = "LONGTEXT")
+  @Convert(converter = UriConverter.class)
+  private final URI uri;
+
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @JdbcTypeCode(SqlTypes.VARCHAR)
+  private UUID id;
+
 	@FullTextField
 	private String title;
-
 	private int height;
 	private int width;
 	private long filesize;
-
-	@Column(columnDefinition = "LONGTEXT")
-	@Convert(converter = UriConverter.class)
-	private final URI uri;
 
 	public Image() {
 		this.uri = null;

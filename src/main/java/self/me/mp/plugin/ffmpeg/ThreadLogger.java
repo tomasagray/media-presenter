@@ -1,9 +1,8 @@
 package self.me.mp.plugin.ffmpeg;
 
+import java.nio.channels.AsynchronousFileChannel;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
-
-import java.nio.channels.AsynchronousFileChannel;
 
 public interface ThreadLogger {
 

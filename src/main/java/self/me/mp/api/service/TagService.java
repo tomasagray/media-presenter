@@ -1,5 +1,9 @@
 package self.me.mp.api.service;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,11 +11,6 @@ import self.me.mp.db.PerformerRepository;
 import self.me.mp.db.TagRepository;
 import self.me.mp.model.Performer;
 import self.me.mp.model.Tag;
-
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional

@@ -1,6 +1,8 @@
 package self.me.mp.api.service;
 
 import jakarta.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.search.engine.search.query.SearchResult;
@@ -16,9 +18,6 @@ import self.me.mp.model.ComicBook;
 import self.me.mp.model.Picture;
 import self.me.mp.model.SearchAllResult;
 import self.me.mp.model.Video;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class SearchService {

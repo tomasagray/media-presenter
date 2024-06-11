@@ -1,13 +1,12 @@
 package self.me.mp.api.service;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
-
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
 @Service
 public class FileTransferWatcher {

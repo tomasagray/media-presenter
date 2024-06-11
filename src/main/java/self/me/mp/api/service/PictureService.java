@@ -17,53 +17,53 @@ import self.me.mp.model.Picture;
 @Service
 public class PictureService {
 
-	private static final Logger logger = LogManager.getLogger(PictureService.class);
-	private final PictureRepository pictureRepo;
+  private static final Logger logger = LogManager.getLogger(PictureService.class);
+  private final PictureRepository pictureRepo;
 
-	public PictureService(PictureRepository pictureRepo) {
-		this.pictureRepo = pictureRepo;
-	}
+  public PictureService(PictureRepository pictureRepo) {
+    this.pictureRepo = pictureRepo;
+  }
 
-	public void save(@NotNull Picture picture) {
-		pictureRepo.save(picture);
-	}
+  public void save(@NotNull Picture picture) {
+    pictureRepo.save(picture);
+  }
 
-	public void saveAll(@NotNull Iterable<? extends Picture> pictures) {
-		pictureRepo.saveAll(pictures);
-	}
+  public void saveAll(@NotNull Iterable<? extends Picture> pictures) {
+    pictureRepo.saveAll(pictures);
+  }
 
-	public Page<Picture> getAll(int page, int pageSize) {
-		return pictureRepo.findAll(PageRequest.of(page, pageSize));
-	}
+  public Page<Picture> getAll(int page, int pageSize) {
+    return pictureRepo.findAll(PageRequest.of(page, pageSize));
+  }
 
-	public Page<Picture> getLatestPictures(int page, int pageSize) {
-		return pictureRepo.findLatest(PageRequest.of(page, pageSize));
-	}
+  public Page<Picture> getLatestPictures(int page, int pageSize) {
+    return pictureRepo.findLatest(PageRequest.of(page, pageSize));
+  }
 
-	public List<Picture> getRandomPictures(int count) {
-		return pictureRepo.findRandom(PageRequest.ofSize(count));
-	}
+  public List<Picture> getRandomPictures(int count) {
+    return pictureRepo.findRandom(PageRequest.ofSize(count));
+  }
 
-	public List<Picture> getUnprocessedPictures() {
-		return pictureRepo.findUnprocessedPictures();
-	}
+  public List<Picture> getUnprocessedPictures() {
+    return pictureRepo.findUnprocessedPictures();
+  }
 
-	public Optional<Picture> getPicture(@NotNull UUID picId) {
-		return pictureRepo.findById(picId);
-	}
+  public Optional<Picture> getPicture(@NotNull UUID picId) {
+    return pictureRepo.findById(picId);
+  }
 
-	public Optional<UrlResource> getPictureData(@NotNull UUID picId) {
-		return getPicture(picId).map(img -> UrlResource.from(img.getUri()));
-	}
+  public Optional<UrlResource> getPictureData(@NotNull UUID picId) {
+    return getPicture(picId).map(img -> UrlResource.from(img.getUri()));
+  }
 
-	public List<Picture> getPictureByPath(@NotNull Path path) {
-		return pictureRepo.findAll().stream().filter(pic ->
-				pic.getUri().getPath().startsWith(path.toString())
-		).toList();
-	}
+  public List<Picture> getPictureByPath(@NotNull Path path) {
+    return pictureRepo.findAll().stream()
+        .filter(pic -> pic.getUri().getPath().startsWith(path.toString()))
+        .toList();
+  }
 
-	public void deletePicture(@NotNull UUID picId) {
-		logger.info("Deleting Picture: {}", picId);
-		pictureRepo.deleteById(picId);
-	}
+  public void deletePicture(@NotNull UUID picId) {
+    logger.info("Deleting Picture: {}", picId);
+    pictureRepo.deleteById(picId);
+  }
 }

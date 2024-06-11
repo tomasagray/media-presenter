@@ -15,9 +15,9 @@ public interface PictureRepository extends JpaRepository<Picture, UUID> {
   @Query("SELECT p FROM Picture p ORDER BY p.added DESC")
   Page<Picture> findLatest(Pageable request);
 
-	@Query("SELECT p FROM Picture p ORDER BY rand()")
-	List<Picture> findRandom(Pageable request);
+  @Query("SELECT p FROM Picture p ORDER BY rand()")
+  List<Picture> findRandom(Pageable request);
 
-	@Query("SELECT p FROM Picture p WHERE p.width = 0")
-	List<Picture> findUnprocessedPictures();
+  @Query("SELECT p FROM Picture p WHERE p.width = 0")
+  List<Picture> findUnprocessedPictures();
 }

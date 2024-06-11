@@ -18,11 +18,11 @@ public interface ComicBookRepository extends JpaRepository<ComicBook, UUID> {
   @Query("SELECT cb FROM ComicBook cb ORDER BY cb.added DESC")
   Page<ComicBook> findLatest(Pageable request);
 
-	@Query("SELECT cb FROM ComicBook cb ORDER BY rand()")
-	List<ComicBook> findRandomComics(Pageable request);
+  @Query("SELECT cb FROM ComicBook cb ORDER BY rand()")
+  List<ComicBook> findRandomComics(Pageable request);
 
-	Optional<ComicBook> findComicBookByImagesContaining(Image image);
+  Optional<ComicBook> findComicBookByImagesContaining(Image image);
 
-	@Query("SELECT cb FROM ComicBook cb WHERE cb.location=:directory")
-	Optional<ComicBook> findComicBookIn(Path directory);
+  @Query("SELECT cb FROM ComicBook cb WHERE cb.location=:directory")
+  Optional<ComicBook> findComicBookIn(Path directory);
 }

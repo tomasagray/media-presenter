@@ -1,5 +1,9 @@
 package self.me.mp.api.service;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -11,11 +15,6 @@ import self.me.mp.db.ComicPageRepository;
 import self.me.mp.model.ComicBook;
 import self.me.mp.model.ComicPage;
 import self.me.mp.model.Image;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Transactional

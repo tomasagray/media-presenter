@@ -11,21 +11,21 @@ import self.me.mp.plugin.ffmpeg.FFmpegPlugin;
 @Order(1)
 public class DependencyValidation implements CommandLineRunner {
 
-	private static final Logger logger = LogManager.getLogger(DependencyValidation.class);
-	private final FFmpegPlugin ffmpeg;
+  private static final Logger logger = LogManager.getLogger(DependencyValidation.class);
+  private final FFmpegPlugin ffmpeg;
 
-	public DependencyValidation(FFmpegPlugin ffmpeg) {
-		this.ffmpeg = ffmpeg;
-	}
+  public DependencyValidation(FFmpegPlugin ffmpeg) {
+    this.ffmpeg = ffmpeg;
+  }
 
-	@Override
-	public void run(String... args) {
-		try {
-			String ffmpegVersion = ffmpeg.getVersion();
-			logger.info("FFMPEG version: {}", ffmpegVersion);
-		} catch (Exception e) {
-			logger.error("Startup dependency validation failed!", e);
-			System.exit(-1);
-		}
-	}
+  @Override
+  public void run(String... args) {
+    try {
+      String ffmpegVersion = ffmpeg.getVersion();
+      logger.info("FFMPEG version: {}", ffmpegVersion);
+    } catch (Exception e) {
+      logger.error("Startup dependency validation failed!", e);
+      System.exit(-1);
+    }
+  }
 }

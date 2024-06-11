@@ -1,5 +1,10 @@
 package self.me.mp.api.controller;
 
+import static self.me.mp.api.resource.ComicBookResource.ComicBookModeller;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -12,12 +17,6 @@ import self.me.mp.api.resource.ComicBookResource;
 import self.me.mp.api.service.user.UserComicService;
 import self.me.mp.user.UserComicBookView;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
-import static self.me.mp.api.resource.ComicBookResource.ComicBookModeller;
-
 @Controller
 @RequestMapping("/comics")
 public class ComicBookController {
@@ -29,6 +28,12 @@ public class ComicBookController {
         this.comicBookService = comicBookService;
         this.modeller = modeller;
     }
+
+  private static void addSortLinks(@NotNull Model model) {
+    model.addAttribute("latest_link", "/comics/latest");
+    model.addAttribute("random_link", "/comics/random");
+    model.addAttribute("fav_link", "/comics/favorites");
+  }
 
     @GetMapping({"", "/", "/latest"})
     public String getLatestComics(
@@ -54,14 +59,6 @@ public class ComicBookController {
             model.addAttribute("next_page", page.nextPageable().getPageNumber());
         }
     }
-
-
-    private static void addSortLinks(@NotNull Model model) {
-        model.addAttribute("latest_link", "/comics/latest");
-        model.addAttribute("random_link", "/comics/random");
-        model.addAttribute("fav_link", "/comics/favorites");
-    }
-
 
     @GetMapping(value = "/all/paged", produces = MediaType.APPLICATION_JSON_VALUE)
     public CollectionModel<ComicBookResource> getAllComicsPaged(

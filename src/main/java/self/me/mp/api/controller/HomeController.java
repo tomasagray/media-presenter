@@ -1,5 +1,7 @@
 package self.me.mp.api.controller;
 
+import java.util.Collection;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Controller;
@@ -17,9 +19,6 @@ import self.me.mp.api.service.user.UserVideoService;
 import self.me.mp.user.UserComicBookView;
 import self.me.mp.user.UserImageView;
 import self.me.mp.user.UserVideoView;
-
-import java.util.Collection;
-import java.util.List;
 
 @Controller
 public class HomeController {

@@ -1,6 +1,12 @@
 package self.me.mp.model;
 
 import jakarta.persistence.*;
+import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -16,13 +22,6 @@ import self.me.mp.db.converter.FFmpegMetadataConverter;
 import self.me.mp.db.converter.PathConverter;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
 
-import java.nio.file.Path;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -30,27 +29,25 @@ import java.util.UUID;
 @Indexed
 public class Video {
 
+  private final Timestamp added = Timestamp.from(Instant.now());
+
+  @Convert(converter = PathConverter.class)
+  private final Path file;
+
+  @OneToOne(cascade = CascadeType.ALL)
+  private final ImageSet thumbnails = new ImageSet();
+
 	@Id
 	@GeneratedValue(generator = "uuid2")
 	@GenericGenerator(name = "uuid2", strategy = "uuid2")
 	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private UUID id;
-
 	@FullTextField
 	private String title;
-	private final Timestamp added = Timestamp.from(Instant.now());
-
 	@ManyToMany(fetch = FetchType.EAGER)
 	@IndexedEmbedded
 	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private Set<Tag> tags;
-
-	@Convert(converter = PathConverter.class)
-	private final Path file;
-
-	@OneToOne(cascade = CascadeType.ALL)
-	private final ImageSet thumbnails = new ImageSet();
-
 	@Convert(converter = FFmpegMetadataConverter.class)
 	@Column(columnDefinition = "LONGTEXT")
 	private FFmpegMetadata metadata;

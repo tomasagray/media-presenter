@@ -1,11 +1,5 @@
 package self.me.mp.plugin.ffmpeg;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -15,6 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 /**
  * Class which creates an FFMPEG concatenation task; concatenates multiple video files into one

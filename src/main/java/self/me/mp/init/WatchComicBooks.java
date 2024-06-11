@@ -1,5 +1,13 @@
 package self.me.mp.init;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -13,15 +21,6 @@ import self.me.mp.api.service.ComicBookService;
 import self.me.mp.api.service.ComicScanningService;
 import self.me.mp.api.service.RecursiveWatcherService;
 import self.me.mp.model.Image;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @Order(2)

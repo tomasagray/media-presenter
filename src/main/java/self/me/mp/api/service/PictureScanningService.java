@@ -38,6 +38,7 @@ public class PictureScanningService implements FileScanningService {
   private final RecursiveWatcherService watcherService;
   private final FileTransferWatcher transferWatcher;
   private final List<Picture> scannedPictures = new ArrayList<>();
+
   @Value("${pictures.location}")
   private Path pictureLocation;
 

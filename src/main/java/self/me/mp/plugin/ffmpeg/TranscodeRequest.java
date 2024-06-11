@@ -1,12 +1,11 @@
 package self.me.mp.plugin.ffmpeg;
 
-import lombok.Data;
-import self.me.mp.plugin.ffmpeg.metadata.FFmpegStream;
-
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import lombok.Data;
+import self.me.mp.plugin.ffmpeg.metadata.FFmpegStream;
 
 @Data
 public abstract class TranscodeRequest {

@@ -1,13 +1,11 @@
 package self.me.mp.plugin.ffmpeg;
 
-import org.jetbrains.annotations.NotNull;
-import self.me.mp.plugin.ffmpeg.metadata.FFmpegStream;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+import org.jetbrains.annotations.NotNull;
+import self.me.mp.plugin.ffmpeg.metadata.FFmpegStream;
 
 public class TranscodeRequestParser {
 

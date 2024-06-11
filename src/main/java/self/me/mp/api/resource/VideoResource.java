@@ -1,6 +1,13 @@
 package self.me.mp.api.resource;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import com.fasterxml.jackson.annotation.JsonRootName;
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.UUID;
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.RepresentationModel;
@@ -11,14 +18,6 @@ import org.springframework.stereotype.Component;
 import self.me.mp.api.controller.VideoController;
 import self.me.mp.model.Tag;
 import self.me.mp.user.UserVideoView;
-
-import java.sql.Timestamp;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @NoArgsConstructor

@@ -1,5 +1,8 @@
 package self.me.mp.user;
 
+import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.UUID;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -10,10 +13,6 @@ import self.me.mp.model.Tag;
 import self.me.mp.model.Video;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegFormat;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
-
-import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -30,6 +29,14 @@ public class UserVideoView extends UserView {
     @Component
     public static class UserVideoModeller extends UserViewModeller<Video, UserVideoView> {
 
+    private static double getDuration(@NotNull Video data) {
+      FFmpegMetadata metadata = data.getMetadata();
+      if (metadata == null) return 0;
+      FFmpegFormat format = metadata.getFormat();
+      if (format == null) return 0;
+      return format.getDuration();
+    }
+
         @Override
         public UserVideoView toView(@NotNull Video data) {
             UserVideoView view = new UserVideoView();
@@ -40,14 +47,6 @@ public class UserVideoView extends UserView {
             view.setTimestamp(data.getAdded());
             view.setDuration(getDuration(data));
             return view;
-        }
-
-        private static double getDuration(@NotNull Video data) {
-            FFmpegMetadata metadata = data.getMetadata();
-            if (metadata == null) return 0;
-            FFmpegFormat format = metadata.getFormat();
-            if (format == null) return 0;
-            return format.getDuration();
         }
     }
 }

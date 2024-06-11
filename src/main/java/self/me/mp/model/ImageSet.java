@@ -1,6 +1,12 @@
 package self.me.mp.model;
 
 import jakarta.persistence.*;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,13 +21,6 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmb
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.hibernate.type.SqlTypes;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-
 @Getter
 @Setter
 @ToString
@@ -31,24 +30,22 @@ import java.util.UUID;
 @Indexed
 public class ImageSet {
 
+  private final Timestamp added = Timestamp.from(Instant.now());
+
 	@Id
 	@GeneratedValue(generator = "uuid2")
 	@GenericGenerator(name = "uuid2", strategy = "uuid2")
 	@JdbcTypeCode(SqlTypes.VARCHAR)
 	private UUID id;
-
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@ToString.Exclude
 	private Set<Image> images;
-
 	@FullTextField
 	private String title;
-
 	@ManyToMany(targetEntity = Tag.class, fetch = FetchType.EAGER)
 	@IndexedEmbedded
 	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private Set<Tag> tags;
-	private final Timestamp added = Timestamp.from(Instant.now());
 
 	public ImageSet() {
 		this.images = new LinkedHashSet<>();

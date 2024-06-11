@@ -3,6 +3,7 @@ package self.me.mp.model;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,8 +15,6 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.jetbrains.annotations.NotNull;
 import self.me.mp.db.Md5IdBridge;
-
-import java.util.Objects;
 
 @Getter
 @Setter

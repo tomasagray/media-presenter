@@ -1,5 +1,9 @@
 package self.me.mp.api.service;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.time.LocalTime;
+import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,11 +14,6 @@ import self.me.mp.model.Image;
 import self.me.mp.model.Video;
 import self.me.mp.plugin.ffmpeg.FFmpegPlugin;
 import self.me.mp.plugin.ffmpeg.metadata.FFmpegStream;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.time.LocalTime;
-import java.util.List;
 
 @Service
 public class ThumbnailService {

@@ -10,7 +10,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 @Indexed
 @NoArgsConstructor
 public class Performer extends Tag {
-    public Performer(String name) {
-        super(name);
-    }
+  public Performer(String name) {
+    super(name);
+  }
 }

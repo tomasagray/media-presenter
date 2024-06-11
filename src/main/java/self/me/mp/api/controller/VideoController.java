@@ -1,5 +1,10 @@
 package self.me.mp.api.controller;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
@@ -13,12 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import self.me.mp.api.resource.VideoResource;
 import self.me.mp.api.service.user.UserVideoService;
 import self.me.mp.user.UserVideoView;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Controller
 @RequestMapping("/videos")

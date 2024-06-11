@@ -1,12 +1,11 @@
 package self.me.mp.model;
 
 import jakarta.persistence.Entity;
-import lombok.*;
-import org.hibernate.Hibernate;
-
 import java.net.URI;
 import java.util.Objects;
 import java.util.UUID;
+import lombok.*;
+import org.hibernate.Hibernate;
 
 @Getter
 @Setter

@@ -38,6 +38,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
   private final RecursiveWatcherService watcherService;
   private final FileTransferWatcher transferWatcher;
   private final List<Video> scannedVideos = new ArrayList<>();
+
   @Value("${videos.storage-location}")
   private Path videoStorageLocation;
 

@@ -1,8 +1,7 @@
 package self.me.mp.plugin.ffmpeg.metadata;
 
-import lombok.*;
-
 import java.util.Map;
+import lombok.*;
 
 @Getter
 @Setter

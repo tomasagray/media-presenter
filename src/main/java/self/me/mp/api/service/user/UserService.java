@@ -1,5 +1,7 @@
 package self.me.mp.api.service.user;
 
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -10,9 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import self.me.mp.db.UserPreferencesRepository;
 import self.me.mp.model.UserPreferences;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Transactional
