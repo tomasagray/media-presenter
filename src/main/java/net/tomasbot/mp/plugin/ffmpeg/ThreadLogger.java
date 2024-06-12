@@ -6,6 +6,5 @@ import reactor.core.publisher.Flux;
 
 public interface ThreadLogger {
 
-	Flux<String> beginLogging(@NotNull Process process, @NotNull AsynchronousFileChannel fileChannel);
-
+  Flux<String> beginLogging(@NotNull Process process, @NotNull AsynchronousFileChannel fileChannel);
 }

@@ -20,61 +20,59 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserPictureService {
 
-	private final UserService userService;
-	private final PictureService pictureService;
-	private final UserImageModeller modeller;
+  private final UserService userService;
+  private final PictureService pictureService;
+  private final UserImageModeller modeller;
 
-	public UserPictureService(
-			UserService userService,
-			PictureService pictureService,
-			UserImageModeller modeller) {
-		this.userService = userService;
-		this.pictureService = pictureService;
-		this.modeller = modeller;
-	}
+  public UserPictureService(
+      UserService userService, PictureService pictureService, UserImageModeller modeller) {
+    this.userService = userService;
+    this.pictureService = pictureService;
+    this.modeller = modeller;
+  }
 
-	public Page<UserImageView> getLatestUserPictures(int page, int size) {
-		return pictureService.getLatestPictures(page, size).map(this::getUserImageView);
-	}
+  public Page<UserImageView> getLatestUserPictures(int page, int size) {
+    return pictureService.getLatestPictures(page, size).map(this::getUserImageView);
+  }
 
-	public List<UserImageView> getRandomUserPictures(int count) {
-		return pictureService.getRandomPictures(count).stream().map(this::getUserImageView).toList();
-	}
+  public List<UserImageView> getRandomUserPictures(int count) {
+    return pictureService.getRandomPictures(count).stream().map(this::getUserImageView).toList();
+  }
 
-	public Optional<UserImageView> getUserPicture(@NotNull UUID picId) {
-		return pictureService.getPicture(picId).map(this::getUserImageView);
-	}
+  public Optional<UserImageView> getUserPicture(@NotNull UUID picId) {
+    return pictureService.getPicture(picId).map(this::getUserImageView);
+  }
 
-	public UserImageView getUserImageView(@NotNull Picture picture) {
-		return userService.getUserPreferences().isFavorite(picture) ?
-				modeller.toFavorite(picture) : modeller.toView(picture);
-	}
+  public UserImageView getUserImageView(@NotNull Picture picture) {
+    return userService.getUserPreferences().isFavorite(picture)
+        ? modeller.toFavorite(picture)
+        : modeller.toView(picture);
+  }
 
-	public Collection<UserImageView> getUserImageViews(@NotNull Collection<Picture> pictures) {
-		return pictures.stream().map(this::getUserImageView).toList();
-	}
+  public Collection<UserImageView> getUserImageViews(@NotNull Collection<Picture> pictures) {
+    return pictures.stream().map(this::getUserImageView).toList();
+  }
 
-	public UserImageView toggleIsPictureFavorite(@NotNull UUID picId) {
-		Optional<Picture> optional = pictureService.getPicture(picId);
-		if (optional.isEmpty()) {
-			throw new IllegalArgumentException("Trying to favorite non-existent Picture: " + picId);
-		}
-		Picture picture = optional.get();
-		UserPreferences preferences = userService.getUserPreferences();
-		if (preferences.toggleFavorite(picture)) {
-			return modeller.toFavorite(picture);
-		}
-		return modeller.toView(picture);
-	}
+  public UserImageView toggleIsPictureFavorite(@NotNull UUID picId) {
+    Optional<Picture> optional = pictureService.getPicture(picId);
+    if (optional.isEmpty()) {
+      throw new IllegalArgumentException("Trying to favorite non-existent Picture: " + picId);
+    }
+    Picture picture = optional.get();
+    UserPreferences preferences = userService.getUserPreferences();
+    if (preferences.toggleFavorite(picture)) {
+      return modeller.toFavorite(picture);
+    }
+    return modeller.toView(picture);
+  }
 
-	public Collection<UserImageView> getFavoritePictures() {
-		return userService.getUserPreferences()
-				.getFavoritePictures().stream()
-				.map(this::getUserImageView)
-				.toList();
-	}
+  public Collection<UserImageView> getFavoritePictures() {
+    return userService.getUserPreferences().getFavoritePictures().stream()
+        .map(this::getUserImageView)
+        .toList();
+  }
 
-	public Optional<UrlResource> getPictureData(UUID picId) {
-		return pictureService.getPictureData(picId);
-	}
+  public Optional<UrlResource> getPictureData(UUID picId) {
+    return pictureService.getPictureData(picId);
+  }
 }

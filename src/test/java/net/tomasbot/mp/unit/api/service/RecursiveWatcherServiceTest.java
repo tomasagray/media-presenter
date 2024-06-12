@@ -1,4 +1,4 @@
-package self.me.mp.integration.api.service;
+package net.tomasbot.mp.unit.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,17 +11,19 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import net.tomasbot.mp.api.service.RecursiveWatcherService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import self.me.mp.api.service.RecursiveWatcherService;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -31,12 +33,13 @@ class RecursiveWatcherServiceTest {
   private static final Logger logger = LogManager.getLogger(RecursiveWatcherServiceTest.class);
   private static final List<Path> cleanupFiles = new ArrayList<>();
   private final RecursiveWatcherService watcherService;
-  private final Path watchDir;
+
+  @Value("#{environment.DATA_ROOT}")
+  private Path watchDir;
 
   @Autowired
   RecursiveWatcherServiceTest(RecursiveWatcherService watcherService) {
     this.watcherService = watcherService;
-    this.watchDir = Path.of(System.getProperty("watching"));
   }
 
   @AfterAll
@@ -51,10 +54,27 @@ class RecursiveWatcherServiceTest {
     }
   }
 
+  @BeforeEach
+  void setup() throws IOException {
+    createDirectory(watchDir);
+    createDirectory(watchDir.resolve("videos"));
+    createDirectory(watchDir.resolve("pics"));
+    createDirectory(watchDir.resolve("comics"));
+  }
+
+  private void createDirectory(@NotNull Path dir) throws IOException {
+    logger.info("Setting up test directory: {}", dir);
+    File file = dir.toFile();
+    if (!file.exists()) {
+      logger.info("Making test directory: {}", dir);
+      boolean made = file.mkdirs();
+      if (!made) throw new IOException("Could not create test directory: " + dir);
+    }
+  }
+
   @Test
   @DisplayName("Verify service can watch a specified directory")
   void watch() throws IOException {
-
     logger.info("Watching directory: {}", watchDir);
     watcherService.watch(
         watchDir,
@@ -83,7 +103,6 @@ class RecursiveWatcherServiceTest {
   @Test
   @DisplayName("Ensure ignored paths are actually ignored")
   void ignore() throws IOException {
-
     // given
     assert watchDir != null;
     File[] subDirs = watchDir.toFile().listFiles();

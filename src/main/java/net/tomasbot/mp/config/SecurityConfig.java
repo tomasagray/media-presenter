@@ -29,116 +29,107 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 @EnableWebSecurity
 public class SecurityConfig {
 
-	private final Logger LOGGER = LogManager.getLogger(SecurityConfig.class);
+  private final Logger LOGGER = LogManager.getLogger(SecurityConfig.class);
 
-	private final UserService userService;
+  private final UserService userService;
 
-	public SecurityConfig(UserService userService) {
-		this.userService = userService;
-	}
+  public SecurityConfig(UserService userService) {
+    this.userService = userService;
+  }
 
-	@Bean
-	public UserDetailsManager userDetailsManager(DataSource dataSource) {
-		JdbcUserDetailsManager detailsManager = new JdbcUserDetailsManager(dataSource);
-		createDefaultUsers(detailsManager);
-		return detailsManager;
-	}
+  @Bean
+  public UserDetailsManager userDetailsManager(DataSource dataSource) {
+    JdbcUserDetailsManager detailsManager = new JdbcUserDetailsManager(dataSource);
+    createDefaultUsers(detailsManager);
+    return detailsManager;
+  }
 
-	private void createDefaultUsers(@NotNull UserDetailsManager detailsManager) {
-		// TODO: implement new user registration
-		UserDetails user = createUserIfNotExists(
-				"user",
-				passwordEncoder().encode("password"),
-				Roles.USER);
-		if (user != null) {
-			detailsManager.createUser(user);
-		}
-		UserDetails admin = createUserIfNotExists(
-				"admin",
-				passwordEncoder().encode("password"),
-				Roles.ADMIN);
-		if (admin != null) {
-			detailsManager.createUser(admin);
-		}
-	}
+  private void createDefaultUsers(@NotNull UserDetailsManager detailsManager) {
+    // TODO: implement new user registration
+    UserDetails user =
+        createUserIfNotExists("user", passwordEncoder().encode("password"), Roles.USER);
+    if (user != null) {
+      detailsManager.createUser(user);
+    }
+    UserDetails admin =
+        createUserIfNotExists("admin", passwordEncoder().encode("password"), Roles.ADMIN);
+    if (admin != null) {
+      detailsManager.createUser(admin);
+    }
+  }
 
-	public UserDetails createUserIfNotExists(String username, String password, Roles role) {
-		try {
-			UserPreferences preferences = userService.getUserPreferences(username);
-			LOGGER.info("Found existing User Preferences: {}", preferences);
-			LOGGER.info("User: {} already exists; skipping creation...", username);
-			return null;
-		} catch (IllegalStateException ignore) {
-			LOGGER.info("User: {} does not exist; creating...", username);
-			return createNewUser(username, password, role);
-		}
-	}
+  public UserDetails createUserIfNotExists(String username, String password, Roles role) {
+    try {
+      UserPreferences preferences = userService.getUserPreferences(username);
+      LOGGER.info("Found existing User Preferences: {}", preferences);
+      LOGGER.info("User: {} already exists; skipping creation...", username);
+      return null;
+    } catch (IllegalStateException ignore) {
+      LOGGER.info("User: {} does not exist; creating...", username);
+      return createNewUser(username, password, role);
+    }
+  }
 
-	private @NotNull UserDetails createNewUser(
-			@NotNull String username,
-			@NotNull String password,
-			@NotNull Roles role) {
+  private @NotNull UserDetails createNewUser(
+      @NotNull String username, @NotNull String password, @NotNull Roles role) {
 
-		UserDetails user = User.withUsername(username)
-				.password(password)
-				.roles(role.name())
-				.build();
-		UserDetails preferences = userService.createUserPreferences(user);
-		LOGGER.info("Created User Preferences: {}", preferences);
-		return user;
-	}
+    UserDetails user = User.withUsername(username).password(password).roles(role.name()).build();
+    UserDetails preferences = userService.createUserPreferences(user);
+    LOGGER.info("Created User Preferences: {}", preferences);
+    return user;
+  }
 
-	@Bean
-	public AuthenticationFailureHandler getFailureHandler() {
-		return new SimpleUrlAuthenticationFailureHandler() {
-			@Override
-			public void onAuthenticationFailure(
-					HttpServletRequest request,
-					HttpServletResponse response,
-					AuthenticationException e) throws IOException, ServletException {
-				String[] username = request.getParameterMap().get("username");
-				LOGGER.error("Login with (username={}, password=*****) failed; {}",
-						username, e.getMessage());
-				request.getRequestDispatcher("/login?error=true").forward(request, response);
-			}
-		};
-	}
+  @Bean
+  public AuthenticationFailureHandler getFailureHandler() {
+    return new SimpleUrlAuthenticationFailureHandler() {
+      @Override
+      public void onAuthenticationFailure(
+          HttpServletRequest request, HttpServletResponse response, AuthenticationException e)
+          throws IOException, ServletException {
+        String[] username = request.getParameterMap().get("username");
+        LOGGER.error(
+            "Login with (username={}, password=*****) failed; {}", username, e.getMessage());
+        request.getRequestDispatcher("/login?error=true").forward(request, response);
+      }
+    };
+  }
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
-	@Bean
-	public SecurityFilterChain filterChain(@NotNull HttpSecurity http) throws Exception {
-		return http.csrf()
-				.disable().authorizeHttpRequests()
-				.requestMatchers("/admin/**")
-				.hasRole(Roles.ADMIN.name())
-				.requestMatchers("/anonymous*")
-				.anonymous()
-				.requestMatchers("/login*", "/logout*", "/css/**", "/img/**", "/js/**")
-				.permitAll()
-				.anyRequest()
-				.authenticated()
-				.and()
-				.formLogin()
-				.loginPage("/login")
-				.loginProcessingUrl("/request_login")
-				.defaultSuccessUrl("/home", true)
-				.failureUrl("/login?error=true")
-				.failureHandler(getFailureHandler())
-				.and()
-				.logout()
-				.logoutUrl("/logout")
-				.logoutSuccessUrl("/logout_success")
-				.deleteCookies("JSESSIONID")
-				.and()
-				.build();
-	}
+  @Bean
+  public SecurityFilterChain filterChain(@NotNull HttpSecurity http) throws Exception {
+    return http.csrf()
+        .disable()
+        .authorizeHttpRequests()
+        .requestMatchers("/admin/**")
+        .hasRole(Roles.ADMIN.name())
+        .requestMatchers("/anonymous*")
+        .anonymous()
+        .requestMatchers("/login*", "/logout*", "/css/**", "/img/**", "/js/**")
+        .permitAll()
+        .anyRequest()
+        .authenticated()
+        .and()
+        .formLogin()
+        .loginPage("/login")
+        .loginProcessingUrl("/request_login")
+        .defaultSuccessUrl("/home", true)
+        .failureUrl("/login?error=true")
+        .failureHandler(getFailureHandler())
+        .and()
+        .logout()
+        .logoutUrl("/logout")
+        .logoutSuccessUrl("/logout_success")
+        .deleteCookies("JSESSIONID")
+        .and()
+        .build();
+  }
 
-	public enum Roles {
-		USER,
-		ADMIN,
-	}
+  public enum Roles {
+    USER,
+    ADMIN,
+  }
 }

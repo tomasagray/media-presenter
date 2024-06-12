@@ -14,19 +14,16 @@ import org.hibernate.Hibernate;
 @NoArgsConstructor
 public class Picture extends Image {
 
-	@Builder(builderMethodName = "pictureBuilder")
-	public Picture(UUID id, String title, int height, int width, long filesize, URI uri) {
+  @Builder(builderMethodName = "pictureBuilder")
+  public Picture(UUID id, String title, int height, int width, long filesize, URI uri) {
     super(uri, id, title, height, width, filesize);
-	}
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o))
-			return false;
-		Picture picture = (Picture) o;
-		return getId() != null && Objects.equals(getId(), picture.getId());
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    Picture picture = (Picture) o;
+    return getId() != null && Objects.equals(getId(), picture.getId());
+  }
 }
-

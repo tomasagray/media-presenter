@@ -26,37 +26,31 @@ import org.jetbrains.annotations.NotNull;
 @NoArgsConstructor
 public class UserPreferences {
 
-	@Id
-	@GeneratedValue(generator = "uuid2")
-	@GenericGenerator(name = "uuid2", strategy = "uuid2")
-	@JdbcTypeCode(SqlTypes.VARCHAR)
-	private UUID id;
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @JdbcTypeCode(SqlTypes.VARCHAR)
+  private UUID id;
 
-	private String username;
+  private String username;
 
-	@OneToMany
-	@Exclude
-	private Set<Video> favoriteVideos;
-	@OneToMany
-	@Exclude
-	private Set<Picture> favoritePictures;
-	@OneToMany
-	@Exclude
-	private Set<ComicBook> favoriteComics;
+  @OneToMany @Exclude private Set<Video> favoriteVideos;
+  @OneToMany @Exclude private Set<Picture> favoritePictures;
+  @OneToMany @Exclude private Set<ComicBook> favoriteComics;
 
-	public UserPreferences(String username) {
-		this.username = username;
-	}
+  public UserPreferences(String username) {
+    this.username = username;
+  }
 
-	private static <T> boolean toggleFavorite(@NotNull Collection<T> favorites, T entity) {
-		if (favorites.contains(entity)) {
-			favorites.remove(entity);
-			return false;
-		} else {
-			favorites.add(entity);
-			return true;
-		}
-	}
+  private static <T> boolean toggleFavorite(@NotNull Collection<T> favorites, T entity) {
+    if (favorites.contains(entity)) {
+      favorites.remove(entity);
+      return false;
+    } else {
+      favorites.add(entity);
+      return true;
+    }
+  }
 
   public boolean isFavorite(Video video) {
     return favoriteVideos.stream().map(Video::getId).anyMatch(id -> id.equals(video.getId()));
@@ -70,30 +64,28 @@ public class UserPreferences {
     return favoriteComics.contains(comic);
   }
 
-	public boolean toggleFavorite(Video video) {
-		return toggleFavorite(favoriteVideos, video);
-	}
+  public boolean toggleFavorite(Video video) {
+    return toggleFavorite(favoriteVideos, video);
+  }
 
-	public boolean toggleFavorite(Picture picture) {
-		return toggleFavorite(favoritePictures, picture);
-	}
+  public boolean toggleFavorite(Picture picture) {
+    return toggleFavorite(favoritePictures, picture);
+  }
 
-	public boolean toggleFavorite(ComicBook comicBook) {
-		return toggleFavorite(favoriteComics, comicBook);
-	}
+  public boolean toggleFavorite(ComicBook comicBook) {
+    return toggleFavorite(favoriteComics, comicBook);
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o))
-			return false;
-		UserPreferences that = (UserPreferences) o;
-		return getId() != null && Objects.equals(getId(), that.getId());
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    UserPreferences that = (UserPreferences) o;
+    return getId() != null && Objects.equals(getId(), that.getId());
+  }
 
-	@Override
-	public int hashCode() {
-		return getClass().hashCode();
-	}
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
 }

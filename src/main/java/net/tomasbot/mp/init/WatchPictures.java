@@ -28,59 +28,59 @@ import org.springframework.stereotype.Component;
 @Profile("!test-volatile")
 public class WatchPictures implements CommandLineRunner {
 
-	private static final Logger logger = LogManager.getLogger(WatchPictures.class);
-	private final RecursiveWatcherService watcherService;
-	private final PictureScanningService scanningService;
-	private final PictureService pictureService;
-	@Value("${pictures.location}")
-	private Path pictureLocation;
+  private static final Logger logger = LogManager.getLogger(WatchPictures.class);
+  private final RecursiveWatcherService watcherService;
+  private final PictureScanningService scanningService;
+  private final PictureService pictureService;
 
-	public WatchPictures(
-			RecursiveWatcherService watcherService,
-			PictureScanningService scanningService,
-			PictureService pictureService) {
-		this.watcherService = watcherService;
-		this.scanningService = scanningService;
-		this.pictureService = pictureService;
-	}
+  @Value("${pictures.location}")
+  private Path pictureLocation;
 
-	private void initializePictureLocation() throws IOException {
-		File file = pictureLocation.toFile();
-		if (!file.exists()) {
-			logger.info("Picture storage location: {} does not exist; creating...", pictureLocation);
-			if (!file.mkdirs()) {
-				throw new IOException("Could not create location for Picture storage: " + pictureLocation);
-			}
-		}
-	}
+  public WatchPictures(
+      RecursiveWatcherService watcherService,
+      PictureScanningService scanningService,
+      PictureService pictureService) {
+    this.watcherService = watcherService;
+    this.scanningService = scanningService;
+    this.pictureService = pictureService;
+  }
 
-	@Override
-	@Async("startup")
-	public void run(String... args) throws Exception {
-		initializePictureLocation();
-		Set<Path> existing = pictureService.getAll(0, Integer.MAX_VALUE)
-				.stream()
-				.map(Picture::getUri)
-				.map(Paths::get)
-				.collect(Collectors.toSet());
+  private void initializePictureLocation() throws IOException {
+    File file = pictureLocation.toFile();
+    if (!file.exists()) {
+      logger.info("Picture storage location: {} does not exist; creating...", pictureLocation);
+      if (!file.mkdirs()) {
+        throw new IOException("Could not create location for Picture storage: " + pictureLocation);
+      }
+    }
+  }
 
-		logger.info("Scanning Picture files in: {}", pictureLocation);
-		final Instant jobStart = Instant.now();
-		watcherService.watch(
-				pictureLocation,
-				file -> scanningService.scanFile(file, existing),
-				scanningService::handleFileEvent,
-				() -> finishPictureScan(jobStart)
-		);
-	}
+  @Override
+  @Async("startup")
+  public void run(String... args) throws Exception {
+    initializePictureLocation();
+    Set<Path> existing =
+        pictureService.getAll(0, Integer.MAX_VALUE).stream()
+            .map(Picture::getUri)
+            .map(Paths::get)
+            .collect(Collectors.toSet());
 
-	private void finishPictureScan(@NotNull Instant jobStart) {
-		Duration jobDuration = Duration.between(jobStart, Instant.now());
-		logger.info("Initial scan of Pictures finished in {}ms", jobDuration.toMillis());
-		scanningService.saveScannedData();
-		List<Picture> pictures = pictureService.getUnprocessedPictures();
-		for (Picture picture : pictures) {
-			scanningService.processImageMetadata(picture);
-		}
-	}
+    logger.info("Scanning Picture files in: {}", pictureLocation);
+    final Instant jobStart = Instant.now();
+    watcherService.watch(
+        pictureLocation,
+        file -> scanningService.scanFile(file, existing),
+        scanningService::handleFileEvent,
+        () -> finishPictureScan(jobStart));
+  }
+
+  private void finishPictureScan(@NotNull Instant jobStart) {
+    Duration jobDuration = Duration.between(jobStart, Instant.now());
+    logger.info("Initial scan of Pictures finished in {}ms", jobDuration.toMillis());
+    scanningService.saveScannedData();
+    List<Picture> pictures = pictureService.getUnprocessedPictures();
+    for (Picture picture : pictures) {
+      scanningService.processImageMetadata(picture);
+    }
+  }
 }

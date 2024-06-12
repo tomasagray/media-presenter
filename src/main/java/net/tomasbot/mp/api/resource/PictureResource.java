@@ -24,43 +24,38 @@ import org.springframework.stereotype.Component;
 @Relation(collectionRelation = "pictures")
 public class PictureResource extends ImageResource<PictureResource> {
 
-	private int height;
-	private int width;
-	private long filesize;
+  private int height;
+  private int width;
+  private long filesize;
 
-	@Component
-	public static class PictureResourceModeller
-			extends RepresentationModelAssemblerSupport<UserImageView, PictureResource> {
+  @Component
+  public static class PictureResourceModeller
+      extends RepresentationModelAssemblerSupport<UserImageView, PictureResource> {
 
-		public PictureResourceModeller() {
-			super(PictureController.class, PictureResource.class);
-		}
+    public PictureResourceModeller() {
+      super(PictureController.class, PictureResource.class);
+    }
 
-		@Override
-		public @NotNull PictureResource toModel(@NotNull UserImageView entity) {
+    @Override
+    public @NotNull PictureResource toModel(@NotNull UserImageView entity) {
 
-			PictureResource model = instantiateModel(entity);
-			UUID id = entity.getId();
+      PictureResource model = instantiateModel(entity);
+      UUID id = entity.getId();
 
-			model.setId(id);
-			model.setTitle(entity.getTitle());
-			model.setWidth(entity.getWidth());
-			model.setHeight(entity.getHeight());
-			model.setFilesize(entity.getFilesize());
-			model.setTags(entity.getTags());
-			model.setFavorite(entity.isFavorite());
+      model.setId(id);
+      model.setTitle(entity.getTitle());
+      model.setWidth(entity.getWidth());
+      model.setHeight(entity.getHeight());
+      model.setFilesize(entity.getFilesize());
+      model.setTags(entity.getTags());
+      model.setFavorite(entity.isFavorite());
 
-			// attach links
-			model.add(linkTo(methodOn(PictureController.class)
-					.getPicture(id))
-					.withSelfRel());
-			model.add(linkTo(methodOn(PictureController.class)
-					.togglePictureFavorite(id))
-					.withRel("favorite"));
-			model.add(linkTo(methodOn(PictureController.class)
-					.getPictureData(id))
-					.withRel("data"));
-			return model;
-		}
-	}
+      // attach links
+      model.add(linkTo(methodOn(PictureController.class).getPicture(id)).withSelfRel());
+      model.add(
+          linkTo(methodOn(PictureController.class).togglePictureFavorite(id)).withRel("favorite"));
+      model.add(linkTo(methodOn(PictureController.class).getPictureData(id)).withRel("data"));
+      return model;
+    }
+  }
 }

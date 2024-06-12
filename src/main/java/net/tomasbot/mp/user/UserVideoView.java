@@ -19,15 +19,15 @@ import org.springframework.stereotype.Component;
 @EqualsAndHashCode(callSuper = true)
 public class UserVideoView extends UserView {
 
-    private UUID id;
-    private String title;
-    private ImageSet thumbnails;
-    private Collection<Tag> tags;
-    private Timestamp timestamp;
-    private double duration;
+  private UUID id;
+  private String title;
+  private ImageSet thumbnails;
+  private Collection<Tag> tags;
+  private Timestamp timestamp;
+  private double duration;
 
-    @Component
-    public static class UserVideoModeller extends UserViewModeller<Video, UserVideoView> {
+  @Component
+  public static class UserVideoModeller extends UserViewModeller<Video, UserVideoView> {
 
     private static double getDuration(@NotNull Video data) {
       FFmpegMetadata metadata = data.getMetadata();
@@ -37,16 +37,16 @@ public class UserVideoView extends UserView {
       return format.getDuration();
     }
 
-        @Override
-        public UserVideoView toView(@NotNull Video data) {
-            UserVideoView view = new UserVideoView();
-            view.setId(data.getId());
-            view.setTitle(data.getTitle());
-            view.setThumbnails(data.getThumbnails());
-            view.setTags(data.getTags());
-            view.setTimestamp(data.getAdded());
-            view.setDuration(getDuration(data));
-            return view;
-        }
+    @Override
+    public UserVideoView toView(@NotNull Video data) {
+      UserVideoView view = new UserVideoView();
+      view.setId(data.getId());
+      view.setTitle(data.getTitle());
+      view.setThumbnails(data.getThumbnails());
+      view.setTags(data.getTags());
+      view.setTimestamp(data.getAdded());
+      view.setDuration(getDuration(data));
+      return view;
     }
+  }
 }

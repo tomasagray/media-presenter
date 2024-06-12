@@ -21,70 +21,69 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserVideoService {
 
-	private final VideoService videoService;
-	private final UserService userService;
-	private final UserVideoModeller videoModeller;
+  private final VideoService videoService;
+  private final UserService userService;
+  private final UserVideoModeller videoModeller;
 
-	public UserVideoService(
-			VideoService videoService,
-			UserService userService,
-			UserVideoModeller videoModeller) {
-		this.videoService = videoService;
-		this.userService = userService;
-		this.videoModeller = videoModeller;
-	}
+  public UserVideoService(
+      VideoService videoService, UserService userService, UserVideoModeller videoModeller) {
+    this.videoService = videoService;
+    this.userService = userService;
+    this.videoModeller = videoModeller;
+  }
 
-	public Page<UserVideoView> getAllUserVideos(int page, int size) {
-		return videoService.getAll(page, size).map(this::getUserVideoView);
-	}
+  public Page<UserVideoView> getAllUserVideos(int page, int size) {
+    return videoService.getAll(page, size).map(this::getUserVideoView);
+  }
 
-	public Page<UserVideoView> getLatestUserVideos(int page, int size) {
-		return videoService.getLatest(page, size).map(this::getUserVideoView);
-	}
+  public Page<UserVideoView> getLatestUserVideos(int page, int size) {
+    return videoService.getLatest(page, size).map(this::getUserVideoView);
+  }
 
-	public Optional<UserVideoView> getUserVideo(@NotNull UUID videoId) {
-		return videoService.getById(videoId).map(this::getUserVideoView);
-	}
+  public Optional<UserVideoView> getUserVideo(@NotNull UUID videoId) {
+    return videoService.getById(videoId).map(this::getUserVideoView);
+  }
 
-	public List<UserVideoView> getRandomUserVideos(int count) {
-		return videoService.getRandom(count).stream().map(this::getUserVideoView).toList();
-	}
+  public List<UserVideoView> getRandomUserVideos(int count) {
+    return videoService.getRandom(count).stream().map(this::getUserVideoView).toList();
+  }
 
-	private UserVideoView getUserVideoView(@NotNull Video video) {
-		UserPreferences preferences = userService.getUserPreferences();
-		return preferences.isFavorite(video) ?
-				videoModeller.toFavorite(video) : videoModeller.toView(video);
-	}
+  private UserVideoView getUserVideoView(@NotNull Video video) {
+    UserPreferences preferences = userService.getUserPreferences();
+    return preferences.isFavorite(video)
+        ? videoModeller.toFavorite(video)
+        : videoModeller.toView(video);
+  }
 
-	public Collection<UserVideoView> getUserVideoViews(@NotNull Collection<Video> videos) {
-		return videos.stream().map(this::getUserVideoView).toList();
-	}
+  public Collection<UserVideoView> getUserVideoViews(@NotNull Collection<Video> videos) {
+    return videos.stream().map(this::getUserVideoView).toList();
+  }
 
-	public UserVideoView toggleVideoFavorite(@NotNull UUID videoId) {
-		Optional<Video> optional = videoService.getById(videoId);
-		if (optional.isEmpty()) {
-			throw new IllegalArgumentException("Trying to set favorite on non-existent Video: " + videoId);
-		}
-		Video video = optional.get();
-		UserPreferences preferences = userService.getUserPreferences();
-		if (preferences.toggleFavorite(video)) {
-			return videoModeller.toFavorite(video);
-		}
-		return videoModeller.toView(video);
-	}
+  public UserVideoView toggleVideoFavorite(@NotNull UUID videoId) {
+    Optional<Video> optional = videoService.getById(videoId);
+    if (optional.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Trying to set favorite on non-existent Video: " + videoId);
+    }
+    Video video = optional.get();
+    UserPreferences preferences = userService.getUserPreferences();
+    if (preferences.toggleFavorite(video)) {
+      return videoModeller.toFavorite(video);
+    }
+    return videoModeller.toView(video);
+  }
 
-	public Collection<UserVideoView> getVideoFavorites() {
-		return userService.getUserPreferences()
-				.getFavoriteVideos().stream()
-				.map(this::getUserVideoView)
-				.toList();
-	}
+  public Collection<UserVideoView> getVideoFavorites() {
+    return userService.getUserPreferences().getFavoriteVideos().stream()
+        .map(this::getUserVideoView)
+        .toList();
+  }
 
-	public UrlResource getVideoData(@NotNull UUID videoId) throws MalformedURLException {
-		return videoService.getVideoData(videoId);
-	}
+  public UrlResource getVideoData(@NotNull UUID videoId) throws MalformedURLException {
+    return videoService.getVideoData(videoId);
+  }
 
-	public UrlResource getVideoThumb(@NotNull UUID videoId, @NotNull UUID thumbId) {
-		return videoService.getVideoThumb(videoId, thumbId);
-	}
+  public UrlResource getVideoThumb(@NotNull UUID videoId, @NotNull UUID thumbId) {
+    return videoService.getVideoThumb(videoId, thumbId);
+  }
 }

@@ -17,38 +17,37 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserService {
 
-	private final Logger logger = LogManager.getLogger(UserService.class);
+  private final Logger logger = LogManager.getLogger(UserService.class);
 
-	private final UserPreferencesRepository repository;
+  private final UserPreferencesRepository repository;
 
-	public UserService(UserPreferencesRepository repository) {
-		this.repository = repository;
-	}
+  public UserService(UserPreferencesRepository repository) {
+    this.repository = repository;
+  }
 
-	public UserDetails createUserPreferences(
-			@NotNull UserDetails user) {
-		logger.info("Creating new User Preferences for: {}", user);
-		UserPreferences preferences = new UserPreferences(user.getUsername());
-		repository.save(preferences);
-		return user;
-	}
+  public UserDetails createUserPreferences(@NotNull UserDetails user) {
+    logger.info("Creating new User Preferences for: {}", user);
+    UserPreferences preferences = new UserPreferences(user.getUsername());
+    repository.save(preferences);
+    return user;
+  }
 
-	public UserPreferences getUserPreferences() {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		UserDetails user = (UserDetails) auth.getPrincipal();
-		return getUserPreferences(user.getUsername());
-	}
+  public UserPreferences getUserPreferences() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    UserDetails user = (UserDetails) auth.getPrincipal();
+    return getUserPreferences(user.getUsername());
+  }
 
-	public UserPreferences getUserPreferences(@NotNull String username) {
-		logger.trace("Getting User Preferences for: {}", username);
-		Optional<UserPreferences> optional = repository.findByUsername(username);
-		if (optional.isEmpty()) {
-			throw new IllegalStateException("Could not find UserPreferences for User: " + username);
-		}
-		return optional.get();
-	}
+  public UserPreferences getUserPreferences(@NotNull String username) {
+    logger.trace("Getting User Preferences for: {}", username);
+    Optional<UserPreferences> optional = repository.findByUsername(username);
+    if (optional.isEmpty()) {
+      throw new IllegalStateException("Could not find UserPreferences for User: " + username);
+    }
+    return optional.get();
+  }
 
-	public void deleteUserPreferences(@NotNull UUID prefId) {
-		repository.deleteById(prefId);
-	}
+  public void deleteUserPreferences(@NotNull UUID prefId) {
+    repository.deleteById(prefId);
+  }
 }

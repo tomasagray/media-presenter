@@ -9,6 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PerformerRepository extends JpaRepository<Performer, Md5Id> {
 
-    Optional<Performer> findByName(String name);
-
+  Optional<Performer> findByName(String name);
 }

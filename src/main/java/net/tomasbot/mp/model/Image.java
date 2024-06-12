@@ -28,11 +28,12 @@ import org.hibernate.type.SqlTypes;
 @Indexed
 public class Image {
 
-	@ManyToMany(fetch = FetchType.EAGER)
-	@IndexedEmbedded
-	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
-	private final Set<Tag> tags = new HashSet<>();
-	private final Timestamp added = Timestamp.from(Instant.now());
+  @ManyToMany(fetch = FetchType.EAGER)
+  @IndexedEmbedded
+  @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
+  private final Set<Tag> tags = new HashSet<>();
+
+  private final Timestamp added = Timestamp.from(Instant.now());
 
   @Column(columnDefinition = "LONGTEXT")
   @Convert(converter = UriConverter.class)
@@ -44,32 +45,39 @@ public class Image {
   @JdbcTypeCode(SqlTypes.VARCHAR)
   private UUID id;
 
-	@FullTextField
-	private String title;
-	private int height;
-	private int width;
-	private long filesize;
+  @FullTextField private String title;
+  private int height;
+  private int width;
+  private long filesize;
 
-	public Image() {
-		this.uri = null;
-	}
+  public Image() {
+    this.uri = null;
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (!(o instanceof Image image))
-			return false;
-		return getHeight() == image.getHeight() && getWidth() == image.getWidth()
-				&& getFilesize() == image.getFilesize() && Objects.equals(getId(), image.getId())
-				&& Objects.equals(getTags(), image.getTags()) && Objects.equals(getAdded(),
-				image.getAdded()) && Objects.equals(getTitle(), image.getTitle()) && Objects.equals(
-				getUri(), image.getUri());
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Image image)) return false;
+    return getHeight() == image.getHeight()
+        && getWidth() == image.getWidth()
+        && getFilesize() == image.getFilesize()
+        && Objects.equals(getId(), image.getId())
+        && Objects.equals(getTags(), image.getTags())
+        && Objects.equals(getAdded(), image.getAdded())
+        && Objects.equals(getTitle(), image.getTitle())
+        && Objects.equals(getUri(), image.getUri());
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(getId(), getTags(), getAdded(), getTitle(), getHeight(), getWidth(),
-				getFilesize(), getUri());
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        getId(),
+        getTags(),
+        getAdded(),
+        getTitle(),
+        getHeight(),
+        getWidth(),
+        getFilesize(),
+        getUri());
+  }
 }

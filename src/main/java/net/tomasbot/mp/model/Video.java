@@ -37,51 +37,53 @@ public class Video {
   @OneToOne(cascade = CascadeType.ALL)
   private final ImageSet thumbnails = new ImageSet();
 
-	@Id
-	@GeneratedValue(generator = "uuid2")
-	@GenericGenerator(name = "uuid2", strategy = "uuid2")
-	@JdbcTypeCode(SqlTypes.VARCHAR)
-	private UUID id;
-	@FullTextField
-	private String title;
-	@ManyToMany(fetch = FetchType.EAGER)
-	@IndexedEmbedded
-	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
-	private Set<Tag> tags;
-	@Convert(converter = FFmpegMetadataConverter.class)
-	@Column(columnDefinition = "LONGTEXT")
-	private FFmpegMetadata metadata;
+  @Id
+  @GeneratedValue(generator = "uuid2")
+  @GenericGenerator(name = "uuid2", strategy = "uuid2")
+  @JdbcTypeCode(SqlTypes.VARCHAR)
+  private UUID id;
 
-	public Video() {
-		this.title = null;
-		this.file = null;
-	}
+  @FullTextField private String title;
 
-	public void addThumbnail(Image thumbnail) {
-		this.thumbnails.addImage(thumbnail);
-	}
+  @ManyToMany(fetch = FetchType.EAGER)
+  @IndexedEmbedded
+  @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
+  private Set<Tag> tags;
 
-	public String toString() {
-		return String.format("[ID=%s, title=%s, file=%s, added=%s]",
-				getId(), getTitle(), getFile(), getAdded());
-	}
+  @Convert(converter = FFmpegMetadataConverter.class)
+  @Column(columnDefinition = "LONGTEXT")
+  private FFmpegMetadata metadata;
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (!(o instanceof Video video))
-			return false;
-		return Objects.equals(getId(), video.getId()) && Objects.equals(getTitle(), video.getTitle())
-				&& Objects.equals(getAdded(), video.getAdded()) && Objects.equals(getTags(),
-				video.getTags()) && Objects.equals(getFile(), video.getFile()) && Objects.equals(
-				getThumbnails(), video.getThumbnails()) && Objects.equals(getMetadata(),
-				video.getMetadata());
-	}
+  public Video() {
+    this.title = null;
+    this.file = null;
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(getId(), getTitle(), getAdded(), getTags(), getFile(), getThumbnails(),
-				getMetadata());
-	}
+  public void addThumbnail(Image thumbnail) {
+    this.thumbnails.addImage(thumbnail);
+  }
+
+  public String toString() {
+    return String.format(
+        "[ID=%s, title=%s, file=%s, added=%s]", getId(), getTitle(), getFile(), getAdded());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Video video)) return false;
+    return Objects.equals(getId(), video.getId())
+        && Objects.equals(getTitle(), video.getTitle())
+        && Objects.equals(getAdded(), video.getAdded())
+        && Objects.equals(getTags(), video.getTags())
+        && Objects.equals(getFile(), video.getFile())
+        && Objects.equals(getThumbnails(), video.getThumbnails())
+        && Objects.equals(getMetadata(), video.getMetadata());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        getId(), getTitle(), getAdded(), getTags(), getFile(), getThumbnails(), getMetadata());
+  }
 }

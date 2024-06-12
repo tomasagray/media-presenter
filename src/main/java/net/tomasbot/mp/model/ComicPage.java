@@ -14,18 +14,16 @@ import org.hibernate.Hibernate;
 @NoArgsConstructor
 public class ComicPage extends Image {
 
-	@Builder(builderMethodName = "pageBuilder")
-	public ComicPage(UUID id, String title, int height, int width, long filesize, URI uri) {
+  @Builder(builderMethodName = "pageBuilder")
+  public ComicPage(UUID id, String title, int height, int width, long filesize, URI uri) {
     super(uri, id, title, height, width, filesize);
-	}
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o))
-			return false;
-		ComicPage page = (ComicPage) o;
-		return getId() != null && Objects.equals(getId(), page.getId());
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    ComicPage page = (ComicPage) o;
+    return getId() != null && Objects.equals(getId(), page.getId());
+  }
 }

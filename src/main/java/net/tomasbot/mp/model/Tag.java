@@ -23,8 +23,7 @@ import org.jetbrains.annotations.NotNull;
 @Indexed
 public class Tag {
 
-	@FullTextField
-	protected final String name;
+  @FullTextField protected final String name;
 
   @EmbeddedId
   @DocumentId(identifierBridge = @IdentifierBridgeRef(type = Md5IdBridge.class))
@@ -32,28 +31,28 @@ public class Tag {
   @GeneratedValue(generator = "tag_id_gen")
   protected Md5Id tagId;
 
-	public Tag() {
-		this.name = null;
-	}
+  public Tag() {
+    this.name = null;
+  }
 
-	public Tag(@NotNull String name) {
-		this.name = name.trim();
-		if (this.name.isEmpty()) {
-			throw new IllegalArgumentException("Empty Tag: " + name);
-		}
-		this.tagId = new Md5Id(this.name);
-	}
+  public Tag(@NotNull String name) {
+    this.name = name.trim();
+    if (this.name.isEmpty()) {
+      throw new IllegalArgumentException("Empty Tag: " + name);
+    }
+    this.tagId = new Md5Id(this.name);
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-		Tag tag = (Tag) o;
-		return getTagId() != null && Objects.equals(getTagId(), tag.getTagId());
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    Tag tag = (Tag) o;
+    return getTagId() != null && Objects.equals(getTagId(), tag.getTagId());
+  }
 
-	@Override
-	public int hashCode() {
-		return getClass().hashCode();
-	}
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
 }
