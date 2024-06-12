@@ -1,0 +1,19 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="mp_dev [persistent]" type="SpringBootApplicationConfigurationType"
+                   factoryName="Spring Boot">
+        <envs>
+            <env name="CONFIG_ROOT" value=" /projectdata/mp/dev/persistent/config/"/>
+            <env name="DATA_ROOT" value=" /projectdata/mp/dev/persistent/data"/>
+            <env name="DB_URL" value="jdbc:mysql://192.168.0.107:30306/mp_dev"/>
+            <env name="DB_USER" value="mp"/>
+            <env name="DB_PASSWORD" value="media"/>
+        </envs>
+        <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources"/>
+        <module name="media-presenter.main"/>
+        <option name="SPRING_BOOT_MAIN_CLASS" value="net.tomasbot.mp.MpApplication"/>
+        <option name="VM_PARAMETERS" value="-Dspring.profiles.active=dev-persistent"/>
+        <method v="2">
+            <option name="Make" enabled="true"/>
+        </method>
+    </configuration>
+</component>
