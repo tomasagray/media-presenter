@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.2.4] - 2024-06-11
+
+### Changed
+
+- Refactored application under `net.tomasbot.mp`
+
+### Added
+
+- `Performer` tag subtype
+- File not found handler
+
+### Fixed
+
+- Styles missing from Video tags
+- Comics & Pictures appearing in reverse chronological order
+
 ## [0.2.3] - 2024-02-12
 
 ### Added
