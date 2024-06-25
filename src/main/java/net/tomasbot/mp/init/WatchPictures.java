@@ -65,7 +65,7 @@ public class WatchPictures implements CommandLineRunner {
             .map(Paths::get)
             .collect(Collectors.toSet());
 
-    logger.info("Scanning Picture files in: {}", pictureLocation);
+    logger.info("Scanning Picture files in: '{}'", pictureLocation);
     final Instant jobStart = Instant.now();
     watcherService.watch(
         pictureLocation,

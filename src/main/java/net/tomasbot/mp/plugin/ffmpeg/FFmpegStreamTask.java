@@ -43,8 +43,14 @@ public abstract class FFmpegStreamTask extends LoggableThread {
         logPublisher =
             new FFmpegLogger()
                 .beginLogging(this.process, fileChannel)
-                .doOnNext(this.onEvent)
-                .doOnError(e -> this.onError.accept(e))
+                .doOnNext(
+                    e -> {
+                      if (onEvent != null) onEvent.accept(e);
+                    })
+                .doOnError(
+                    e -> {
+                      if (onError != null) onError.accept(e);
+                    })
                 .doOnComplete(
                     () -> process.onExit().thenAccept(p1 -> onComplete.accept(p1.exitValue())));
         logPublisher.subscribe();

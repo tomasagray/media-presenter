@@ -56,7 +56,7 @@ public class PictureScanningService implements FileScanningService {
   }
 
   @Override
-  public void scanFile(@NotNull Path file, @NotNull Collection<Path> existing) {
+  public synchronized void scanFile(@NotNull Path file, @NotNull Collection<Path> existing) {
     try {
       fileUtilitiesService.repairFilename(file);
       if (!existing.contains(file)) {
@@ -105,7 +105,7 @@ public class PictureScanningService implements FileScanningService {
 
   @Override
   public void handleFileEvent(@NotNull Path file, @NotNull WatchEvent.Kind<?> kind) {
-    logger.info("Event: {} happened to picture: {}", kind, file);
+    logger.trace("Event: {} happened to picture: {}", kind, file);
     if (ENTRY_CREATE.equals(kind)) {
       if (Files.isDirectory(file)) {
         logger.info("Detected new Picture directory: {}", file);

@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.*;
 import javax.imageio.ImageIO;
-import net.tomasbot.mp.db.ComicBookRepository;
 import net.tomasbot.mp.db.ImageRepository;
 import net.tomasbot.mp.model.ComicBook;
 import net.tomasbot.mp.model.ComicPage;
@@ -35,7 +34,6 @@ public class ComicScanningService implements FileScanningService {
 
   private static final Logger logger = LogManager.getLogger(ComicScanningService.class);
   private static final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
-  private final ComicBookRepository comicRepo;
   private final ImageRepository imageRepository;
   private final ComicBookService comicService;
   private final TagService tagService;
@@ -49,14 +47,12 @@ public class ComicScanningService implements FileScanningService {
   private Path comicsLocation;
 
   public ComicScanningService(
-      ComicBookRepository comicRepo,
       ImageRepository imageRepository,
       ComicBookService comicService,
       TagService tagService,
       RecursiveWatcherService watcherService,
       FileTransferWatcher transferWatcher,
       FileUtilitiesService fileUtilitiesService) {
-    this.comicRepo = comicRepo;
     this.imageRepository = imageRepository;
     this.comicService = comicService;
     this.tagService = tagService;
@@ -120,14 +116,14 @@ public class ComicScanningService implements FileScanningService {
 
   @Async("fileScanner")
   @Transactional
-  public void addPageOrCreateComic(@NotNull Image page) {
+  public synchronized void addPageOrCreateComic(@NotNull Image page) {
     try {
       if (imageRequiresParsing(page)) {
         parseImage(page);
       }
       Path parent = Path.of(page.getUri()).getParent();
-      comicRepo
-          .findComicBookIn(parent)
+      comicService
+          .getComicBookAt(parent)
           .ifPresentOrElse(comic -> addPageToComic(page, comic), () -> createComic(page));
     } catch (IncorrectResultSizeDataAccessException e) {
       logger.error("Duplicate comic book: {}, {}", page, e.getMessage());
@@ -234,7 +230,13 @@ public class ComicScanningService implements FileScanningService {
     }
   }
 
-  private void handleDeletedImage(@NotNull Path file) {
+  private void handleDeletedImage(Path file) {
+    Optional<ComicBook> comicBookOptional = comicService.getComicBookAt(file);
+    if (comicBookOptional.isPresent()) {
+      comicService.delete(comicBookOptional.get());
+      return;
+    }
+
     Optional<Image> imgOpt = imageRepository.findByUri(file.toUri());
     if (imgOpt.isPresent()) {
       Image image = imgOpt.get();
@@ -251,10 +253,10 @@ public class ComicScanningService implements FileScanningService {
           comicService.save(comicBook);
         }
       } else {
-        throw new IllegalStateException("Image deleted was not part of a Comic Book: " + image);
+        logger.warn("Image deleted was not part of a Comic Book: {}", image);
       }
     } else {
-      throw new IllegalStateException("Detected deletion of unknown Comic Book Image: " + file);
+      logger.warn("Detected deletion of unknown Comic Book Image: {}", file);
     }
   }
 }

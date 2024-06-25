@@ -88,7 +88,7 @@ public class WatchComicBooks implements CommandLineRunner {
             .collect(Collectors.toSet());
     logger.info("At scan init, there are: {} Comic Book pages in the database...", existing.size());
 
-    logger.info("Scanning Comic Books in: {} ...", comicsLocation);
+    logger.info("Scanning Comic Books in: '{}' ...", comicsLocation);
     final Instant jobStart = Instant.now();
     watcherService.watch(
         comicsLocation,

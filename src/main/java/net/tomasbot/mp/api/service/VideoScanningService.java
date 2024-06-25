@@ -11,8 +11,8 @@ import java.nio.file.WatchEvent;
 import java.util.*;
 import net.tomasbot.mp.model.Tag;
 import net.tomasbot.mp.model.Video;
-import net.tomasbot.mp.plugin.ffmpeg.FFmpegPlugin;
 import net.tomasbot.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
+import net.tomasbot.mp.plugin.ffmpeg.metadata.FFmpegStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,7 +48,6 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
       TagService tagService,
       TranscodingService transcodingService,
       RecursiveWatcherService watcherService,
-      FFmpegPlugin ffmpegPlugin,
       FileUtilitiesService fileUtilitiesService,
       FileTransferWatcher transferWatcher) {
     this.videoService = videoService;
@@ -65,8 +64,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     try {
       if (converted.toFile().exists()) {
         Files.delete(converted);
-        // todo - delete transcode log,
-        // delete converted data, throw error
+        // todo - delete transcode log, delete converted data, throw error
       }
     } catch (IOException e) {
       throw new UncheckedIOException(e);
@@ -120,16 +118,19 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
   public synchronized void saveScannedData() {
     List<Video> savable = scannedVideos.stream().filter(Objects::nonNull).toList();
     logger.info("Saving {} Videos to database...", savable.size());
-    videoService.saveAll(savable);
+    savable.forEach(this::scanVideoMetadata);
     scannedVideos.clear();
   }
 
   @Async("transcoder")
-  public void scanVideoMetadata(@NotNull Video video) {
+  public synchronized void scanVideoMetadata(@NotNull Video video) {
     try {
       // metadata
-      final FFmpegMetadata metadata;
-      metadata = transcodingService.getVideoMetadata(video);
+      final FFmpegMetadata metadata = transcodingService.getVideoMetadata(video);
+      List<FFmpegStream> streams = metadata.getStreams();
+      if (streams == null || streams.isEmpty()) {
+        throw new IOException("Could not read video metadata: no streams");
+      }
       video.setMetadata(metadata);
 
       // title
@@ -143,6 +144,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
       video.setTags(new HashSet<>(tags));
 
       // thumbnails
+      videoService.save(video); // ensure video has ID
       thumbnailService.generateVideoThumbnails(video);
       videoService.save(video);
     } catch (IOException e) {
@@ -205,11 +207,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     } else if (ENTRY_MODIFY.equals(kind)) {
       transferWatcher.watchFileTransfer(path, this::finishScanVideo);
     } else if (ENTRY_DELETE.equals(kind)) {
-      videoService
-          .getVideoByPath(path)
-          .ifPresentOrElse(
-              videoService::deleteVideo,
-              () -> logger.info("Deleted video that was not in DB: {}", path));
+      videoService.getVideoByPath(path).forEach(videoService::deleteVideo);
     }
   }
 

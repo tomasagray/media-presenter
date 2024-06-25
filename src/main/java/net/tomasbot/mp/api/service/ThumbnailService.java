@@ -1,5 +1,6 @@
 package net.tomasbot.mp.api.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalTime;
@@ -36,7 +37,6 @@ public class ThumbnailService {
   }
 
   public void generateVideoThumbnails(@NotNull Video video) throws IOException {
-
     logger.info("Creating thumbnail for Video: {}", video);
 
     Path thumb = createThumbDir(video);
@@ -75,7 +75,8 @@ public class ThumbnailService {
   @NotNull
   private Path createThumbDir(@NotNull Video video) throws IOException {
     Path thumb = thumbLocation.resolve(video.getId().toString());
-    if (!thumb.toFile().mkdirs()) {
+    File thumbFile = thumb.toFile();
+    if (!thumbFile.mkdirs() && !thumbFile.getParentFile().exists()) {
       throw new IOException("Could not create thumbnail directory: " + thumb);
     }
     return thumb;

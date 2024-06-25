@@ -5,11 +5,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 @Service
 public class FileTransferWatcher {
+
+  private static final Logger logger = LogManager.getLogger(FileTransferWatcher.class);
 
   private static final Map<Path, Thread> transferringFiles = new ConcurrentHashMap<>();
   private static final int XFER_TIMEOUT = 1_000;
@@ -25,6 +29,7 @@ public class FileTransferWatcher {
                 onFinish.accept(path);
               } catch (InterruptedException ignore) {
                 // this will happen repeatedly: as the file transfers, new WatchEvents are created
+                logger.trace("Transfer watcher was interrupted...");
               }
             });
     transferringFiles.put(path, fileWatcher);
