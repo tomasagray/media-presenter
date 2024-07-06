@@ -54,7 +54,15 @@ public class ComicBookService {
   }
 
   public Optional<ComicBook> getComicBookAt(Path path) {
-    return comicBookRepo.findComicBookIn(path);
+    List<ComicBook> comics = comicBookRepo.findComicBooksIn(path);
+    if (comics.isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(comics.get(0));
+  }
+
+  public List<ComicBook> getComicBooksAt(Path path) {
+    return comicBookRepo.findComicBooksIn(path);
   }
 
   public Optional<ComicBook> getComicBookForPage(@NotNull Image page) {

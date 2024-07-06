@@ -12,7 +12,5 @@ public interface FileScanningService {
 
   void handleFileEvent(@NotNull Path file, @NotNull WatchEvent.Kind<?> kind);
 
-  void saveScannedData();
-
   MultiValueMap<String, Path> getInvalidFiles();
 }

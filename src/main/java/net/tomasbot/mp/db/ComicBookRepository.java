@@ -24,5 +24,5 @@ public interface ComicBookRepository extends JpaRepository<ComicBook, UUID> {
   Optional<ComicBook> findComicBookByImagesContaining(Image image);
 
   @Query("SELECT cb FROM ComicBook cb WHERE cb.location = :directory")
-  Optional<ComicBook> findComicBookIn(Path directory);
+  List<ComicBook> findComicBooksIn(Path directory);
 }

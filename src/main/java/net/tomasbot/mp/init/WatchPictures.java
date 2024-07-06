@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.tomasbot.mp.api.service.PictureScanningService;
@@ -77,10 +76,5 @@ public class WatchPictures implements CommandLineRunner {
   private void finishPictureScan(@NotNull Instant jobStart) {
     Duration jobDuration = Duration.between(jobStart, Instant.now());
     logger.info("Initial scan of Pictures finished in {}ms", jobDuration.toMillis());
-    scanningService.saveScannedData();
-    List<Picture> pictures = pictureService.getUnprocessedPictures();
-    for (Picture picture : pictures) {
-      scanningService.processImageMetadata(picture);
-    }
   }
 }

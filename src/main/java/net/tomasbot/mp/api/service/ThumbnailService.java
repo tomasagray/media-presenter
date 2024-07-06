@@ -37,19 +37,19 @@ public class ThumbnailService {
   }
 
   public void generateVideoThumbnails(@NotNull Video video) throws IOException {
-    logger.info("Creating thumbnail for Video: {}", video);
-
-    Path thumb = createThumbDir(video);
     List<FFmpegStream> streams = video.getMetadata().getStreams();
     if (streams == null || streams.isEmpty()) {
       throw new IOException("Video has no streams: " + video);
     }
 
-    double duration = streams.get(0).getDuration();
-    int sliceFactor = getSliceFactor(duration);
-    double offset = duration * 0.05;
-    double sliceDuration = duration / sliceFactor;
+    // determine thumbnail intervals
+    final double duration = streams.get(0).getDuration();
+    final int sliceFactor = getSliceFactor(duration);
+    final double offset = duration * 0.05;
+    final double sliceDuration = duration / sliceFactor;
 
+    logger.info("Creating thumbnails for Video: {}", video);
+    Path thumb = createThumbDirFor(video);
     for (int i = 0; i < sliceFactor; i++) {
       double thumbPos = i * sliceDuration + offset;
       Image thumbnail = generateThumbnail(video, thumb.resolve(i + ".jpg"), (long) thumbPos);
@@ -73,7 +73,7 @@ public class ThumbnailService {
   }
 
   @NotNull
-  private Path createThumbDir(@NotNull Video video) throws IOException {
+  private Path createThumbDirFor(@NotNull Video video) throws IOException {
     Path thumb = thumbLocation.resolve(video.getId().toString());
     File thumbFile = thumb.toFile();
     if (!thumbFile.mkdirs() && !thumbFile.getParentFile().exists()) {
