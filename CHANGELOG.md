@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.2.6] - 2024-07-06
+
+### Changed
+
+- Improved appearance of navigation menu icons
+
+### Added
+
+- Page display for comics
+- Auto-focus on search bar display
+
+### Fixed
+
+- Redundant/repetitive thumbnail generation
+- Comic page count display on home page
+- Annoying background scroll when using image viewer
+
 ## [0.2.5] - 2024-06-24
 
 ### Fixed
