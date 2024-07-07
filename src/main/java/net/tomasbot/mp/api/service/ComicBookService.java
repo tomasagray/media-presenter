@@ -1,5 +1,6 @@
 package net.tomasbot.mp.api.service;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -52,6 +53,18 @@ public class ComicBookService {
     return pageRepository.findLoosePages();
   }
 
+  public Optional<ComicBook> getComicBookAt(Path path) {
+    List<ComicBook> comics = comicBookRepo.findComicBooksIn(path);
+    if (comics.isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(comics.get(0));
+  }
+
+  public List<ComicBook> getComicBooksAt(Path path) {
+    return comicBookRepo.findComicBooksIn(path);
+  }
+
   public Optional<ComicBook> getComicBookForPage(@NotNull Image page) {
     return comicBookRepo.findComicBookByImagesContaining(page);
   }
@@ -61,7 +74,7 @@ public class ComicBookService {
   }
 
   public ComicBook save(@NotNull ComicBook comicBook) {
-    return comicBookRepo.save(comicBook);
+    return comicBookRepo.saveAndFlush(comicBook);
   }
 
   public void delete(@NotNull ComicBook comicBook) {

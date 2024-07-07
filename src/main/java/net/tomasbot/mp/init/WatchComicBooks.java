@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.tomasbot.mp.api.service.ComicBookService;
@@ -14,7 +13,6 @@ import net.tomasbot.mp.api.service.RecursiveWatcherService;
 import net.tomasbot.mp.model.Image;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -56,24 +54,9 @@ public class WatchComicBooks implements CommandLineRunner {
     }
   }
 
-  private void addPagesToComics(@NotNull Collection<? extends Image> pages) throws IOException {
-    logger.info("Assigning {} pages to Comic Books...", pages.size());
-    for (Image page : pages) {
-      scanningService.addPageOrCreateComic(page);
-    }
-  }
-
   private void finishComicBookScan(Instant jobStart) {
-    try {
-      Duration jobDuration = Duration.between(jobStart, Instant.now());
-      logger.info("Initial scan of Comic Book files finished in {}ms", jobDuration.toMillis());
-
-      scanningService.saveScannedData();
-      Collection<? extends Image> pages = comicBookService.getLoosePages();
-      addPagesToComics(pages);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    Duration jobDuration = Duration.between(jobStart, Instant.now());
+    logger.info("Initial scan of Comic Book files finished in {}ms", jobDuration.toMillis());
   }
 
   @Override
@@ -88,7 +71,7 @@ public class WatchComicBooks implements CommandLineRunner {
             .collect(Collectors.toSet());
     logger.info("At scan init, there are: {} Comic Book pages in the database...", existing.size());
 
-    logger.info("Scanning Comic Books in: {} ...", comicsLocation);
+    logger.info("Scanning Comic Books in: '{}' ...", comicsLocation);
     final Instant jobStart = Instant.now();
     watcherService.watch(
         comicsLocation,

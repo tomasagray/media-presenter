@@ -5,22 +5,25 @@ const MIN_SWIPE_PX = 10
 
 export const attachVideoCardHandlers = (video) => {
     let {id} = video
-    let element = document.getElementById(`${id}`)
+    let element = $('#' + id)
     // attach event handlers
-    element.onclick = () => showVideoPlayer(video)
+    element.on('click', () => showVideoPlayer(video))
     attachImageCycleSwipe(element)
-    let images = element.querySelectorAll('.Display-image')
+
+    let images = element.find('.Display-image')
     let timer
-    element.onmouseenter = () => timer = cycleImages(images)
-    element.onmouseleave = () => clearInterval(timer)
+    element.on('mouseenter', () => timer = cycleImages(images))
+    element.on('mouseleave', () => clearInterval(timer))
 }
 
 export const showVideoPlayer = (video) => {
-    let url = getVideoLink(video.links)
+    attachFavoriteButtonBehavior(video)
+
     $('.Footer-menu-container').css('display', 'none')
     $('#Video-player-container').css('display', 'block')
-    attachFavoriteButtonBehavior(video)
+
     let player = $('#Video-player')
+    let url = getVideoLink(video.links)
     player.attr('src', url)
     player[0].load()
 }
@@ -55,7 +58,6 @@ const toggleFavorite = async (entity) => {
             console.error('favoriting failed!', err)
         })
         .always(() => {
-            console.log('done toggling')
             $favoriteButton.removeClass('loading')
             $favoriteButton.attr('enabled', true)
         })
@@ -73,49 +75,56 @@ export const getVideoLink = (links) => links?.find(link => link.rel === 'data')?
 
 // TODO: use jQuery selectors throughout
 export const attachImageCycleSwipe = (element) => {
-    let images = element.querySelectorAll('.Display-image')
-    element.ontouchstart = (e) => onStartSwipe(e)
-    element.ontouchend = (e) => onEndSwipe(e,
+    let images = element.find('.Display-image')
+    element.on('touchstart', (e) => onStartSwipe(e))
+    element.on('touchend', (e) => onEndSwipe(e,
         () => showNextImage(images),
-        () => showPrevImage(images))
+        () => showPrevImage(images)))
     // show first image
-    element.querySelector('.Display-image').classList.add('current')
+    images[0].classList.add('current')
 }
 
 export const cycleImages = (images) => {
     return setInterval(() => showNextImage(images), 1000)
 }
 
+const updatePageCounter = (current, total) => {
+    let oneIndex = current + 1
+    let text = `${oneIndex} / ${total}`
+    $('#Page-counter').text(text)
+}
+
 export const showPrevImage = (images) => {
     let end = images.length - 1
+    let current = 0
     for (let j = end; j >= 0; j--) {
         if (images[j].classList.contains('current')) {
             images[j].classList.remove('current')
             if (j > 0) {
-                images[j - 1].classList.add('current')
+                current = j - 1
             } else {
-                images[end].classList.add('current')
+                current = end
             }
-            return
         }
     }
-    images[0].classList.add('current')
+    images[current].classList.add('current')
+    updatePageCounter(current, images.length)
 }
 
 export const showNextImage = (images) => {
+    let current = 1
     for (let i = 0; i < images.length; i++) {
         if (images[i].classList.contains('current')) {
             images[i].classList.remove('current')
             if (i === images.length - 1) {
-                images[0].classList.add('current')
+                current = 0
             } else {
-                images[i + 1].classList.add('current');
+                current = i + 1
             }
-            return
         }
     }
-    // 'current' was not set, set the first thumb
-    images[0].classList.add('current')
+    images[current].classList.add('current')
+    updatePageCounter(current, images.length)
 }
 
 let touchStart = 0, touchEnd = 0
@@ -127,15 +136,15 @@ export const onEndSwipe = (e, onSwipeLeft, onSwipeRight) => {
     touchEnd = e.changedTouches[0].screenX
     let swipe = Math.abs(touchStart - touchEnd)
     if (swipe > MIN_SWIPE_PX) {
-        if (touchStart > touchEnd) {
-            onSwipeLeft();
-        } else {
-            onSwipeRight();
-        }
+        if (touchStart > touchEnd) onSwipeLeft()
+        else onSwipeRight()
     }
 }
 
 export const onShowImageViewer = (images, selected) => {
+    // prevent body scroll
+    $('body').css('overflow', 'hidden')
+
     for (const img of images) {
         let clone = img.cloneNode(true)
         let container = document.createElement('div')
@@ -143,12 +152,19 @@ export const onShowImageViewer = (images, selected) => {
         container.appendChild(clone)
         document.getElementById('image-viewer').appendChild(container)
     }
-    let container = document.getElementById('image-viewer-container')
-    container.style.display = 'block'
-    attachImageCycleSwipe(container)
-    if (selected) {
+
+    let pageCounter = $('#Page-counter')
+    if (selected) { // picture display
         setSelected(selected)
+        pageCounter.css('visibility', 'hidden')
+    } else {    // comic display
+        updatePageCounter(0, images.length)
+        pageCounter.css('visibility', 'visible')
     }
+
+    let container = $('#image-viewer-container')
+    container.css('display', 'block')
+    attachImageCycleSwipe(container)
 }
 
 const setSelected = (selected) => {
@@ -164,6 +180,7 @@ const setSelected = (selected) => {
 }
 
 export const onHideImageViewer = () => {
+    $('body').css('overflow', 'revert')
     let container = document.getElementById('image-viewer-container')
     container.style.display = 'none'
     document.getElementById('image-viewer').innerHTML = ''
@@ -198,6 +215,7 @@ export const getPageImages = (comic) => {
 let listener = null
 export const onShowSearchModal = () => {
     $('#search-modal-container').css('display', 'block')
+    $('#search-form').focus()
     setTimeout(() => {  // prevent race condition
         onClickOutside('#search-modal')
         document.addEventListener('click', listener)

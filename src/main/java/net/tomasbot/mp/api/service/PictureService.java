@@ -25,7 +25,7 @@ public class PictureService {
   }
 
   public void save(@NotNull Picture picture) {
-    pictureRepo.save(picture);
+    pictureRepo.saveAndFlush(picture);
   }
 
   public void saveAll(@NotNull Iterable<? extends Picture> pictures) {

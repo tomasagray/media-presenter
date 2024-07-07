@@ -9,16 +9,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.*;
-import net.tomasbot.mp.model.Tag;
 import net.tomasbot.mp.model.Video;
-import net.tomasbot.mp.plugin.ffmpeg.FFmpegPlugin;
-import net.tomasbot.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -28,35 +24,30 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 
   private static final Logger logger = LogManager.getLogger(VideoScanningService.class);
 
-  private final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
-
   private final VideoService videoService;
-  private final ThumbnailService thumbnailService;
-  private final TagService tagService;
+  private final VideoFileScanner videoFileScanner;
   private final TranscodingService transcodingService;
-  private final FileUtilitiesService fileUtilitiesService;
   private final RecursiveWatcherService watcherService;
+  private final FileUtilitiesService fileUtilitiesService;
   private final FileTransferWatcher transferWatcher;
-  private final List<Video> scannedVideos = new ArrayList<>();
+
+  private final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
 
   @Value("${videos.storage-location}")
   private Path videoStorageLocation;
 
   VideoScanningService(
       VideoService videoService,
-      ThumbnailService thumbnailService,
-      TagService tagService,
+      VideoFileScanner videoFileScanner,
       TranscodingService transcodingService,
       RecursiveWatcherService watcherService,
-      FFmpegPlugin ffmpegPlugin,
       FileUtilitiesService fileUtilitiesService,
       FileTransferWatcher transferWatcher) {
     this.videoService = videoService;
-    this.thumbnailService = thumbnailService;
-    this.tagService = tagService;
+    this.videoFileScanner = videoFileScanner;
     this.transcodingService = transcodingService;
-    this.fileUtilitiesService = fileUtilitiesService;
     this.watcherService = watcherService;
+    this.fileUtilitiesService = fileUtilitiesService;
     this.transferWatcher = transferWatcher;
   }
 
@@ -65,8 +56,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     try {
       if (converted.toFile().exists()) {
         Files.delete(converted);
-        // todo - delete transcode log,
-        // delete converted data, throw error
+        // todo - delete transcode log, delete converted data, throw error
       }
     } catch (IOException e) {
       throw new UncheckedIOException(e);
@@ -85,8 +75,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
       logger.trace("Attempting to scan video file: {}", file);
       if (!existing.contains(file)) {
         logger.info("Scanning new video: {}", file);
-        final Video video = new Video(file);
-        scannedVideos.add(video);
+        createVideo(file);
       } else {
         logger.trace("Video file: {} has already been scanned", file);
       }
@@ -95,6 +84,11 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
       String ext = FilenameUtils.getExtension(file.toString());
       invalidFiles.add(ext, file);
     }
+  }
+
+  private void createVideo(@NotNull Path file) {
+    final Video video = new Video(file);
+    videoFileScanner.scanFileMetadata(video);
   }
 
   @Override
@@ -113,40 +107,6 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
       }
     } catch (Throwable e) {
       logger.error("Error scanning video file to add: {}", e.getMessage(), e);
-    }
-  }
-
-  @Override
-  public synchronized void saveScannedData() {
-    List<Video> savable = scannedVideos.stream().filter(Objects::nonNull).toList();
-    logger.info("Saving {} Videos to database...", savable.size());
-    videoService.saveAll(savable);
-    scannedVideos.clear();
-  }
-
-  @Async("transcoder")
-  public void scanVideoMetadata(@NotNull Video video) {
-    try {
-      // metadata
-      final FFmpegMetadata metadata;
-      metadata = transcodingService.getVideoMetadata(video);
-      video.setMetadata(metadata);
-
-      // title
-      final Path file = video.getFile();
-      final String title = transcodingService.getTitle(metadata);
-      if (title != null) video.setTitle(title);
-      else video.setTitle(FilenameUtils.getBaseName(file.toString()));
-
-      // set tags
-      final List<Tag> tags = tagService.getTags(videoStorageLocation.relativize(file));
-      video.setTags(new HashSet<>(tags));
-
-      // thumbnails
-      thumbnailService.generateVideoThumbnails(video);
-      videoService.save(video);
-    } catch (IOException e) {
-      logger.error("Could not scan Video metadata: {}", e.getMessage(), e);
     }
   }
 
@@ -194,35 +154,15 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     if (ENTRY_CREATE.equals(kind)) {
       if (Files.isDirectory(path)) {
         watcherService.walkTreeAndSetWatches(
-            path,
-            dir -> this.scanFile(dir, new ArrayList<>()),
-            this::handleFileEvent,
-            this::processScannedVideos);
+            path, dir -> this.scanFile(dir, new ArrayList<>()), this::handleFileEvent, null);
       } else {
         logger.info("Adding new video: {}", path);
-        transferWatcher.watchFileTransfer(path, this::finishScanVideo);
+        transferWatcher.watchFileTransfer(path, this::createVideo);
       }
     } else if (ENTRY_MODIFY.equals(kind)) {
-      transferWatcher.watchFileTransfer(path, this::finishScanVideo);
+      transferWatcher.watchFileTransfer(path, this::createVideo);
     } else if (ENTRY_DELETE.equals(kind)) {
-      videoService
-          .getVideoByPath(path)
-          .ifPresentOrElse(
-              videoService::deleteVideo,
-              () -> logger.info("Deleted video that was not in DB: {}", path));
-    }
-  }
-
-  private void finishScanVideo(@NotNull Path path) {
-    scanFile(path, new ArrayList<>());
-    processScannedVideos();
-  }
-
-  private void processScannedVideos() {
-    List<Video> videos = new ArrayList<>(scannedVideos);
-    saveScannedData();
-    for (Video video : videos) {
-      scanVideoMetadata(video);
+      videoService.getVideoByPath(path).forEach(videoService::deleteVideo);
     }
   }
 }

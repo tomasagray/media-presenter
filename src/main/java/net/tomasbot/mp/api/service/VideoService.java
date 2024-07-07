@@ -42,7 +42,7 @@ public class VideoService {
   }
 
   public void save(@NotNull Video video) {
-    videoRepository.save(video);
+    videoRepository.saveAndFlush(video);
   }
 
   public void saveAll(@NotNull Iterable<? extends Video> videos) {
@@ -79,10 +79,10 @@ public class VideoService {
     throw new IllegalArgumentException("Video not found: " + videoId);
   }
 
-  public Optional<Video> getVideoByPath(@NotNull Path path) {
+  public List<Video> getVideoByPath(@NotNull Path path) {
     return videoRepository.findAll().stream()
         .filter(video -> video.getFile().equals(path))
-        .findFirst();
+        .toList();
   }
 
   public void deleteVideo(@NotNull Video video) {

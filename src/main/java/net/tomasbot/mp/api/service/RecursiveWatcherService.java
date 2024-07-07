@@ -137,7 +137,7 @@ public class RecursiveWatcherService {
         WatchKey watchKey = path.register(watchService, kinds);
         watches.put(watchKey, new WatchHandler(path, handler));
       } catch (IOException e) {
-        // Don't care!
+        logger.error("Could not register watch on: {}", path, e);
       }
     }
   }
@@ -161,7 +161,9 @@ public class RecursiveWatcherService {
       while ((key = watchService.take()) != null) {
         WatchHandler handler = watches.get(key);
         if (handler == null) {
-          throw new IllegalStateException("WatchHandler missing for WatchKey: " + key);
+          logger.warn("WatchHandler missing for WatchKey: {}; removing", key);
+          watches.remove(key);
+          continue;
         }
 
         for (WatchEvent<?> event : key.pollEvents()) {

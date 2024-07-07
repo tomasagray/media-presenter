@@ -55,11 +55,6 @@ public class WatchVideoStorageDirectory implements CommandLineRunner {
   private void finishVideoScan(Instant jobStart) {
     Duration jobDuration = Duration.between(jobStart, Instant.now());
     logger.info("Initial scan of Videos finished in {}ms", jobDuration.toMillis());
-    scanningService.saveScannedData();
-    List<Video> videos = videoService.getUnprocessedVideos();
-    for (Video video : videos) {
-      scanningService.scanVideoMetadata(video);
-    }
   }
 
   @Override
@@ -69,7 +64,7 @@ public class WatchVideoStorageDirectory implements CommandLineRunner {
     List<Path> existing =
         videoService.getAll(0, Integer.MAX_VALUE).stream().map(Video::getFile).toList();
 
-    logger.info("Initializing video storage watcher at: {}", videoStorageLocation);
+    logger.info("Initializing video storage watcher at: '{}'", videoStorageLocation);
     final Instant jobStart = Instant.now();
     watcherService.watch(
         videoStorageLocation,

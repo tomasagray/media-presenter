@@ -50,7 +50,7 @@ public class WatchVideoAddDirectory implements CommandLineRunner {
   public void run(String... args) throws Exception {
     initializeVideoLocation(addVideoLocation);
 
-    logger.info("Initializing add new video watcher in: {}", addVideoLocation);
+    logger.info("Initializing add new video watcher in: '{}'", addVideoLocation);
     Instant jobStart = Instant.now();
     watcherService.watch(
         addVideoLocation,
