@@ -11,6 +11,7 @@ export const attachVideoCardHandlers = (video) => {
     attachImageCycleSwipe(element)
 
     let images = element.find('.Display-image')
+    images[0].classList.add('current')  // show first thumbnail
     let timer
     element.on('mouseenter', () => timer = cycleImages(images))
     element.on('mouseleave', () => clearInterval(timer))
@@ -80,8 +81,6 @@ export const attachImageCycleSwipe = (element) => {
     element.on('touchend', (e) => onEndSwipe(e,
         () => showNextImage(images),
         () => showPrevImage(images)))
-    // show first image
-    images[0].classList.add('current')
 }
 
 export const cycleImages = (images) => {
@@ -153,6 +152,10 @@ export const onShowImageViewer = (images, selected) => {
         document.getElementById('image-viewer').appendChild(container)
     }
 
+    let container = $('#image-viewer-container')
+    container.css('display', 'block')
+    attachImageCycleSwipe(container)
+
     let pageCounter = $('#Page-counter')
     if (selected) { // picture display
         setSelected(selected)
@@ -160,22 +163,17 @@ export const onShowImageViewer = (images, selected) => {
     } else {    // comic display
         updatePageCounter(0, images.length)
         pageCounter.css('visibility', 'visible')
+        // show first page
+        container.find('.Display-image')[0].classList.add('current')
     }
-
-    let container = $('#image-viewer-container')
-    container.css('display', 'block')
-    attachImageCycleSwipe(container)
 }
 
 const setSelected = (selected) => {
-    let images = document.querySelectorAll('#image-viewer .Display-image')
-    images.forEach(img => {
-        let src = img.querySelector('img').src
-        if (src === selected) {
-            img.classList.add('current')
-        } else {
-            img.classList.remove('current')
-        }
+    let images = $('#image-viewer .Display-image')
+    images.each((idx, pic) => {
+        let src = pic.querySelector('img').src
+        src === selected ? pic.classList.add('current') :
+            pic.classList.remove('current')
     })
 }
 

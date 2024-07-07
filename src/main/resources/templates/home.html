@@ -25,9 +25,8 @@
     <div th:if="${not #lists.isEmpty(pictures.getContent())}">
         <h1>Pictures</h1>
         <div class="Picture-card-container">
-            <div class="Picture-card"
-                 data-th-each="image : ${pictures.getContent()}"
-                 data-th-insert="~{image/image_card}">
+            <div data-th-each="image : ${pictures.getContent()}">
+                <div data-th-replace="~{image/image_card::imageCard(extraText = null)}"></div>
             </div>
         </div>
         <div class="More-link">
