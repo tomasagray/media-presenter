@@ -42,9 +42,9 @@
     <div th:if="${not #lists.isEmpty(comics.getContent())}">
         <h1>Comic Books</h1>
         <div class="Picture-card-container">
-            <div class="Picture-card"
-                 data-th-each="image : ${comics.getContent()}"
-                 data-th-insert="~{image/image_card}">
+            <!--/*@thymesVar id="image" type="net.tomasbot.mp.api.resource.ComicBookResource"*/-->
+            <div data-th-each="image : ${comics.getContent()}">
+                <div data-th-replace="~{image/image_card::imageCard(extraText = ${image.pageCount})}"></div>
             </div>
         </div>
         <div class="More-link">
