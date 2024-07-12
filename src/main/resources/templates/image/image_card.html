@@ -7,23 +7,11 @@
 <body>
 <div class="Picture-card" data-th-fragment="imageCard(extraText)">
     <script data-th-inline="javascript" type="module">
-        import {
-            onShowImageViewer,
-            getSiblingImages,
-            hasPages,
-            getPageImages,
-        } from "/js/mp.js";
+        import {attachImageHandlers} from "/js/mp.image.js";
 
         $(() => {
             let image = [[${image}]]
-            if (hasPages(image)) {
-                let images = getPageImages(image)
-                $(`#${image.id}`).on('click', () => onShowImageViewer(images))
-            } else {
-                let images = getSiblingImages()
-                let selected = image.links.find(link => link.rel === 'data').href
-                $(`#${image.id}`).on('click', () => onShowImageViewer(images, selected))
-            }
+            attachImageHandlers(image)
         })
     </script>
     <!--/*@thymesVar id="image" type="net.tomasbot.mp.api.resource.ImageResource<T>"*/-->

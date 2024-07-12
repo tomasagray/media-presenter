@@ -9,28 +9,15 @@
     <script data-th-inline="javascript" type="module">
         import {
             onHideImageViewer,
-            showPrevImage,
-            showNextImage,
-        } from "/js/mp.js";
+            attachImageViewerHandlers
+        } from "/js/mp.image.js";
 
         $(() => {
             // attach event handlers
             $('#Image-viewer-close-button').on('click', () => onHideImageViewer())
             $('#Toggle-image-favorite-button').on('click',
                 () => alert('TODO: Implement Picture, Comic Book favorite action'))
-            document.addEventListener('keydown', (e) => {
-                let container = document.querySelector('#image-viewer-container')
-                let display = container.style.display
-                if (display && display !== 'none') {
-                    let images = container.querySelectorAll('.Display-image')
-                    if (e.key === 'ArrowLeft') {
-                        showPrevImage(images)
-                    }
-                    if (e.key === 'ArrowRight') {
-                        showNextImage(images)
-                    }
-                }
-            })
+            attachImageViewerHandlers()
         })
     </script>
     <div class="Viewer-controls-container">

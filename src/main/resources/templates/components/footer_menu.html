@@ -47,29 +47,9 @@
 
         $(() => {
             $('#Search-modal-button').click(onShowSearchModal)
-
-            let url = window.location.href
-            let match = url.match(/home|videos|pictures|comics/)
-            if (match) {
-                let key = match[0]
-                let selector = `${key}-link`
-                document.getElementById(selector).innerHTML =
-                    `<img alt="${key}" src="/img/icon/${key}_selected/${key}_selected_64.png" />`
-            } else if (url.match(/favorites/)) {
-                $('#favorites-link').html(
-                    '<img alt="Favorites" src="/img/icon/favorite/favorite_64.png" />'
-                )
-            } else {
-                $('#home-link').html(
-                    '<img alt="Home" src="/img/icon/home_selected/home_selected_64.png" />'
-                )
-            }
-
             $(document).keyup(e => {
-                if (e.key === 'Escape') {
-                    onHideSearchModal()
-                }
-            });
+                if (e.key === 'Escape') onHideSearchModal()
+            })
         })
     </script>
 </div>
