@@ -7,6 +7,12 @@
 <div class="Page-container">
     <div data-th-replace="~{components/sort_bar::sort-bar}"></div>
     <div data-th-insert="~{image/image_viewer::image-viewer}"></div>
+    <script data-th-inline="javascript" type="module">
+        import {loadImages} from "/js/mp.image_repo.js";
+
+        const images = [[${images}]]
+        loadImages(images)
+    </script>
     <div>
         <div class="Picture-card-container">
             <!--/*@thymesVar id="image" type="net.tomasbot.mp.api.resource.ComicBookResource"*/-->

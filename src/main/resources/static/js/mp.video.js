@@ -1,6 +1,21 @@
+import {toggleFavorite} from "./mp.js";
 import {attachImageCycleSwipe, cycleImages} from "./mp.image.js";
 
 console.log('mp.video.js was picked up')
+
+const showVideoPlayer = (video) => {
+    attachFavoriteButtonBehavior(video)
+
+    $('.Footer-menu-container').css('display', 'none')
+    $('#Video-player-container').css('display', 'block')
+
+    let player = $('#Video-player')
+    let url = getVideoLink(video.links)
+    player.attr('src', url)
+    player[0].load()
+}
+
+const getVideoLink = (links) => links?.find(link => link.rel === 'data')?.href
 
 export const attachVideoCardHandlers = (video) => {
     let {id} = video
@@ -16,51 +31,18 @@ export const attachVideoCardHandlers = (video) => {
     element.on('mouseleave', () => clearInterval(timer))
 }
 
-export const showVideoPlayer = (video) => {
-    attachFavoriteButtonBehavior(video)
-
-    $('.Footer-menu-container').css('display', 'none')
-    $('#Video-player-container').css('display', 'block')
-
-    let player = $('#Video-player')
-    let url = getVideoLink(video.links)
-    player.attr('src', url)
-    player[0].load()
-}
-
 export const attachFavoriteButtonBehavior = (entity) => {
     let {favorite} = entity
-    let $favoriteButtons = $('.Favorite-button')
-    $favoriteButtons.each((idx, favoriteButton) => {
-        favorite ? $(favoriteButton).addClass('favorite')
-            : $(favoriteButton).removeClass('favorite')
-        $(favoriteButton).unbind().click(() => toggleFavorite(entity))
-    })
-}
-
-const toggleFavorite = async (entity) => {
-    const $favoriteButton = $('.Favorite-button')
-    $favoriteButton.attr('enabled', false)
-    $favoriteButton.removeClass('favorite')
-    $favoriteButton.addClass('loading')
-
+    let $favoriteButton = $('#Toggle-video-favorite-button')
     let link = entity['links'].find(link => link.rel === 'favorite').href
-    await $.ajax({
-        url: link,
-        method: 'PATCH',
-    })
-        .done((video) => {
+
+    favorite ? $favoriteButton.addClass('favorite')
+        : $favoriteButton.removeClass('favorite')
+    $favoriteButton.unbind().click(() => toggleFavorite(link, (video) => {
             video['favorite'] ?
                 $favoriteButton.addClass('favorite') :
                 $favoriteButton.removeClass('favorite')
-        })
-        .fail((err) => {
-            console.error('favoriting failed!', err)
-        })
-        .always(() => {
-            $favoriteButton.removeClass('loading')
-            $favoriteButton.attr('enabled', true)
-        })
+    }))
 }
 
 export const hideVideoPlayer = () => {
@@ -70,5 +52,3 @@ export const hideVideoPlayer = () => {
     $('.Footer-menu-container').css('display', 'flex')
     $('#Video-player-container').css('display', 'none')
 }
-
-export const getVideoLink = (links) => links?.find(link => link.rel === 'data')?.href

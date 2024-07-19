@@ -7,16 +7,9 @@
 <body>
 <div class="Image-viewer-container" data-th-fragment="image-viewer" id="image-viewer-container">
     <script data-th-inline="javascript" type="module">
-        import {
-            onHideImageViewer,
-            attachImageViewerHandlers
-        } from "/js/mp.image.js";
+        import {attachImageViewerHandlers} from "/js/mp.image.js";
 
         $(() => {
-            // attach event handlers
-            $('#Image-viewer-close-button').on('click', () => onHideImageViewer())
-            $('#Toggle-image-favorite-button').on('click',
-                () => alert('TODO: Implement Picture, Comic Book favorite action'))
             attachImageViewerHandlers()
         })
     </script>
