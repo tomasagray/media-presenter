@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+## [0.2.7] - 2024-07-21
+
+### Changed
+
+- Nav menu links default to random displays
+
+### Added
+
+- Favoriting for Comic Books & Pictures
+
+### Fixed
+
+- Incorrect (always first) image displayed when viewing Pictures
+- Nav menu not showing selected (filled-in) icon
+
 ## [0.2.6] - 2024-07-06
 
 ### Changed
@@ -16,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Page display for comics
-- Auto-focus on search bar display
+- Autofocus on search bar display
 
 ### Fixed
 
