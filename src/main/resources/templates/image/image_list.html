@@ -9,16 +9,22 @@
     <div data-th-insert="~{image/image_viewer::image-viewer}"></div>
     <script data-th-inline="javascript" type="module">
         import {loadImages} from "/js/mp.image_repo.js";
+        import {loadComics} from "/js/mp.comic_repo.js";
 
         const images = [[${images}]]
         loadImages(images)
+
+        const comics = [[${comics}]]
+        loadComics(comics)
     </script>
     <div>
         <div class="Picture-card-container">
-            <div data-th-each="image : ${images}">
+            <div th:if="images != null" data-th-each="image : ${images}">
                 <div data-th-replace="~{image/image_card::imageCard(extraText = null)}"></div>
             </div>
-        </div>
+            <div th:if="comics != null" data-th-each="image : ${comics}">
+                <div data-th-replace="~{image/image_card::imageCard(extraText = null)}"></div>
+            </div></div>
     </div>
     <div data-th-insert="~{components/page_navigation::page-navigation}"></div>
 </div>

@@ -5,11 +5,21 @@
 </head>
 <body>
 <div class="Page-container">
-    <div th:if="${not #lists.isEmpty(videos.getContent())}">
+    <script data-th-inline="javascript" type="module">
+        import {loadImages} from "/js/mp.image_repo.js";
+        import {loadComics} from "/js/mp.comic_repo.js";
+
+        const images = [[${pictures}]]
+        loadImages(images)
+
+        const comics = [[${comics}]]
+        loadComics(comics)
+    </script>
+    <div th:if="${not #lists.isEmpty(videos)}">
         <h1>Videos</h1>
         <div class="Video-card-container">
             <div class="Video-card"
-                 data-th-each="video : ${videos.getContent()}"
+                 data-th-each="video : ${videos}"
                  data-th-insert="~{video/video_card}">
             </div>
         </div>
@@ -22,10 +32,10 @@
             </a>
         </div>
     </div>
-    <div th:if="${not #lists.isEmpty(pictures.getContent())}">
+    <div th:if="${not #lists.isEmpty(pictures)}">
         <h1>Pictures</h1>
         <div class="Picture-card-container">
-            <div data-th-each="image : ${pictures.getContent()}">
+            <div data-th-each="image : ${pictures}">
                 <div data-th-replace="~{image/image_card::imageCard(extraText = null)}"></div>
             </div>
         </div>
@@ -38,11 +48,11 @@
             </a>
         </div>
     </div>
-    <div th:if="${not #lists.isEmpty(comics.getContent())}">
+    <div th:if="${not #lists.isEmpty(comics)}">
         <h1>Comic Books</h1>
         <div class="Picture-card-container">
             <!--/*@thymesVar id="image" type="net.tomasbot.mp.api.resource.ComicBookResource"*/-->
-            <div data-th-each="image : ${comics.getContent()}">
+            <div data-th-each="image : ${comics}">
                 <div data-th-replace="~{image/image_card::imageCard(extraText = ${image.pageCount})}"></div>
             </div>
         </div>

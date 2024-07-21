@@ -55,9 +55,9 @@ public class HomeController {
     CollectionModel<PictureResource> pictureResources = pictureModeller.toCollectionModel(pictures);
     List<UserComicBookView> comics = comicBookService.getRandomUserComics(DEFAULT_ITEM_COUNT);
     CollectionModel<ComicBookResource> comicResources = comicModeller.toCollectionModel(comics);
-    model.addAttribute("videos", videoResources);
-    model.addAttribute("pictures", pictureResources);
-    model.addAttribute("comics", comicResources);
+    model.addAttribute("videos", videoResources.getContent());
+    model.addAttribute("pictures", pictureResources.getContent());
+    model.addAttribute("comics", comicResources.getContent());
     model.addAttribute("page_title", "Home");
     return "home";
   }
@@ -70,9 +70,9 @@ public class HomeController {
     CollectionModel<PictureResource> pictureResources = pictureModeller.toCollectionModel(pictures);
     Collection<UserComicBookView> comics = comicBookService.getFavoriteComics();
     CollectionModel<ComicBookResource> comicResources = comicModeller.toCollectionModel(comics);
-    model.addAttribute("videos", videoResources);
-    model.addAttribute("pictures", pictureResources);
-    model.addAttribute("comics", comicResources);
+    model.addAttribute("videos", videoResources.getContent());
+    model.addAttribute("pictures", pictureResources.getContent());
+    model.addAttribute("comics", comicResources.getContent());
     model.addAttribute("page_title", "Favorites");
     return "home";
   }

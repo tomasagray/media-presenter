@@ -1,5 +1,3 @@
-import {updatePageCounter} from "./mp.image.js"
-
 console.log('mp.js was picked up')
 
 const MIN_SWIPE_PX = 10

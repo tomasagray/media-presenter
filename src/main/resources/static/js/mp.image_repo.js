@@ -1,13 +1,16 @@
 console.log('mp.image_repo.js was picked up')
 
+
 const image_repository = new Map()
 
 export const loadImages = (images) => {
-    images.forEach(image => loadImage(image))
+    images && images.forEach(image => loadImage(image))
 }
 
 export const loadImage = (image) => {
-    image_repository.set(image.id, image)
+    // console.log('loading image', image)
+    if (image && image.id)
+        image_repository.set(image.id, image)
 }
 
 export const fetchImages = () => {
@@ -32,12 +35,16 @@ const getImageLink = (img, rel) => {
 
 export const fetchImageAt = (url) => {
     let image = null
-    image_repository.forEach(img => {
+    for (let i = 0; i < image_repository.size; i++) {
+        let img = fetchImageAtPosition(i)
         const dataLink = getImageLink(img, 'data')
         if (dataLink.href === url) {
-            image = img
+            return {
+                pos: i,
+                data: img
+            }
         }
-    })
+    }
     return image
 }
 
@@ -49,4 +56,8 @@ export const fetchImageAtPosition = (pos) => {
         i++
     }
     return requested
+}
+
+export const fetchPictureCount = () => {
+    return image_repository.size
 }

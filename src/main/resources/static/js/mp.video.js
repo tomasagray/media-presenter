@@ -1,7 +1,42 @@
 import {toggleFavorite} from "./mp.js";
-import {attachImageCycleSwipe, cycleImages} from "./mp.image.js";
+import {attachImageCycleSwipe} from "./mp.image.js";
+
 
 console.log('mp.video.js was picked up')
+
+
+const getVideoLink = (links) => links?.find(link => link.rel === 'data')?.href
+
+const showNextImage = (images) => {
+    let current = 1
+    for (let i = 0; i < images.length; i++) {
+        if (images[i].classList.contains('current')) {
+            images[i].classList.remove('current')
+            if (i === images.length - 1) {
+                current = 0
+            } else {
+                current = i + 1
+            }
+        }
+    }
+    images[current].classList.add('current')
+}
+
+const cycleImages = (images) => setInterval(() => showNextImage(images), 1000)
+
+const attachFavoriteButtonBehavior = (entity) => {
+    let {favorite} = entity
+    let $favoriteButton = $('#Toggle-video-favorite-button')
+    let link = entity['links'].find(link => link.rel === 'favorite').href
+
+    favorite ? $favoriteButton.addClass('favorite')
+        : $favoriteButton.removeClass('favorite')
+    $favoriteButton.unbind().click(() => toggleFavorite(link, (video) => {
+            video['favorite'] ?
+                $favoriteButton.addClass('favorite') :
+                $favoriteButton.removeClass('favorite')
+    }))
+}
 
 const showVideoPlayer = (video) => {
     attachFavoriteButtonBehavior(video)
@@ -15,8 +50,6 @@ const showVideoPlayer = (video) => {
     player[0].load()
 }
 
-const getVideoLink = (links) => links?.find(link => link.rel === 'data')?.href
-
 export const attachVideoCardHandlers = (video) => {
     let {id} = video
     let element = $('#' + id)
@@ -29,20 +62,6 @@ export const attachVideoCardHandlers = (video) => {
     let timer
     element.on('mouseenter', () => timer = cycleImages(images))
     element.on('mouseleave', () => clearInterval(timer))
-}
-
-export const attachFavoriteButtonBehavior = (entity) => {
-    let {favorite} = entity
-    let $favoriteButton = $('#Toggle-video-favorite-button')
-    let link = entity['links'].find(link => link.rel === 'favorite').href
-
-    favorite ? $favoriteButton.addClass('favorite')
-        : $favoriteButton.removeClass('favorite')
-    $favoriteButton.unbind().click(() => toggleFavorite(link, (video) => {
-            video['favorite'] ?
-                $favoriteButton.addClass('favorite') :
-                $favoriteButton.removeClass('favorite')
-    }))
 }
 
 export const hideVideoPlayer = () => {
