@@ -1,5 +1,4 @@
-import {toggleFavorite} from "./mp.js";
-import {attachImageCycleSwipe} from "./mp.image.js";
+import {onEndSwipe, onStartSwipe, toggleFavorite} from "./mp.js";
 
 
 console.log('mp.video.js was picked up')
@@ -7,22 +6,45 @@ console.log('mp.video.js was picked up')
 
 const getVideoLink = (links) => links?.find(link => link.rel === 'data')?.href
 
-const showNextImage = (images) => {
-    let current = 1
+const cycleImages = (images, getNext) => {
+    let current = 0
     for (let i = 0; i < images.length; i++) {
         if (images[i].classList.contains('current')) {
             images[i].classList.remove('current')
-            if (i === images.length - 1) {
-                current = 0
-            } else {
-                current = i + 1
-            }
+            current = getNext(i, images.length)
+            break
         }
     }
     images[current].classList.add('current')
 }
 
-const cycleImages = (images) => setInterval(() => showNextImage(images), 1000)
+const showNextImage = (images) =>
+    cycleImages(images, (current, total) => current === total - 1 ? 0 : current + 1)
+
+const showPrevImage = (images) =>
+    cycleImages(images, (current, total) => current === 0 ? total - 1 : current - 1)
+
+const autoCycleImages = (images) => setInterval(() => showNextImage(images), 1000)
+
+const showVideoPlayer = (video) => {
+    attachFavoriteButtonBehavior(video)
+
+    $('.Footer-menu-container').css('display', 'none')
+    $('#Video-player-container').css('display', 'block')
+
+    let player = $('#Video-player')
+    let url = getVideoLink(video.links)
+    player.attr('src', url)
+    player[0].load()
+}
+
+export const hideVideoPlayer = () => {
+    let player = $('#Video-player')
+    player.attr('src', null)
+    player[0].load()
+    $('.Footer-menu-container').css('display', 'flex')
+    $('#Video-player-container').css('display', 'none')
+}
 
 const attachFavoriteButtonBehavior = (entity) => {
     let {favorite} = entity
@@ -38,16 +60,12 @@ const attachFavoriteButtonBehavior = (entity) => {
     }))
 }
 
-const showVideoPlayer = (video) => {
-    attachFavoriteButtonBehavior(video)
-
-    $('.Footer-menu-container').css('display', 'none')
-    $('#Video-player-container').css('display', 'block')
-
-    let player = $('#Video-player')
-    let url = getVideoLink(video.links)
-    player.attr('src', url)
-    player[0].load()
+const attachImageCycleSwipe = (element) => {
+    const images = element.find('.Display-image')
+    element.on('touchstart', (e) => onStartSwipe(e))
+    element.on('touchend', (e) => onEndSwipe(e,
+        () => showNextImage(images),
+        () => showPrevImage(images)))
 }
 
 export const attachVideoCardHandlers = (video) => {
@@ -60,14 +78,6 @@ export const attachVideoCardHandlers = (video) => {
     let images = element.find('.Display-image')
     images[0].classList.add('current')  // show first thumbnail
     let timer
-    element.on('mouseenter', () => timer = cycleImages(images))
+    element.on('mouseenter', () => timer = autoCycleImages(images))
     element.on('mouseleave', () => clearInterval(timer))
-}
-
-export const hideVideoPlayer = () => {
-    let player = $('#Video-player')
-    player.attr('src', null)
-    player[0].load()
-    $('.Footer-menu-container').css('display', 'flex')
-    $('#Video-player-container').css('display', 'none')
 }

@@ -1,8 +1,8 @@
 console.log('mp.js was picked up')
 
+
 const MIN_SWIPE_PX = 10
 
-// TODO: use jQuery selectors throughout
 let touchStart = 0, touchEnd = 0
 export const onStartSwipe = (e) => {
     touchStart = e.changedTouches[0].screenX

@@ -7,6 +7,17 @@ import {getState, setState} from "./mp.state.js";
 console.log('mp.image.js was picked up')
 
 
+const getDataUrl = (entity) => entity.links.find(link => link.rel === 'data')?.href
+
+const getFavoriteUrl = (entity) => entity.links.find(link => link.rel === 'favorite')?.href
+
+const getLinksArray = (_links) => {
+    return Object.entries(_links).map((link) => ({
+        rel: link[0],
+        href: link[1].href
+    }))
+}
+
 const setFavoriteButtonState = (isFav) => {
     const favButton = $('#Toggle-image-favorite-button')
     isFav ? favButton.addClass('favorite') :
@@ -23,19 +34,6 @@ const updatePageCounter = (pages) => {
     } else {
         pageCounter.css('visibility', 'hidden')
     }
-}
-
-const updateViewerState = () => {
-    let {
-        url,
-        isFav,
-        favUrl,
-        pages
-    } = getState()
-    // set viewer image
-    $('#image-viewer-display').css('background-image', `url(${url})`)
-    setFavoriteButtonState(isFav, favUrl)
-    updatePageCounter(pages)
 }
 
 const createComicState = (url, prev, pages) => {
@@ -60,6 +58,19 @@ const createPictureState = (prevPicture) => {
         favUrl: getFavoriteUrl(prevPicture),
         pages: null,
     }
+}
+
+const updateViewerState = () => {
+    let {
+        url,
+        isFav,
+        favUrl,
+        pages
+    } = getState()
+    // set viewer image
+    $('#image-viewer-display').css('background-image', `url(${url})`)
+    setFavoriteButtonState(isFav, favUrl)
+    updatePageCounter(pages)
 }
 
 const cycleImage = (nextComic, nextPicture) => {
@@ -94,18 +105,11 @@ const showNextImage = () => {
     )
 }
 
-const getDataUrl = (entity) => entity.links.find(link => link.rel === 'data')?.href
-
-const getFavoriteUrl = (entity) => entity.links.find(link => link.rel === 'favorite')?.href
-
 const onShowImageViewer = (id, isComic) => {
     // prevent body scroll
     $('body').css('overflow', 'hidden')
-
     // display viewer
-    const container = $('#image-viewer-container')
-    container.css('display', 'block')
-    attachImageCycleSwipe(container)
+    $('#image-viewer-container').css('display', 'block')
 
     if (isComic) {    // comic display
         let comic = fetchComic(id)
@@ -142,13 +146,6 @@ const onHideImageViewer = () => {
     container.css('display', 'none')
 }
 
-const getLinksArray = (_links) => {
-    return Object.entries(_links).map((link) => ({
-        rel: link[0],
-        href: link[1].href
-    }))
-}
-
 const onFavoriteImage = async () => {
     const favButton = $('#Toggle-image-favorite-button')
 
@@ -180,6 +177,8 @@ export const attachImageHandlers = (image) => {
 
 export const attachImageViewerHandlers = () => {
     const  container = $('#image-viewer-container')
+    attachImageCycleSwipe(container)
+
     $('#Image-viewer-close-button').on('click', () => onHideImageViewer())
     $('#Toggle-image-favorite-button').on('click tap', () => onFavoriteImage())
     $(document).on('keydown', (e) => {
@@ -192,9 +191,8 @@ export const attachImageViewerHandlers = () => {
 }
 
 export const attachImageCycleSwipe = (element) => {
-    let images = element.find('.Display-image')
     element.on('touchstart', (e) => onStartSwipe(e))
     element.on('touchend', (e) => onEndSwipe(e,
-        () => showNextImage(images),
-        () => showPrevImage(images)))
+        () => showNextImage(),
+        () => showPrevImage()))
 }
