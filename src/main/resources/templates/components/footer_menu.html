@@ -43,6 +43,7 @@
         import {
             onShowSearchModal,
             onHideSearchModal,
+            setupSelectedNavItem,
         } from "/js/mp.js";
 
         $(() => {
@@ -50,6 +51,7 @@
             $(document).keyup(e => {
                 if (e.key === 'Escape') onHideSearchModal()
             })
+            setupSelectedNavItem()
         })
     </script>
 </div>
