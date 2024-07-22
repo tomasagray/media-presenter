@@ -13,13 +13,13 @@
         <a href="/favorites" id="favorites-link">
             <img alt="Favorites" src="/img/icon/not_favorite/not_favorite_64.png"/>
         </a>
-        <a href="/videos/latest" id="videos-link">
+        <a href="/videos/random" id="videos-link">
             <img alt="Video" src="/img/icon/videos_unselected/videos_unselected_64.png"/>
         </a>
-        <a href="/pictures/latest" id="pictures-link">
+        <a href="/pictures/random" id="pictures-link">
             <img alt="Pictures" src="/img/icon/pictures_unselected/pictures_unselected_64.png"/>
         </a>
-        <a href="/comics/latest" id="comics-link">
+        <a href="/comics/random" id="comics-link">
             <img alt="Comics" src="/img/icon/comics_unselected/comics_unselected_64.png"/>
         </a>
         <button class="Footer-menu-button" id="Search-modal-button">
@@ -43,33 +43,15 @@
         import {
             onShowSearchModal,
             onHideSearchModal,
+            setupSelectedNavItem,
         } from "/js/mp.js";
 
         $(() => {
             $('#Search-modal-button').click(onShowSearchModal)
-
-            let url = window.location.href
-            let match = url.match(/home|videos|pictures|comics/)
-            if (match) {
-                let key = match[0]
-                let selector = `${key}-link`
-                document.getElementById(selector).innerHTML =
-                    `<img alt="${key}" src="/img/icon/${key}_selected/${key}_selected_64.png" />`
-            } else if (url.match(/favorites/)) {
-                $('#favorites-link').html(
-                    '<img alt="Favorites" src="/img/icon/favorite/favorite_64.png" />'
-                )
-            } else {
-                $('#home-link').html(
-                    '<img alt="Home" src="/img/icon/home_selected/home_selected_64.png" />'
-                )
-            }
-
             $(document).keyup(e => {
-                if (e.key === 'Escape') {
-                    onHideSearchModal()
-                }
-            });
+                if (e.key === 'Escape') onHideSearchModal()
+            })
+            setupSelectedNavItem()
         })
     </script>
 </div>

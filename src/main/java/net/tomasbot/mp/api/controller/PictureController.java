@@ -65,7 +65,7 @@ public class PictureController {
       @RequestParam(name = "size", defaultValue = "15") int size, @NotNull Model model) {
     List<UserImageView> pictures = pictureService.getRandomUserPictures(size);
     CollectionModel<PictureResource> resources = modeller.toCollectionModel(pictures);
-    model.addAttribute("images", resources);
+    model.addAttribute("images", resources.getContent());
     model.addAttribute("page_title", "Pictures");
     addSortLinks(model);
     return "image/image_list";
@@ -75,7 +75,7 @@ public class PictureController {
   public String getFavoritePictures(@NotNull Model model) {
     Collection<UserImageView> favorites = pictureService.getFavoritePictures();
     CollectionModel<PictureResource> resources = modeller.toCollectionModel(favorites);
-    model.addAttribute("images", resources);
+    model.addAttribute("images", resources.getContent());
     model.addAttribute("page_title", "Favorite Pictures");
     addSortLinks(model);
     return "image/image_list";

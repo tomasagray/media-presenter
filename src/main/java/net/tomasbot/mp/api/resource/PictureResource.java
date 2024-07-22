@@ -38,7 +38,6 @@ public class PictureResource extends ImageResource<PictureResource> {
 
     @Override
     public @NotNull PictureResource toModel(@NotNull UserImageView entity) {
-
       PictureResource model = instantiateModel(entity);
       UUID id = entity.getId();
 

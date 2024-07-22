@@ -7,30 +7,10 @@
 <body>
 <div class="Image-viewer-container" data-th-fragment="image-viewer" id="image-viewer-container">
     <script data-th-inline="javascript" type="module">
-        import {
-            onHideImageViewer,
-            showPrevImage,
-            showNextImage,
-        } from "/js/mp.js";
+        import {attachImageViewerHandlers} from "/js/mp.image.js";
 
         $(() => {
-            // attach event handlers
-            $('#Image-viewer-close-button').on('click', () => onHideImageViewer())
-            $('#Toggle-image-favorite-button').on('click',
-                () => alert('TODO: Implement Picture, Comic Book favorite action'))
-            document.addEventListener('keydown', (e) => {
-                let container = document.querySelector('#image-viewer-container')
-                let display = container.style.display
-                if (display && display !== 'none') {
-                    let images = container.querySelectorAll('.Display-image')
-                    if (e.key === 'ArrowLeft') {
-                        showPrevImage(images)
-                    }
-                    if (e.key === 'ArrowRight') {
-                        showNextImage(images)
-                    }
-                }
-            })
+            attachImageViewerHandlers()
         })
     </script>
     <div class="Viewer-controls-container">
@@ -47,9 +27,12 @@
                 <span></span>
             </span>
         </button>
-        <div id="Page-counter">the word null</div>
+        <div id="Page-counter"></div>
     </div>
     <div class="Image-viewer" id="image-viewer">
+        <div id="image-viewer-display"
+             style="display: block; position: absolute; top: 0; left: 0;
+              width: 100%; height: 100%; background-position: center; background-size: cover"></div>
     </div>
 </div>
 </body>

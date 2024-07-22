@@ -43,21 +43,18 @@ public class ComicBookController {
     Page<UserComicBookView> comics = comicBookService.getLatestUserComics(page, size);
     setAttributes(model, comics);
     model.addAttribute("page_title", "Latest Comics");
+    if (comics.hasPrevious())
+      model.addAttribute("prev_page", comics.previousPageable().getPageNumber());
+    if (comics.hasNext()) model.addAttribute("next_page", comics.nextPageable().getPageNumber());
     addSortLinks(model);
     return "image/comic_list";
   }
 
   private void setAttributes(@NotNull Model model, @NotNull Page<UserComicBookView> page) {
     List<ComicBookResource> resources = page.get().map(modeller::toModel).toList();
-    model.addAttribute("images", resources);
+    model.addAttribute("comics", resources);
     model.addAttribute("current_page", Math.max(page.getNumber() + 1, 1));
     model.addAttribute("total_pages", page.getTotalPages());
-    if (page.hasPrevious()) {
-      model.addAttribute("prev_page", page.previousPageable().getPageNumber());
-    }
-    if (page.hasNext()) {
-      model.addAttribute("next_page", page.nextPageable().getPageNumber());
-    }
   }
 
   @GetMapping(value = "/all/paged", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,7 +70,7 @@ public class ComicBookController {
       @RequestParam(name = "count", defaultValue = "15") int count, @NotNull Model model) {
     List<UserComicBookView> comics = comicBookService.getRandomUserComics(count);
     CollectionModel<ComicBookResource> resources = modeller.toCollectionModel(comics);
-    model.addAttribute("images", resources);
+    model.addAttribute("comics", resources.getContent());
     model.addAttribute("page_title", "Comic Books");
     addSortLinks(model);
     return "image/comic_list";
@@ -83,7 +80,7 @@ public class ComicBookController {
   public String getFavoriteComics(@NotNull Model model) {
     Collection<UserComicBookView> favorites = comicBookService.getFavoriteComics();
     CollectionModel<ComicBookResource> resources = modeller.toCollectionModel(favorites);
-    model.addAttribute("images", resources);
+    model.addAttribute("comics", resources.getContent());
     model.addAttribute("page_title", "Favorite Comic Books");
     addSortLinks(model);
     return "image/comic_list";
