@@ -57,11 +57,11 @@ public class UserPreferences {
   }
 
   public boolean isFavorite(Picture picture) {
-    return favoritePictures.contains(picture);
+    return favoritePictures.stream().map(Picture::getId).anyMatch(id -> id.equals(picture.getId()));
   }
 
   public boolean isFavorite(ComicBook comic) {
-    return favoriteComics.contains(comic);
+    return favoriteComics.stream().map(ComicBook::getId).anyMatch(id -> id.equals(comic.getId()));
   }
 
   public boolean toggleFavorite(Video video) {
