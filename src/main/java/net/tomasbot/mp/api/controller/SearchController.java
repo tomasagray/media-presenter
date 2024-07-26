@@ -57,8 +57,8 @@ public class SearchController {
         comicModeller.toCollectionModel(results.getComics());
 
     model.addAttribute("videos", videos);
-    model.addAttribute("pictures", pictures);
-    model.addAttribute("comics", comics);
+    model.addAttribute("pictures", pictures.getContent());
+    model.addAttribute("comics", comics.getContent());
     model.addAttribute("page_title", "Search results: " + query);
     model.addAttribute("total_pages", results.getTotalResults());
     return "home";
