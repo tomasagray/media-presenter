@@ -6,6 +6,7 @@
       <env name="DB_PASSWORD" value="media" />
       <env name="DB_URL" value="jdbc:h2:mem:mp_dev" />
       <env name="DB_USER" value="mp" />
+      <env name="REMEMBER_ME_KEY" value="remember_me" />
     </envs>
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
     <module name="media-presenter.main" />
