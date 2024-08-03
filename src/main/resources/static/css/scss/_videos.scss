@@ -40,5 +40,17 @@
   #Video-player {
     width: 100%;
     height: 100%;
+
+    @include rotate90;
+
+    &.rotate {
+      width: 100vh;
+      height: 100vw;
+
+      &.CCW {
+        top: -20%;
+        left: 15%;
+      }
+    }
   }
 }
