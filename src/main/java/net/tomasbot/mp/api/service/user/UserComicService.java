@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.UUID;
 import net.tomasbot.mp.api.service.ComicBookService;
 import net.tomasbot.mp.model.ComicBook;
-import net.tomasbot.mp.model.UserPreferences;
 import net.tomasbot.mp.user.UserComicBookView;
 import net.tomasbot.mp.user.UserComicBookView.UserComicModeller;
 import org.jetbrains.annotations.NotNull;
@@ -19,13 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserComicService {
 
-  private final UserService userService;
+  private final UserPreferenceService userPreferenceService;
   private final ComicBookService comicService;
   private final UserComicModeller modeller;
 
   public UserComicService(
-      UserService userService, ComicBookService comicService, UserComicModeller modeller) {
-    this.userService = userService;
+          UserPreferenceService userPreferenceService, ComicBookService comicService, UserComicModeller modeller) {
+    this.userPreferenceService = userPreferenceService;
     this.comicService = comicService;
     this.modeller = modeller;
   }
@@ -40,7 +39,7 @@ public class UserComicService {
 
   @NotNull
   private UserComicBookView getUserComicBookView(@NotNull ComicBook comic) {
-    return userService.getUserPreferences().isFavorite(comic)
+    return userPreferenceService.isFavorite(comic)
         ? modeller.toFavorite(comic)
         : modeller.toView(comic);
   }
@@ -63,15 +62,14 @@ public class UserComicService {
       throw new IllegalArgumentException("Trying to favorite non-existent Comic Book: " + comicId);
     }
     ComicBook comic = optional.get();
-    UserPreferences preferences = userService.getUserPreferences();
-    if (preferences.toggleFavorite(comic)) {
+    if (userPreferenceService.toggleFavorite(comic)) {
       return modeller.toFavorite(comic);
     }
     return modeller.toView(comic);
   }
 
   public Collection<UserComicBookView> getFavoriteComics() {
-    return userService.getUserPreferences().getFavoriteComics().stream()
+    return userPreferenceService.getCurrentUserPreferences().getFavoriteComics().stream()
         .map(this::getUserComicBookView)
         .toList();
   }

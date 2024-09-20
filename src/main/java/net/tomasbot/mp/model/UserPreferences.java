@@ -42,40 +42,6 @@ public class UserPreferences {
     this.username = username;
   }
 
-  private static <T> boolean toggleFavorite(@NotNull Collection<T> favorites, T entity) {
-    if (favorites.contains(entity)) {
-      favorites.remove(entity);
-      return false;
-    } else {
-      favorites.add(entity);
-      return true;
-    }
-  }
-
-  public boolean isFavorite(Video video) {
-    return favoriteVideos.stream().map(Video::getId).anyMatch(id -> id.equals(video.getId()));
-  }
-
-  public boolean isFavorite(Picture picture) {
-    return favoritePictures.stream().map(Picture::getId).anyMatch(id -> id.equals(picture.getId()));
-  }
-
-  public boolean isFavorite(ComicBook comic) {
-    return favoriteComics.stream().map(ComicBook::getId).anyMatch(id -> id.equals(comic.getId()));
-  }
-
-  public boolean toggleFavorite(Video video) {
-    return toggleFavorite(favoriteVideos, video);
-  }
-
-  public boolean toggleFavorite(Picture picture) {
-    return toggleFavorite(favoritePictures, picture);
-  }
-
-  public boolean toggleFavorite(ComicBook comicBook) {
-    return toggleFavorite(favoriteComics, comicBook);
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

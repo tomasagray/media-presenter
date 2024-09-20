@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import javax.sql.DataSource;
-import net.tomasbot.mp.api.service.user.UserService;
+import net.tomasbot.mp.api.service.user.UserPreferenceService;
 import net.tomasbot.mp.model.UserPreferences;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,13 +38,13 @@ public class SecurityConfig {
 
   private static final Logger LOGGER = LogManager.getLogger(SecurityConfig.class);
 
-  private final UserService userService;
+  private final UserPreferenceService userPreferenceService;
 
   @Value("#{environment.REMEMBER_ME_KEY}")
   private String REMEMBER_ME_KEY;
 
-  public SecurityConfig(UserService userService) {
-    this.userService = userService;
+  public SecurityConfig(UserPreferenceService userPreferenceService) {
+    this.userPreferenceService = userPreferenceService;
   }
 
   @Bean
@@ -71,11 +71,11 @@ public class SecurityConfig {
   private @Nullable UserDetails createUserIfNotExists(
       String username, String password, Roles role) {
     try {
-      UserPreferences preferences = userService.getUserPreferences(username);
+      UserPreferences preferences = userPreferenceService.getUserPreferences(username);
       LOGGER.info("Found existing User Preferences: {}", preferences);
       LOGGER.info("User: {} already exists; skipping creation...", username);
       return null;
-    } catch (IllegalStateException ignore) {
+    } catch (IllegalArgumentException e) {
       LOGGER.info("User: {} does not exist; creating...", username);
       return createNewUser(username, password, role);
     }
@@ -84,7 +84,7 @@ public class SecurityConfig {
   private @NotNull UserDetails createNewUser(
       @NotNull String username, @NotNull String password, @NotNull Roles role) {
     UserDetails user = User.withUsername(username).password(password).roles(role.name()).build();
-    UserDetails preferences = userService.createUserPreferences(user);
+    UserDetails preferences = userPreferenceService.createUserPreferences(user);
     LOGGER.info("Created User Preferences: {}", preferences);
     return user;
   }

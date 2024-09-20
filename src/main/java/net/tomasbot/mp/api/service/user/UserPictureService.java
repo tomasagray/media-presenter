@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 import net.tomasbot.mp.api.service.PictureService;
 import net.tomasbot.mp.model.Picture;
-import net.tomasbot.mp.model.UserPreferences;
 import net.tomasbot.mp.user.UserImageView;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
@@ -20,13 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserPictureService {
 
-  private final UserService userService;
+  private final UserPreferenceService userPreferenceService;
   private final PictureService pictureService;
   private final UserImageModeller modeller;
 
   public UserPictureService(
-      UserService userService, PictureService pictureService, UserImageModeller modeller) {
-    this.userService = userService;
+          UserPreferenceService userPreferenceService, PictureService pictureService, UserImageModeller modeller) {
+    this.userPreferenceService = userPreferenceService;
     this.pictureService = pictureService;
     this.modeller = modeller;
   }
@@ -44,7 +43,7 @@ public class UserPictureService {
   }
 
   public UserImageView getUserImageView(@NotNull Picture picture) {
-    return userService.getUserPreferences().isFavorite(picture)
+    return userPreferenceService.isFavorite(picture)
         ? modeller.toFavorite(picture)
         : modeller.toView(picture);
   }
@@ -59,15 +58,14 @@ public class UserPictureService {
       throw new IllegalArgumentException("Trying to favorite non-existent Picture: " + picId);
     }
     Picture picture = optional.get();
-    UserPreferences preferences = userService.getUserPreferences();
-    if (preferences.toggleFavorite(picture)) {
+    if (userPreferenceService.toggleFavorite(picture)) {
       return modeller.toFavorite(picture);
     }
     return modeller.toView(picture);
   }
 
   public Collection<UserImageView> getFavoritePictures() {
-    return userService.getUserPreferences().getFavoritePictures().stream()
+    return userPreferenceService.getCurrentUserPreferences().getFavoritePictures().stream()
         .map(this::getUserImageView)
         .toList();
   }

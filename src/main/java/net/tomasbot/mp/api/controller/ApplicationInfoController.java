@@ -1,5 +1,7 @@
 package net.tomasbot.mp.api.controller;
 
+import static net.tomasbot.mp.config.ApiConfig.API_ROOT;
+
 import net.tomasbot.mp.api.service.ApplicationInfoService;
 import net.tomasbot.mp.api.service.ApplicationInfoService.ApplicationInfo;
 import org.springframework.http.MediaType;
@@ -16,7 +18,7 @@ public class ApplicationInfoController {
     this.infoService = infoService;
   }
 
-  @GetMapping(value = "/application/info", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = API_ROOT + "/app-info", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ApplicationInfo getAppInfo() {
     return infoService.getApplicationInfo();
