@@ -4,8 +4,7 @@ import java.util.Optional;
 import net.tomasbot.mp.api.service.ComicBookService;
 import net.tomasbot.mp.api.service.PictureService;
 import net.tomasbot.mp.api.service.VideoService;
-import net.tomasbot.mp.model.UserData;
-import net.tomasbot.mp.model.UserPreferences;
+import net.tomasbot.mp.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -41,25 +40,43 @@ public class UserDataService {
     preferences
         .getFavoriteVideos()
         .forEach(
-            video -> {
-              UserData.Favorite favorite = new UserData.Favorite(video.getId(), video.getTitle());
-              userData.getFavoriteVideos().add(favorite);
+            videoId -> {
+              Optional<Video> videoOptional = videoService.getVideo(videoId);
+              if (videoOptional.isPresent()) {
+                Video video = videoOptional.get();
+                UserData.Favorite favorite = new UserData.Favorite(videoId, video.getTitle());
+                userData.getFavoriteVideos().add(favorite);
+              } else
+                throw new IllegalArgumentException(
+                    "Cannot get user data; invalid Video favorite: " + videoId);
             });
     // add picture favs
     preferences
         .getFavoritePictures()
         .forEach(
-            pic -> {
-              UserData.Favorite favorite = new UserData.Favorite(pic.getId(), pic.getTitle());
-              userData.getFavoritePictures().add(favorite);
+            pictureId -> {
+              Optional<Picture> pictureOptional = pictureService.getPicture(pictureId);
+              if (pictureOptional.isPresent()) {
+                Picture picture = pictureOptional.get();
+                UserData.Favorite favorite = new UserData.Favorite(pictureId, picture.getTitle());
+                userData.getFavoritePictures().add(favorite);
+              } else
+                throw new IllegalArgumentException(
+                    "Cannot get user data; invalid Picture favorite: " + pictureId);
             });
     // add comic favs
     preferences
         .getFavoriteComics()
         .forEach(
-            comic -> {
-              UserData.Favorite favorite = new UserData.Favorite(comic.getId(), comic.getTitle());
-              userData.getFavoriteComics().add(favorite);
+            comicId -> {
+              Optional<ComicBook> comicOptional = comicService.getComicBook(comicId);
+              if (comicOptional.isPresent()) {
+                ComicBook comic = comicOptional.get();
+                UserData.Favorite favorite = new UserData.Favorite(comicId, comic.getTitle());
+                userData.getFavoriteComics().add(favorite);
+              } else
+                throw new IllegalArgumentException(
+                    "Cannot get user data; invalid ComicBook favorite: " + comicId);
             });
     return userData;
   }
@@ -68,7 +85,6 @@ public class UserDataService {
     final String username = userData.getUsername();
     logger.info("Importing UserPreferences for user: {}", username);
 
-    UserPreferences preferences = preferenceService.getUserPreferences(username);
     userData.getFavoriteVideos().stream()
         .map(UserData.Favorite::id)
         .map(videoService::getVideo)

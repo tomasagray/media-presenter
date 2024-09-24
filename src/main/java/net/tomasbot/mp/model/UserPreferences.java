@@ -1,10 +1,6 @@
 package net.tomasbot.mp.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.Collection;
+import jakarta.persistence.*;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -12,12 +8,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.ToString.Exclude;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Setter
@@ -34,9 +28,9 @@ public class UserPreferences {
 
   private String username;
 
-  @OneToMany @Exclude private Set<Video> favoriteVideos;
-  @OneToMany @Exclude private Set<Picture> favoritePictures;
-  @OneToMany @Exclude private Set<ComicBook> favoriteComics;
+  @ElementCollection @ToString.Exclude private Set<UUID> favoriteVideos;
+  @ElementCollection @ToString.Exclude private Set<UUID> favoritePictures;
+  @ElementCollection @ToString.Exclude private Set<UUID> favoriteComics;
 
   public UserPreferences(String username) {
     this.username = username;

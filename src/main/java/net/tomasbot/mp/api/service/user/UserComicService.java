@@ -70,6 +70,9 @@ public class UserComicService {
 
   public Collection<UserComicBookView> getFavoriteComics() {
     return userPreferenceService.getCurrentUserPreferences().getFavoriteComics().stream()
+        .map(comicService::getComicBook)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .map(this::getUserComicBookView)
         .toList();
   }

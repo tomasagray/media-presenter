@@ -66,6 +66,9 @@ public class UserPictureService {
 
   public Collection<UserImageView> getFavoritePictures() {
     return userPreferenceService.getCurrentUserPreferences().getFavoritePictures().stream()
+        .map(pictureService::getPicture)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .map(this::getUserImageView)
         .toList();
   }

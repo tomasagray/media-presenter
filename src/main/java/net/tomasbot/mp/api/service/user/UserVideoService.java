@@ -75,6 +75,9 @@ public class UserVideoService {
 
   public Collection<UserVideoView> getVideoFavorites() {
     return userPreferenceService.getCurrentUserPreferences().getFavoriteVideos().stream()
+        .map(videoService::getVideo)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .map(this::getUserVideoView)
         .toList();
   }

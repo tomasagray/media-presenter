@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.*;
+import net.tomasbot.mp.api.service.user.UserVideoService;
 import net.tomasbot.mp.model.Video;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
@@ -25,6 +26,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
   private static final Logger logger = LogManager.getLogger(VideoScanningService.class);
 
   private final VideoService videoService;
+  private final UserVideoService userVideoService;
   private final VideoFileScanner videoFileScanner;
   private final TranscodingService transcodingService;
   private final RecursiveWatcherService watcherService;
@@ -38,12 +40,14 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 
   VideoScanningService(
       VideoService videoService,
+      UserVideoService userVideoService,
       VideoFileScanner videoFileScanner,
       TranscodingService transcodingService,
       RecursiveWatcherService watcherService,
       FileUtilitiesService fileUtilitiesService,
       FileTransferWatcher transferWatcher) {
     this.videoService = videoService;
+    this.userVideoService = userVideoService;
     this.videoFileScanner = videoFileScanner;
     this.transcodingService = transcodingService;
     this.watcherService = watcherService;
@@ -162,7 +166,12 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     } else if (ENTRY_MODIFY.equals(kind)) {
       transferWatcher.watchFileTransfer(path, this::createVideo);
     } else if (ENTRY_DELETE.equals(kind)) {
-      videoService.getVideoByPath(path).forEach(videoService::deleteVideo);
+      videoService.getVideoByPath(path).forEach(this::handleDeleteVideo);
     }
+  }
+
+  private void handleDeleteVideo(Video video) {
+    userVideoService.unfavoriteForAllUsers(video);
+    videoService.deleteVideo(video);
   }
 }

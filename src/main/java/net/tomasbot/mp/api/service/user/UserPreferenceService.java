@@ -55,31 +55,28 @@ public class UserPreferenceService {
     repository.deleteById(prefId);
   }
 
-  private static <T> boolean toggleFavorite(@NotNull Collection<T> favorites, T entity) {
-    if (favorites.contains(entity)) {
-      favorites.remove(entity);
+  private static boolean toggleFavorite(@NotNull Collection<UUID> favorites, UUID id) {
+    if (favorites.contains(id)) {
+      favorites.remove(id);
       return false;
     } else {
-      favorites.add(entity);
+      favorites.add(id);
       return true;
     }
   }
 
   public boolean isFavorite(Video video) {
     return getCurrentUserPreferences().getFavoriteVideos().stream()
-        .map(Video::getId)
         .anyMatch(id -> id.equals(video.getId()));
   }
 
   public boolean isFavorite(Picture picture) {
     return getCurrentUserPreferences().getFavoritePictures().stream()
-        .map(Picture::getId)
         .anyMatch(id -> id.equals(picture.getId()));
   }
 
   public boolean isFavorite(ComicBook comic) {
     return getCurrentUserPreferences().getFavoriteComics().stream()
-        .map(ComicBook::getId)
         .anyMatch(id -> id.equals(comic.getId()));
   }
 
@@ -90,16 +87,19 @@ public class UserPreferenceService {
   public boolean setFavorite(@NotNull UserPreferences preferences, Object o) {
     logger.info("Setting {} as favorite for user: {}", o, preferences.getUsername());
     if (o instanceof Video) {
-      Set<Video> favoriteVideos = preferences.getFavoriteVideos();
-      if (!favoriteVideos.contains((Video) o)) return favoriteVideos.add((Video) o);
+      Set<UUID> favoriteVideos = preferences.getFavoriteVideos();
+      UUID videoId = ((Video) o).getId();
+      if (!favoriteVideos.contains(videoId)) return favoriteVideos.add(videoId);
       else return false;
     } else if (o instanceof Picture) {
-      Set<Picture> favoritePictures = preferences.getFavoritePictures();
-      if (!favoritePictures.contains(o)) return favoritePictures.add((Picture) o);
+      Set<UUID> favoritePictures = preferences.getFavoritePictures();
+      UUID pictureId = ((Picture) o).getId();
+      if (!favoritePictures.contains(pictureId)) return favoritePictures.add(pictureId);
       else return false;
     } else if (o instanceof ComicBook) {
-      Set<ComicBook> favoriteComics = preferences.getFavoriteComics();
-      if (!favoriteComics.contains(o)) return favoriteComics.add((ComicBook) o);
+      Set<UUID> favoriteComics = preferences.getFavoriteComics();
+      UUID comicId = ((ComicBook) o).getId();
+      if (!favoriteComics.contains(comicId)) return favoriteComics.add(comicId);
       else return false;
     } else
       throw new IllegalArgumentException("Cannot favorite unknown type: " + o.getClass().getName());
@@ -112,28 +112,31 @@ public class UserPreferenceService {
   public boolean removeFavorite(@NotNull UserPreferences preferences, Object o) {
     logger.info("Removing user [{}] favorite from {}", preferences.getUsername(), o);
     if (o instanceof Video) {
-      return preferences.getFavoriteVideos().remove((Video) o);
+      UUID videoId = ((Video) o).getId();
+      return preferences.getFavoriteVideos().remove(videoId);
     } else if (o instanceof Picture) {
-      return preferences.getFavoritePictures().remove((Picture) o);
+      UUID pictureId = ((Picture) o).getId();
+      return preferences.getFavoritePictures().remove(pictureId);
     } else if (o instanceof ComicBook) {
-      return preferences.getFavoriteComics().remove((ComicBook) o);
+      UUID comicId = ((ComicBook) o).getId();
+      return preferences.getFavoriteComics().remove(comicId);
     } else
       throw new IllegalArgumentException(
           "Cannot unfavorite unknown type: " + o.getClass().getName());
   }
 
-  public boolean toggleFavorite(Video video) {
-    Set<Video> favoriteVideos = getCurrentUserPreferences().getFavoriteVideos();
-    return toggleFavorite(favoriteVideos, video);
+  public boolean toggleFavorite(@NotNull Video video) {
+    Set<UUID> favoriteVideos = getCurrentUserPreferences().getFavoriteVideos();
+    return toggleFavorite(favoriteVideos, video.getId());
   }
 
-  public boolean toggleFavorite(Picture picture) {
-    Set<Picture> favoritePictures = getCurrentUserPreferences().getFavoritePictures();
-    return toggleFavorite(favoritePictures, picture);
+  public boolean toggleFavorite(@NotNull Picture picture) {
+    Set<UUID> favoritePictures = getCurrentUserPreferences().getFavoritePictures();
+    return toggleFavorite(favoritePictures, picture.getId());
   }
 
-  public boolean toggleFavorite(ComicBook comicBook) {
-    Set<ComicBook> favoriteComics = getCurrentUserPreferences().getFavoriteComics();
-    return toggleFavorite(favoriteComics, comicBook);
+  public boolean toggleFavorite(@NotNull ComicBook comicBook) {
+    Set<UUID> favoriteComics = getCurrentUserPreferences().getFavoriteComics();
+    return toggleFavorite(favoriteComics, comicBook.getId());
   }
 }
