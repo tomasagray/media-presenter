@@ -1,6 +1,11 @@
 package net.tomasbot.mp.api.service.user;
 
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
 import net.tomasbot.mp.api.service.ComicBookService;
 import net.tomasbot.mp.api.service.PictureService;
 import net.tomasbot.mp.api.service.VideoService;
@@ -33,6 +38,18 @@ public class UserDataService {
     this.comicService = comicService;
   }
 
+  private static <T> @NotNull Collection<T> lookupFavorite(
+      @NotNull Function<UUID, Optional<? extends T>> idLookup,
+      @NotNull Function<Path, Collection<T>> pathLookup,
+      @NotNull UserData.Favorite fav) {
+    Optional<? extends T> optional = idLookup.apply(fav.id());
+    if (optional.isPresent()) {
+      return List.of(optional.get());
+    } else {
+      return pathLookup.apply(fav.path());
+    }
+  }
+
   public UserData getUserData(String username) {
     UserPreferences preferences = preferenceService.getUserPreferences(username);
     final UserData userData = new UserData(username);
@@ -44,7 +61,8 @@ public class UserDataService {
               Optional<Video> videoOptional = videoService.getVideo(videoId);
               if (videoOptional.isPresent()) {
                 Video video = videoOptional.get();
-                UserData.Favorite favorite = new UserData.Favorite(videoId, video.getTitle());
+                UserData.Favorite favorite =
+                    new UserData.Favorite(videoId, video.getTitle(), video.getFile());
                 userData.getFavoriteVideos().add(favorite);
               } else
                 throw new IllegalArgumentException(
@@ -58,7 +76,9 @@ public class UserDataService {
               Optional<Picture> pictureOptional = pictureService.getPicture(pictureId);
               if (pictureOptional.isPresent()) {
                 Picture picture = pictureOptional.get();
-                UserData.Favorite favorite = new UserData.Favorite(pictureId, picture.getTitle());
+                Path path = Path.of(picture.getUri());
+                UserData.Favorite favorite =
+                    new UserData.Favorite(pictureId, picture.getTitle(), path);
                 userData.getFavoritePictures().add(favorite);
               } else
                 throw new IllegalArgumentException(
@@ -72,7 +92,8 @@ public class UserDataService {
               Optional<ComicBook> comicOptional = comicService.getComicBook(comicId);
               if (comicOptional.isPresent()) {
                 ComicBook comic = comicOptional.get();
-                UserData.Favorite favorite = new UserData.Favorite(comicId, comic.getTitle());
+                UserData.Favorite favorite =
+                    new UserData.Favorite(comicId, comic.getTitle(), comic.getLocation());
                 userData.getFavoriteComics().add(favorite);
               } else
                 throw new IllegalArgumentException(
@@ -83,27 +104,41 @@ public class UserDataService {
 
   public void importUserData(@NotNull UserData userData) {
     final String username = userData.getUsername();
+    validateImportRequest(username);
+
     logger.info("Importing UserPreferences for user: {}", username);
 
-    userData.getFavoriteVideos().stream()
-        .map(UserData.Favorite::id)
-        .map(videoService::getVideo)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .forEach(preferenceService::setFavorite);
-    userData.getFavoritePictures().stream()
-        .map(UserData.Favorite::id)
-        .map(pictureService::getPicture)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .forEach(preferenceService::setFavorite);
-    userData.getFavoriteComics().stream()
-        .map(UserData.Favorite::id)
-        .map(comicService::getComicBook)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .forEach(preferenceService::setFavorite);
+    setFavorites(
+        userData.getFavoriteVideos(), videoService::getVideo, videoService::getVideoByPath);
+    setFavorites(
+        userData.getFavoritePictures(),
+        pictureService::getPicture,
+        pictureService::getPictureByPath);
+    setFavorites(
+        userData.getFavoriteComics(), comicService::getComicBook, comicService::getComicBooksAt);
 
     logger.info("Successfully imported UserPreferences for user: {}", username);
+  }
+
+  private <T> void setFavorites(
+      @NotNull Collection<UserData.Favorite> favorites,
+      @NotNull Function<UUID, Optional<? extends T>> idLookup,
+      @NotNull Function<Path, Collection<T>> pathLookup) {
+    favorites.stream()
+        .map(fav -> lookupFavorite(idLookup, pathLookup, fav))
+        .flatMap(Collection::stream)
+        .forEach(preferenceService::setFavorite);
+  }
+
+  private void validateImportRequest(@NotNull String username) {
+    UserPreferences currentUserPreferences = preferenceService.getCurrentUserPreferences();
+    String currentUsername = currentUserPreferences.getUsername();
+    if (!username.equals(currentUsername)) {
+      String msg =
+          String.format(
+              "%s is attempting to import user data from another user: %s",
+              currentUsername, username);
+      throw new SecurityException(msg);
+    }
   }
 }

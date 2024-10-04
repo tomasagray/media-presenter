@@ -50,4 +50,11 @@ public class _GlobalExceptionHandler {
   public String handleBadUrl(@NotNull MalformedURLException e) {
     return handleError(e);
   }
+
+  @ExceptionHandler(SecurityException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  @ResponseBody
+  public String handleSecurityError(@NotNull SecurityException e) {
+    return handleError(e);
+  }
 }

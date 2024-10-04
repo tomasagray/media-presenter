@@ -1,5 +1,6 @@
 package net.tomasbot.mp.model;
 
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserData {
 
-  public record Favorite(UUID id, String title) {}
+  public record Favorite(UUID id, String title, Path path) {}
 
   private String username;
 
