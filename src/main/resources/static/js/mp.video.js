@@ -1,4 +1,4 @@
-import {onEndSwipe, onStartSwipe, toggleFavorite} from "./mp.js";
+import {getViewportDimensions, onEndSwipe, onStartSwipe, toggleFavorite} from "./mp.js";
 
 
 console.log('mp.video.js was picked up')
@@ -26,6 +26,27 @@ const showPrevImage = (images) =>
 
 const autoCycleImages = (images) => setInterval(() => showNextImage(images), 1000)
 
+$(window).resize(() => {
+    let display = $('#Video-player-container').css('display')
+    if (display === 'block') adjustVideoPlayerOrientation()
+})
+
+let videoWidth, videoHeight = 0
+
+const adjustVideoPlayerOrientation = () => {
+    const player = $('#Video-player')
+    let {width: vw, height: vh} = getViewportDimensions()
+    if (vw > vh && videoHeight > videoWidth) {  // landscape
+        player.removeClass('CW')
+        player.addClass('rotate CCW')
+    } else if (vh > vw && videoWidth > videoHeight) {   // portrait
+        player.removeClass('CCW')
+        player.addClass('rotate CW')
+    } else {
+        player.removeClass('rotate CW CCW')
+    }
+}
+
 const showVideoPlayer = (video) => {
     attachFavoriteButtonBehavior(video)
 
@@ -33,6 +54,11 @@ const showVideoPlayer = (video) => {
     $('#Video-player-container').css('display', 'block')
 
     let player = $('#Video-player')
+    player.on('loadedmetadata', (e) => {
+        videoWidth = e.target.videoWidth
+        videoHeight = e.target.videoHeight
+        adjustVideoPlayerOrientation()
+    })
     let url = getVideoLink(video.links)
     player.attr('src', url)
     player[0].load()

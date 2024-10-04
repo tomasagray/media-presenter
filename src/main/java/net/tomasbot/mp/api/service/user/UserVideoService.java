@@ -22,13 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserVideoService {
 
   private final VideoService videoService;
-  private final UserService userService;
+  private final UserPreferenceService userPreferenceService;
   private final UserVideoModeller videoModeller;
 
   public UserVideoService(
-      VideoService videoService, UserService userService, UserVideoModeller videoModeller) {
+      VideoService videoService,
+      UserPreferenceService userPreferenceService,
+      UserVideoModeller videoModeller) {
     this.videoService = videoService;
-    this.userService = userService;
+    this.userPreferenceService = userPreferenceService;
     this.videoModeller = videoModeller;
   }
 
@@ -41,16 +43,15 @@ public class UserVideoService {
   }
 
   public Optional<UserVideoView> getUserVideo(@NotNull UUID videoId) {
-    return videoService.getById(videoId).map(this::getUserVideoView);
+    return videoService.getVideo(videoId).map(this::getUserVideoView);
   }
 
   public List<UserVideoView> getRandomUserVideos(int count) {
     return videoService.getRandom(count).stream().map(this::getUserVideoView).toList();
   }
 
-  private UserVideoView getUserVideoView(@NotNull Video video) {
-    UserPreferences preferences = userService.getUserPreferences();
-    return preferences.isFavorite(video)
+  public UserVideoView getUserVideoView(@NotNull Video video) {
+    return userPreferenceService.isFavorite(video)
         ? videoModeller.toFavorite(video)
         : videoModeller.toView(video);
   }
@@ -60,25 +61,35 @@ public class UserVideoService {
   }
 
   public UserVideoView toggleVideoFavorite(@NotNull UUID videoId) {
-    Optional<Video> optional = videoService.getById(videoId);
+    Optional<Video> optional = videoService.getVideo(videoId);
     if (optional.isEmpty()) {
       throw new IllegalArgumentException(
           "Trying to set favorite on non-existent Video: " + videoId);
     }
     Video video = optional.get();
-    UserPreferences preferences = userService.getUserPreferences();
-    if (preferences.toggleFavorite(video)) {
+    if (userPreferenceService.toggleFavorite(video)) {
       return videoModeller.toFavorite(video);
     }
     return videoModeller.toView(video);
   }
 
   public Collection<UserVideoView> getVideoFavorites() {
-    return userService.getUserPreferences().getFavoriteVideos().stream()
+    return userPreferenceService.getCurrentUserPreferences().getFavoriteVideos().stream()
+        .map(videoService::getVideo)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .map(this::getUserVideoView)
         .toList();
   }
 
+  public void unfavoriteForAllUsers(Video video) {
+    List<UserPreferences> allPreferences = userPreferenceService.getAllUserPreferences();
+    for (UserPreferences preferences : allPreferences) {
+      userPreferenceService.removeFavorite(preferences, video);
+    }
+  }
+
+  // === Passthru methods ===
   public UrlResource getVideoData(@NotNull UUID videoId) throws MalformedURLException {
     return videoService.getVideoData(videoId);
   }

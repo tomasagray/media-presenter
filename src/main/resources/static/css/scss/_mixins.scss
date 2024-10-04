@@ -61,3 +61,24 @@
   color: #ccc;
   background-color: rgba(0, 0, 0, .6);
 }
+
+@mixin rotate90 {
+  &.rotate {
+    position: relative;
+    width: 100vh;
+    height: 100vw;
+
+    &.CCW {
+      transform: rotate(-90deg);
+      top: -30%;
+      left: 20%;
+    }
+
+    &.CW {
+      transform: rotate(90deg);
+      height: 100%;
+      width: 100%;
+      left: -5%;
+    }
+  }
+}

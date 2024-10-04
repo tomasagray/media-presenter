@@ -1,4 +1,4 @@
-import {onEndSwipe, onStartSwipe, toggleFavorite} from "./mp.js";
+import {getViewportDimensions, onEndSwipe, onStartSwipe, toggleFavorite} from "./mp.js";
 import {fetchImageAt, fetchImageAtPosition, fetchImageById, fetchPictureCount, loadImage} from "./mp.image_repo.js";
 import {fetchComic, fetchComicForPage, getComicPages, isComic, loadComic} from "./mp.comic_repo.js";
 import {getState, setState} from "./mp.state.js";
@@ -60,6 +60,33 @@ const createPictureState = (prevPicture) => {
     }
 }
 
+$(window).resize(() => {
+    let display = $('#image-viewer-container').css('display')
+    if (display === 'block') updateViewerState()
+})
+
+const adjustViewerOrientation = (url) => {
+    let img = new Image()
+    img.onload = () => {
+        const viewer = $('#image-viewer')
+        const viewerDisplay = $('#image-viewer-display')
+        let {width: vw, height: vh} = getViewportDimensions()
+
+        if (vw > vh && img.height > img.width) {    // landscape mode
+            viewerDisplay.removeClass('CW')
+            viewerDisplay.addClass('rotate CCW')
+        } else if (vh > vw && img.width > img.height) {    // portrait mode
+            viewerDisplay.removeClass('CCW')
+            viewerDisplay.addClass('rotate CW')
+            viewer.addClass('rotateCW')
+        } else {    // reset to default
+            viewer.removeClass('rotateCW')
+            viewerDisplay.removeClass('rotate CW CCW')
+        }
+    }
+    img.src = url
+}
+
 const updateViewerState = () => {
     let {
         url,
@@ -67,6 +94,9 @@ const updateViewerState = () => {
         favUrl,
         pages
     } = getState()
+
+    adjustViewerOrientation(url)
+
     // set viewer image
     $('#image-viewer-display').css('background-image', `url(${url})`)
     setFavoriteButtonState(isFav, favUrl)

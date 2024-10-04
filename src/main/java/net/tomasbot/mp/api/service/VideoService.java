@@ -65,13 +65,13 @@ public class VideoService {
     return videoRepository.findUnprocessedVideos();
   }
 
-  public Optional<Video> getById(@NotNull UUID videoId) {
+  public Optional<Video> getVideo(@NotNull UUID videoId) {
     return videoRepository.findById(videoId);
   }
 
   public UrlResource getVideoData(@NotNull UUID videoId) throws MalformedURLException {
     logger.trace("Reading video data for: {}", videoId);
-    Optional<Video> videoOptional = getById(videoId);
+    Optional<Video> videoOptional = getVideo(videoId);
     if (videoOptional.isPresent()) {
       Video video = videoOptional.get();
       return new UrlResource(video.getFile().toUri());
@@ -91,7 +91,7 @@ public class VideoService {
   }
 
   public UrlResource getVideoThumb(@NotNull UUID videoId, @NotNull UUID thumbId) {
-    return getById(videoId)
+    return getVideo(videoId)
         .map(Video::getThumbnails)
         .map(thumbs -> thumbs.getImage(thumbId))
         .map(Image::getUri)

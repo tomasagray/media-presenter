@@ -78,3 +78,12 @@ export const toggleFavorite = async (link, done) => {
             favButton.attr('enabled', true)
         })
 }
+
+export const getViewportDimensions = () => {
+    let width = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
+    let height = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+    return {
+        width,
+        height,
+    }
+}

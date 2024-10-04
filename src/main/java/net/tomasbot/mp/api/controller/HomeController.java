@@ -47,6 +47,12 @@ public class HomeController {
     this.comicModeller = comicModeller;
   }
 
+  private static void addMoreNavLinks(@NotNull Model model, @NotNull String link) {
+    model.addAttribute("more_videos_link", "/videos" + link);
+    model.addAttribute("more_pictures_link", "/pictures" + link);
+    model.addAttribute("more_comics_link", "/comics" + link);
+  }
+
   @GetMapping({"/", "/home"})
   public String getHomePage(@NotNull Model model) {
     List<UserVideoView> videos = videoService.getRandomUserVideos(DEFAULT_ITEM_COUNT);
@@ -55,10 +61,13 @@ public class HomeController {
     CollectionModel<PictureResource> pictureResources = pictureModeller.toCollectionModel(pictures);
     List<UserComicBookView> comics = comicBookService.getRandomUserComics(DEFAULT_ITEM_COUNT);
     CollectionModel<ComicBookResource> comicResources = comicModeller.toCollectionModel(comics);
+
+    model.addAttribute("page_title", "Home");
     model.addAttribute("videos", videoResources.getContent());
     model.addAttribute("pictures", pictureResources.getContent());
     model.addAttribute("comics", comicResources.getContent());
-    model.addAttribute("page_title", "Home");
+    addMoreNavLinks(model, "/random");
+
     return "home";
   }
 
@@ -70,10 +79,13 @@ public class HomeController {
     CollectionModel<PictureResource> pictureResources = pictureModeller.toCollectionModel(pictures);
     Collection<UserComicBookView> comics = comicBookService.getFavoriteComics();
     CollectionModel<ComicBookResource> comicResources = comicModeller.toCollectionModel(comics);
+
+    model.addAttribute("page_title", "Favorites");
     model.addAttribute("videos", videoResources.getContent());
     model.addAttribute("pictures", pictureResources.getContent());
     model.addAttribute("comics", comicResources.getContent());
-    model.addAttribute("page_title", "Favorites");
+    addMoreNavLinks(model, "/favorites");
+
     return "home";
   }
 }

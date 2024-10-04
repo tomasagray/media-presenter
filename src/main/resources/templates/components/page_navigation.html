@@ -1,32 +1,33 @@
 <div class="Page-navigation-container" data-th-fragment="page-navigation">
-    <!--/*@thymesVar id="prev_page" type="java.lang.Integer"*/-->
     <!--/*@thymesVar id="current_page" type="java.lang.Integer"*/-->
     <!--/*@thymesVar id="total_pages" type="java.lang.Integer"*/-->
-    <!--/*@thymesVar id="next_page" type="java.lang.Integer"*/-->
+    <!--/*@thymesVar id="prev_page_url" type="java.lang.String"*/-->
+    <!--/*@thymesVar id="next_page_url" type="java.lang.String"*/-->
+    <!--/*@thymesVar id="more_link" type="java.lang.String"*/-->
+
+    <!--  Previous page  -->
     <a class="Page-navigation-button"
-       data-th-href="'?page=' + ${prev_page}"
-       data-th-unless="${prev_page == null}"
+       data-th-href="${prev_page_url}"
+       data-th-unless="${prev_page_url == null}"
        href="./latest">
         <img alt="More..." src="/img/icon/page_arrow/page_arrow_32.png"
              style="transform: scaleX(-1)"/>
     </a>
+    <!--  Current page  -->
     <span data-th-unless="${current_page == null}">
         <span data-th-text="${current_page}">current page</span>
         <span style="font-weight: bolder; color: rgba(180,180,180,.5);"> / </span>
         <span data-th-text="${total_pages}"># of pages</span>
    </span>
+    <!--  Next page  -->
     <a class="Page-navigation-button"
-       data-th-href="'?page=' + ${next_page}"
-       data-th-unless="${next_page == null}"
+       data-th-href="${next_page_url}"
+       data-th-unless="${next_page_url == null}"
        href="./latest">
         <img alt="More..." src="/img/icon/page_arrow/page_arrow_32.png"/>
     </a>
-    <div class="More-link" th:if="${current_page == null}">
-        <a href="#" onclick="history.go(0); window.location.reload()">
-            <span>
-                <img alt="More" src="/img/icon/more/more_16.png"/>
-                find more
-            </span>
-        </a>
+    <div data-th-unless="${#strings.isEmpty(more_link)}">
+        <div data-th-replace="~{components/more_button::moreButton(link=${more_link})}">
+        </div>
     </div>
 </div>

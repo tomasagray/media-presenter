@@ -23,32 +23,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/videos")
 public class VideoController {
 
+  private static final String LINK_PREFIX = "/videos";
+
   private final UserVideoService videoService;
   private final VideoResource.VideoResourceModeller modeller;
+  private final NavigationLinkModeller navigationLinkModeller;
 
   public VideoController(
-      UserVideoService videoService, VideoResource.VideoResourceModeller modeller) {
+      UserVideoService videoService,
+      VideoResource.VideoResourceModeller modeller,
+      NavigationLinkModeller navigationLinkModeller) {
     this.videoService = videoService;
     this.modeller = modeller;
-  }
-
-  private static void setVideoAttributes(
-      @NotNull Model model, @NotNull Page<VideoResource> videoPage) {
-    model.addAttribute("videos", videoPage.getContent());
-    model.addAttribute("current_page", videoPage.getNumber() + 1);
-    model.addAttribute("total_pages", videoPage.getTotalPages());
-    if (videoPage.hasPrevious()) {
-      model.addAttribute("prev_page", videoPage.previousPageable().getPageNumber());
-    }
-    if (videoPage.hasNext()) {
-      model.addAttribute("next_page", videoPage.nextPageable().getPageNumber());
-    }
-  }
-
-  private static void addSortLinks(@NotNull Model model) {
-    model.addAttribute("latest_link", "/videos/latest");
-    model.addAttribute("random_link", "/videos/random");
-    model.addAttribute("fav_link", "/videos/favorites");
+    this.navigationLinkModeller = navigationLinkModeller;
   }
 
   @GetMapping({"", "/", "/latest"})
@@ -58,9 +45,12 @@ public class VideoController {
       @NotNull Model model) {
     final Page<VideoResource> videoPage =
         videoService.getLatestUserVideos(page, pageSize).map(modeller::toModel);
-    setVideoAttributes(model, videoPage);
+
     model.addAttribute("page_title", "Latest Videos");
-    addSortLinks(model);
+    model.addAttribute("videos", videoPage.getContent());
+    navigationLinkModeller.addPagingAttributes(model, videoPage);
+    navigationLinkModeller.addSortNavLinks(model, LINK_PREFIX);
+
     return "video/video_list";
   }
 
@@ -77,9 +67,12 @@ public class VideoController {
       @RequestParam(name = "count", defaultValue = "15") int count, @NotNull Model model) {
     List<UserVideoView> videos = videoService.getRandomUserVideos(count);
     CollectionModel<VideoResource> resources = modeller.toCollectionModel(videos);
-    model.addAttribute("videos", resources);
+
     model.addAttribute("page_title", "Videos");
-    addSortLinks(model);
+    model.addAttribute("videos", resources);
+    navigationLinkModeller.addSortNavLinks(model, LINK_PREFIX);
+    model.addAttribute("more_link", LINK_PREFIX + "/random");
+
     return "video/video_list";
   }
 
@@ -87,9 +80,11 @@ public class VideoController {
   public String getFavoriteVideos(@NotNull Model model) {
     Collection<UserVideoView> favorites = videoService.getVideoFavorites();
     CollectionModel<VideoResource> resources = modeller.toCollectionModel(favorites);
-    model.addAttribute("videos", resources);
+
     model.addAttribute("page_title", "Favorite Videos");
-    addSortLinks(model);
+    model.addAttribute("videos", resources);
+    navigationLinkModeller.addSortNavLinks(model, LINK_PREFIX);
+
     return "video/video_list";
   }
 
@@ -106,7 +101,6 @@ public class VideoController {
   public ResponseEntity<ResourceRegion> getVideoData(
       @PathVariable("videoId") UUID videoId, @RequestHeader HttpHeaders headers)
       throws IOException {
-
     UrlResource video = videoService.getVideoData(videoId);
     ResourceRegion region = getResourceRegion(video, headers);
     return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
@@ -118,7 +112,6 @@ public class VideoController {
   @Contract("_, _ -> new")
   private @NotNull ResourceRegion getResourceRegion(
       @NotNull UrlResource video, @NotNull HttpHeaders headers) throws IOException {
-
     long length = video.contentLength();
     Optional<HttpRange> rangeOptional = headers.getRange().stream().findFirst();
     if (rangeOptional.isPresent()) {
@@ -138,7 +131,6 @@ public class VideoController {
   @GetMapping(value = "/video/{videoId}/thumb/{thumbId}", produces = MediaType.IMAGE_JPEG_VALUE)
   public ResponseEntity<UrlResource> getThumbnail(
       @PathVariable("videoId") UUID videoId, @PathVariable("thumbId") UUID thumbId) {
-
     UrlResource thumb = videoService.getVideoThumb(videoId, thumbId);
     return ResponseEntity.ok(thumb);
   }

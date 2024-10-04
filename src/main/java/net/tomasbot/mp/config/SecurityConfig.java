@@ -1,15 +1,19 @@
 package net.tomasbot.mp.config;
 
+import static org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices.*;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import javax.sql.DataSource;
-import net.tomasbot.mp.api.service.user.UserService;
+import net.tomasbot.mp.api.service.user.UserPreferenceService;
 import net.tomasbot.mp.model.UserPreferences;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,24 +21,30 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-  private final Logger LOGGER = LogManager.getLogger(SecurityConfig.class);
+  private static final Logger LOGGER = LogManager.getLogger(SecurityConfig.class);
 
-  private final UserService userService;
+  private final UserPreferenceService userPreferenceService;
 
-  public SecurityConfig(UserService userService) {
-    this.userService = userService;
+  @Value("#{environment.REMEMBER_ME_KEY}")
+  private String REMEMBER_ME_KEY;
+
+  public SecurityConfig(UserPreferenceService userPreferenceService) {
+    this.userPreferenceService = userPreferenceService;
   }
 
   @Bean
@@ -58,13 +68,14 @@ public class SecurityConfig {
     }
   }
 
-  public UserDetails createUserIfNotExists(String username, String password, Roles role) {
+  private @Nullable UserDetails createUserIfNotExists(
+      String username, String password, Roles role) {
     try {
-      UserPreferences preferences = userService.getUserPreferences(username);
+      UserPreferences preferences = userPreferenceService.getUserPreferences(username);
       LOGGER.info("Found existing User Preferences: {}", preferences);
       LOGGER.info("User: {} already exists; skipping creation...", username);
       return null;
-    } catch (IllegalStateException ignore) {
+    } catch (IllegalArgumentException e) {
       LOGGER.info("User: {} does not exist; creating...", username);
       return createNewUser(username, password, role);
     }
@@ -72,15 +83,14 @@ public class SecurityConfig {
 
   private @NotNull UserDetails createNewUser(
       @NotNull String username, @NotNull String password, @NotNull Roles role) {
-
     UserDetails user = User.withUsername(username).password(password).roles(role.name()).build();
-    UserDetails preferences = userService.createUserPreferences(user);
+    UserDetails preferences = userPreferenceService.createUserPreferences(user);
     LOGGER.info("Created User Preferences: {}", preferences);
     return user;
   }
 
   @Bean
-  public AuthenticationFailureHandler getFailureHandler() {
+  AuthenticationFailureHandler getFailureHandler() {
     return new SimpleUrlAuthenticationFailureHandler() {
       @Override
       public void onAuthenticationFailure(
@@ -95,12 +105,22 @@ public class SecurityConfig {
   }
 
   @Bean
-  public PasswordEncoder passwordEncoder() {
+  PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
   @Bean
-  public SecurityFilterChain filterChain(@NotNull HttpSecurity http) throws Exception {
+  RememberMeServices rememberMeServices(UserDetailsService userDetailsService) {
+    RememberMeTokenAlgorithm encodingAlgorithm = RememberMeTokenAlgorithm.SHA256;
+    TokenBasedRememberMeServices rememberMe =
+        new TokenBasedRememberMeServices(REMEMBER_ME_KEY, userDetailsService, encodingAlgorithm);
+    rememberMe.setMatchingAlgorithm(RememberMeTokenAlgorithm.MD5);
+    return rememberMe;
+  }
+
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http, RememberMeServices rememberMeServices)
+      throws Exception {
     return http.csrf()
         .disable()
         .authorizeHttpRequests()
@@ -113,6 +133,7 @@ public class SecurityConfig {
         .anyRequest()
         .authenticated()
         .and()
+        .rememberMe(remember -> remember.rememberMeServices(rememberMeServices))
         .formLogin()
         .loginPage("/login")
         .loginProcessingUrl("/request_login")

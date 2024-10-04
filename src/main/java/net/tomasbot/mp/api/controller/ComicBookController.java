@@ -21,18 +21,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/comics")
 public class ComicBookController {
 
+  private static final String LINK_PREFIX = "/comics";
+
   private final UserComicService comicBookService;
   private final ComicBookModeller modeller;
+  private final NavigationLinkModeller navigationLinkModeller;
 
-  public ComicBookController(UserComicService comicBookService, ComicBookModeller modeller) {
+  public ComicBookController(
+      UserComicService comicBookService,
+      ComicBookModeller modeller,
+      NavigationLinkModeller navigationLinkModeller) {
     this.comicBookService = comicBookService;
     this.modeller = modeller;
-  }
-
-  private static void addSortLinks(@NotNull Model model) {
-    model.addAttribute("latest_link", "/comics/latest");
-    model.addAttribute("random_link", "/comics/random");
-    model.addAttribute("fav_link", "/comics/favorites");
+    this.navigationLinkModeller = navigationLinkModeller;
   }
 
   @GetMapping({"", "/", "/latest"})
@@ -41,22 +42,16 @@ public class ComicBookController {
       @RequestParam(name = "size", defaultValue = "15") int size,
       @NotNull Model model) {
     Page<UserComicBookView> comics = comicBookService.getLatestUserComics(page, size);
-    setAttributes(model, comics);
+    List<ComicBookResource> resources = comics.get().map(modeller::toModel).toList();
+
     model.addAttribute("page_title", "Latest Comics");
-    if (comics.hasPrevious())
-      model.addAttribute("prev_page", comics.previousPageable().getPageNumber());
-    if (comics.hasNext()) model.addAttribute("next_page", comics.nextPageable().getPageNumber());
-    addSortLinks(model);
+    model.addAttribute("comics", resources);
+    navigationLinkModeller.addPagingAttributes(model, comics);
+    navigationLinkModeller.addSortNavLinks(model, LINK_PREFIX);
+
     return "image/comic_list";
   }
-
-  private void setAttributes(@NotNull Model model, @NotNull Page<UserComicBookView> page) {
-    List<ComicBookResource> resources = page.get().map(modeller::toModel).toList();
-    model.addAttribute("comics", resources);
-    model.addAttribute("current_page", Math.max(page.getNumber() + 1, 1));
-    model.addAttribute("total_pages", page.getTotalPages());
-  }
-
+  
   @GetMapping(value = "/all/paged", produces = MediaType.APPLICATION_JSON_VALUE)
   public CollectionModel<ComicBookResource> getAllComicsPaged(
       @RequestParam(name = "page", defaultValue = "0") int page,
@@ -70,9 +65,12 @@ public class ComicBookController {
       @RequestParam(name = "count", defaultValue = "15") int count, @NotNull Model model) {
     List<UserComicBookView> comics = comicBookService.getRandomUserComics(count);
     CollectionModel<ComicBookResource> resources = modeller.toCollectionModel(comics);
-    model.addAttribute("comics", resources.getContent());
+
     model.addAttribute("page_title", "Comic Books");
-    addSortLinks(model);
+    model.addAttribute("comics", resources.getContent());
+    navigationLinkModeller.addSortNavLinks(model, LINK_PREFIX);
+    model.addAttribute("more_link", LINK_PREFIX + "/random");
+
     return "image/comic_list";
   }
 
@@ -80,9 +78,11 @@ public class ComicBookController {
   public String getFavoriteComics(@NotNull Model model) {
     Collection<UserComicBookView> favorites = comicBookService.getFavoriteComics();
     CollectionModel<ComicBookResource> resources = modeller.toCollectionModel(favorites);
-    model.addAttribute("comics", resources.getContent());
+
     model.addAttribute("page_title", "Favorite Comic Books");
-    addSortLinks(model);
+    model.addAttribute("comics", resources.getContent());
+    navigationLinkModeller.addSortNavLinks(model, LINK_PREFIX);
+
     return "image/comic_list";
   }
 
