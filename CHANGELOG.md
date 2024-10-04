@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - (upcoming changes)
 
+- Upcoming changes will appear here
+
+## [0.2.8] - 2024-10-03
+
+### Added
+
+- Remember me (stay logged in)
+- Import/export of user data
+
+### Fixed
+
+- All search results are now accessible
+- Error when deleting a favorited file
+- Picture favorites not correctly displayed
+
 ## [0.2.7] - 2024-07-21
 
 ### Changed
