@@ -5,13 +5,16 @@
     <title>Sort Bar</title>
 </head>
 <body>
+<!--/*@thymesVar id="is_sortable" type="java.lang.Boolean"*/-->
 <div data-th-fragment="sort-bar" class="Sort-bar">
+    <div th:if="${is_sortable}">
     <!--/*@thymesVar id="latest_link" type="java.lang.String"*/-->
     <a data-th-replace="~{components/sort_button::sortButton(link=${latest_link}, text='Latest')}"></a>
     <!--/*@thymesVar id="random_link" type="java.lang.String"*/-->
     <a data-th-replace="~{components/sort_button::sortButton(link=${random_link}, text='Random')}"></a>
     <!--/*@thymesVar id="fav_link" type="java.lang.String"*/-->
     <a data-th-replace="~{components/sort_button::sortButton(link=${fav_link}, text='Favorites')}"></a>
+    </div>
 </div>
 </body>
 </html>

@@ -21,18 +21,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("pictures")
 public class PictureController {
 
+  private static final String LINK_PREFIX = "/pictures";
+
   private final UserPictureService pictureService;
   private final PictureResourceModeller modeller;
+  private final NavigationLinkModeller navigationLinkModeller;
 
-  public PictureController(UserPictureService pictureService, PictureResourceModeller modeller) {
+  public PictureController(
+      UserPictureService pictureService,
+      PictureResourceModeller modeller,
+      NavigationLinkModeller navigationLinkModeller) {
     this.pictureService = pictureService;
     this.modeller = modeller;
-  }
-
-  private static void addSortLinks(@NotNull Model model) {
-    model.addAttribute("latest_link", "/pictures/latest");
-    model.addAttribute("random_link", "/pictures/random");
-    model.addAttribute("fav_link", "/pictures/favorites");
+    this.navigationLinkModeller = navigationLinkModeller;
   }
 
   @GetMapping({"", "/", "/latest"})
@@ -41,23 +42,14 @@ public class PictureController {
       @RequestParam(name = "size", defaultValue = "15") int size,
       @NotNull Model model) {
     Page<UserImageView> pictures = pictureService.getLatestUserPictures(page, size);
-    model.addAttribute("page_title", "Latest pictures");
-    setAttributes(model, pictures);
-    addSortLinks(model);
-    return "image/image_list";
-  }
+    List<PictureResource> pictureResources = pictures.get().map(modeller::toModel).toList();
 
-  private void setAttributes(@NotNull Model model, @NotNull Page<UserImageView> pictures) {
-    List<PictureResource> resources = pictures.get().map(modeller::toModel).toList();
-    model.addAttribute("images", resources);
-    model.addAttribute("current_page", pictures.getNumber() + 1);
-    model.addAttribute("total_pages", pictures.getTotalPages());
-    if (pictures.hasNext()) {
-      model.addAttribute("next_page", pictures.nextPageable().getPageNumber());
-    }
-    if (pictures.hasPrevious()) {
-      model.addAttribute("prev_page", pictures.previousPageable().getPageNumber());
-    }
+    model.addAttribute("page_title", "Latest Pictures");
+    model.addAttribute("images", pictureResources);
+    navigationLinkModeller.addPagingAttributes(model, pictures);
+    navigationLinkModeller.addSortNavLinks(model, LINK_PREFIX);
+
+    return "image/image_list";
   }
 
   @GetMapping(value = "/random")
@@ -65,9 +57,12 @@ public class PictureController {
       @RequestParam(name = "size", defaultValue = "15") int size, @NotNull Model model) {
     List<UserImageView> pictures = pictureService.getRandomUserPictures(size);
     CollectionModel<PictureResource> resources = modeller.toCollectionModel(pictures);
-    model.addAttribute("images", resources.getContent());
+
     model.addAttribute("page_title", "Pictures");
-    addSortLinks(model);
+    model.addAttribute("images", resources.getContent());
+    navigationLinkModeller.addSortNavLinks(model, LINK_PREFIX);
+    model.addAttribute("more_link", LINK_PREFIX + "/random");
+
     return "image/image_list";
   }
 
@@ -75,9 +70,11 @@ public class PictureController {
   public String getFavoritePictures(@NotNull Model model) {
     Collection<UserImageView> favorites = pictureService.getFavoritePictures();
     CollectionModel<PictureResource> resources = modeller.toCollectionModel(favorites);
-    model.addAttribute("images", resources.getContent());
+
     model.addAttribute("page_title", "Favorite Pictures");
-    addSortLinks(model);
+    model.addAttribute("images", resources.getContent());
+    navigationLinkModeller.addSortNavLinks(model, LINK_PREFIX);
+
     return "image/image_list";
   }
 

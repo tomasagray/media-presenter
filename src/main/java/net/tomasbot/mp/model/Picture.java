@@ -6,12 +6,14 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 @Getter
 @Setter
 @ToString(callSuper = true)
 @Entity
 @NoArgsConstructor
+@Indexed
 public class Picture extends Image {
 
   @Builder(builderMethodName = "pictureBuilder")

@@ -1,6 +1,5 @@
 package net.tomasbot.mp.model;
 
-import java.util.Collection;
 import lombok.Builder;
 import lombok.Data;
 import net.tomasbot.mp.user.UserComicBookView;
@@ -11,9 +10,9 @@ import net.tomasbot.mp.user.UserVideoView;
 @Builder
 public class SearchAllResult {
 
-  private Collection<UserVideoView> videos;
-  private Collection<UserImageView> pictures;
-  private Collection<UserComicBookView> comics;
+  private SearchResults<UserVideoView> videos;
+  private SearchResults<UserImageView> pictures;
+  private SearchResults<UserComicBookView> comics;
 
   private long totalResults;
   private int offset;

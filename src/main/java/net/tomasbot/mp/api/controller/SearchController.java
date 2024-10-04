@@ -9,7 +9,12 @@ import net.tomasbot.mp.api.resource.PictureResource;
 import net.tomasbot.mp.api.resource.VideoResource;
 import net.tomasbot.mp.api.service.SearchService;
 import net.tomasbot.mp.model.SearchAllResult;
+import net.tomasbot.mp.model.SearchResults;
+import net.tomasbot.mp.user.UserComicBookView;
+import net.tomasbot.mp.user.UserImageView;
+import net.tomasbot.mp.user.UserVideoView;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,42 +30,122 @@ public class SearchController {
   private final VideoResourceModeller videoModeller;
   private final PictureResourceModeller pictureModeller;
   private final ComicBookModeller comicModeller;
+  private final NavigationLinkModeller navigationLinkModeller;
 
   public SearchController(
       SearchService searchService,
       VideoResourceModeller videoModeller,
       PictureResourceModeller pictureModeller,
-      ComicBookModeller comicModeller) {
+      ComicBookModeller comicModeller,
+      NavigationLinkModeller navigationLinkModeller) {
     this.searchService = searchService;
     this.videoModeller = videoModeller;
     this.pictureModeller = pictureModeller;
     this.comicModeller = comicModeller;
+    this.navigationLinkModeller = navigationLinkModeller;
   }
 
   @GetMapping("/all")
-  public String searchFor(
+  public String searchAllFor(
       @NotNull Model model,
       @RequestParam(value = "q", defaultValue = "") String query,
       @RequestParam(value = "offset", defaultValue = "0") int offset,
       @RequestParam(value = "limit", defaultValue = "12") int limit) {
-
-    SearchAllResult results = searchService.searchFor(query, offset, limit);
+    SearchAllResult results = searchService.searchAllFor(query, PageRequest.of(offset, limit));
     if (results.isEmpty()) {
       model.addAttribute("query", query);
       return "empty_search";
     }
 
-    CollectionModel<VideoResource> videos = videoModeller.toCollectionModel(results.getVideos());
+    SearchResults<UserVideoView> videoResults = results.getVideos();
+    SearchResults<UserImageView> pictureResults = results.getPictures();
+    SearchResults<UserComicBookView> comicResults = results.getComics();
+    CollectionModel<VideoResource> videos =
+        videoModeller.toCollectionModel(videoResults.getContent());
     CollectionModel<PictureResource> pictures =
-        pictureModeller.toCollectionModel(results.getPictures());
+        pictureModeller.toCollectionModel(pictureResults.getContent());
     CollectionModel<ComicBookResource> comics =
-        comicModeller.toCollectionModel(results.getComics());
+        comicModeller.toCollectionModel(comicResults.getContent());
 
-    model.addAttribute("videos", videos);
+    model.addAttribute("page_title", "Search results: " + query);
+    model.addAttribute("videos", videos.getContent());
     model.addAttribute("pictures", pictures.getContent());
     model.addAttribute("comics", comics.getContent());
-    model.addAttribute("page_title", "Search results: " + query);
-    model.addAttribute("total_pages", results.getTotalResults());
+
+    if (videoResults.hasNext()) model.addAttribute("more_videos_link", "/search/videos?q=" + query);
+    if (pictureResults.hasNext())
+      model.addAttribute("more_pictures_link", "/search/pictures?q=" + query);
+    if (comicResults.hasNext()) model.addAttribute("more_comics_link", "/search/comics?q=" + query);
+
     return "home";
+  }
+
+  @GetMapping("/videos")
+  public String searchVideosFor(
+      @NotNull Model model,
+      @RequestParam(value = "q", defaultValue = "") String query,
+      @RequestParam(value = "offset", defaultValue = "0") int offset,
+      @RequestParam(value = "limit", defaultValue = "12") int limit) {
+    SearchAllResult results = searchService.searchVideosFor(query, PageRequest.of(offset, limit));
+    if (results.isEmpty()) {
+      model.addAttribute("query", query);
+      return "empty_search";
+    }
+
+    SearchResults<UserVideoView> videos = results.getVideos();
+    CollectionModel<VideoResource> videoModel =
+        videoModeller.toCollectionModel(videos.getContent());
+
+    model.addAttribute("page_title", "Videos: " + query);
+    model.addAttribute("videos", videoModel);
+    navigationLinkModeller.addPagingAttributes(model, videos);
+
+    return "video/video_list";
+  }
+
+  @GetMapping("/pictures")
+  public String searchPicturesFor(
+      @NotNull Model model,
+      @RequestParam(value = "q", defaultValue = "") String query,
+      @RequestParam(value = "page", defaultValue = "0") int offset,
+      @RequestParam(value = "limit", defaultValue = "12") int limit) {
+    SearchAllResult results = searchService.searchPicturesFor(query, PageRequest.of(offset, limit));
+    if (results.isEmpty()) {
+      model.addAttribute("query", query);
+      return "empty_search";
+    }
+
+    SearchResults<UserImageView> pictures = results.getPictures();
+    CollectionModel<PictureResource> pictureModel =
+        pictureModeller.toCollectionModel(pictures.getContent());
+
+    model.addAttribute("page_title", "Pictures: " + query);
+    model.addAttribute("images", pictureModel);
+    navigationLinkModeller.addPagingAttributes(model, pictures);
+
+    return "image/image_list";
+  }
+
+  @GetMapping("/comics")
+  public String searchComicsFor(
+      @NotNull Model model,
+      @RequestParam(value = "q", defaultValue = "") String query,
+      @RequestParam(value = "page", defaultValue = "0") int offset,
+      @RequestParam(value = "limit", defaultValue = "12") int limit) {
+    SearchAllResult results = searchService.searchComicsFor(query, PageRequest.of(offset, limit));
+    if (results.isEmpty()) {
+      model.addAttribute("query", query);
+      return "empty_search";
+    }
+
+    SearchResults<UserComicBookView> comics = results.getComics();
+    CollectionModel<ComicBookResource> comicModel =
+        comicModeller.toCollectionModel(comics.getContent());
+
+    model.addAttribute("page_title", "Comic Books: " + query);
+    model.addAttribute("images", comicModel);
+    navigationLinkModeller.addPagingAttributes(model, comics);
+
+    return "image/image_list";
   }
 }

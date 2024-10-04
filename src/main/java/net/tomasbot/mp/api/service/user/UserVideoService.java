@@ -50,7 +50,7 @@ public class UserVideoService {
     return videoService.getRandom(count).stream().map(this::getUserVideoView).toList();
   }
 
-  private UserVideoView getUserVideoView(@NotNull Video video) {
+  public UserVideoView getUserVideoView(@NotNull Video video) {
     return userPreferenceService.isFavorite(video)
         ? videoModeller.toFavorite(video)
         : videoModeller.toView(video);

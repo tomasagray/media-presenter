@@ -38,7 +38,7 @@ public class UserComicService {
   }
 
   @NotNull
-  private UserComicBookView getUserComicBookView(@NotNull ComicBook comic) {
+  public UserComicBookView getUserComicBookView(@NotNull ComicBook comic) {
     return userPreferenceService.isFavorite(comic)
         ? modeller.toFavorite(comic)
         : modeller.toView(comic);
