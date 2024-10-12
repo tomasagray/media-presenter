@@ -87,3 +87,30 @@ export const getViewportDimensions = () => {
         height,
     }
 }
+
+const idleSeconds = 5
+const viewerControls = $('.Viewer-controls-container')
+let idleTimer, displayStyle
+
+const hideViewerControls = () => {
+    displayStyle = viewerControls.css('display')
+    viewerControls.fadeOut('fast')
+}
+
+export const resetIdleTimer = () => {
+    clearTimeout(idleTimer)
+    idleTimer = setTimeout(hideViewerControls, idleSeconds * 1_000)
+    viewerControls.stop().css({
+        'opacity': 1,
+        'display': displayStyle ?? 'flex',
+    })
+}
+
+// Utility methods
+export const formatSeconds = (seconds) => {
+    const date = new Date(null)
+    date.setSeconds(seconds)
+
+    let start = seconds >= 3600 ? 11 : 14
+    return date.toISOString().slice(start, 19)
+}

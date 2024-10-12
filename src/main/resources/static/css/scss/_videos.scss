@@ -53,4 +53,44 @@
       }
     }
   }
+
+  #Video-time-container {
+    position: fixed;
+    bottom: 15px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+#Video-time-controls {
+  width: 97%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.Video-time-slider {
+  background-color: rgba(140, 140, 140, .5);
+  width: 100%;
+  border: none !important;
+  border-radius: 5px;
+  box-shadow: inset 2px 3px 3px rgba(0, 0, 0, .5);
+}
+
+.Video-time-slider-handle {
+  border-radius: 50%;
+}
+
+.Video-time-indicator {
+  margin: 1rem;
+  padding: .25rem .5rem;
+  white-space: nowrap;
+  background-color: rgba(0, 0, 0, .3);
+  border-radius: 3px;
+}
+
+.Video-time-range {
+  background-color: rgba(0, 0, 0, .6);
 }

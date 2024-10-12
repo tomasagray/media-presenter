@@ -138,10 +138,16 @@ const showNextImage = () => {
 const onShowImageViewer = (id, isComic) => {
     // prevent body scroll
     $('body').css('overflow', 'hidden')
+
+    $('.Viewer-button.close').on('click', () => onHideImageViewer())
+    $('#Toggle-image-favorite-button').on('click tap', () => onFavoriteImage())
+
     // display viewer
     $('#image-viewer-container').css('display', 'block')
+    $('#image-viewer').css('display', 'block')
 
     if (isComic) {    // comic display
+        $('#Page-counter').css('display', 'block')
         let comic = fetchComic(id)
         let pages = getComicPages(comic)
         let favUrl = getFavoriteUrl(comic)
@@ -174,6 +180,8 @@ const onHideImageViewer = () => {
     $('body').css('overflow', 'revert')
     let container = $('#image-viewer-container')
     container.css('display', 'none')
+    $('.Footer-menu-container').css('display', 'flex')
+    $('#image-viewer').css('display', 'none')
 }
 
 const onFavoriteImage = async () => {
@@ -202,15 +210,12 @@ export const attachImageHandlers = (image) => {
     isComic(image) ?
         imgCard.on('click', () => onShowImageViewer(image.id, true)) :
         imgCard.on('click', () => onShowImageViewer(image.id, false))
-
 }
 
 export const attachImageViewerHandlers = () => {
     const  container = $('#image-viewer-container')
     attachImageCycleSwipe(container)
 
-    $('#Image-viewer-close-button').on('click', () => onHideImageViewer())
-    $('#Toggle-image-favorite-button').on('click tap', () => onFavoriteImage())
     $(document).on('keydown', (e) => {
         let display = container.css('display')
         if (display && display !== 'none') {

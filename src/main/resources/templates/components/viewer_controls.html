@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Viewer Controls</title>
+</head>
+<body>
+<div data-th-fragment="viewer-controls" class="Viewer-controls-container" id="Main-viewer-controls">
+    <script data-th-inline="javascript" type="module">
+        import {resetIdleTimer} from "/js/mp.js";
+
+        $(() => $(document).on('mousemove click keydown touchstart', resetIdleTimer))
+    </script>
+    <button class="Viewer-button close">
+        <img alt="Close" src="/img/icon/close_button/close_button_64.png"/>
+    </button>
+    <button class="Viewer-button Favorite-button" id="Toggle-image-favorite-button">
+        <img alt="Not favorite" class="Not-favorite"
+             id="Image-not-favorite" src="/img/icon/not_favorite/not_favorite_64.png"/>
+        <img alt="Favorite" class="Favorite"
+             id="Image-favorite" src="/img/icon/favorite/favorite_64.png"/>
+        <span class="Loading-spinner">
+                <span></span>
+                <span></span>
+            </span>
+    </button>
+    <div id="Page-counter"></div>
+</div>
+</body>
+</html>

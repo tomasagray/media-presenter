@@ -6,30 +6,21 @@
 </head>
 <body>
 <div data-th-fragment="video-player" id="Video-player-container">
-    <video autoplay controls id="Video-player" loop>
-    </video>
-    <div class="Viewer-controls-container">
-        <button class="Viewer-button" id="Video-player-close-button">
-            <img alt="Close" src="/img/icon/close_button/close_button_64.png"/>
-        </button>
-        <button class="Viewer-button Favorite-button" id="Toggle-video-favorite-button">
-            <img alt="Not favorite" class="Not-favorite"
-                 id="Video-not-favorite" src="/img/icon/not_favorite/not_favorite_64.png"/>
-            <img alt="Favorite" class="Favorite"
-                 id="Video-favorite" src="/img/icon/favorite/favorite_64.png"/>
-            <span class="Loading-spinner">
-                <span></span>
-                <span></span>
-            </span>
-        </button>
-    </div>
-    <script type="module">
-        import {hideVideoPlayer} from "/js/mp.video.js";
+    <script data-th-inline="javascript" type="module">
+        import {setupVideoPlayer} from "/js/mp.video.js";
 
-        $(() => {
-            $('#Video-player-close-button').on('click', hideVideoPlayer)
-        })
+        $(() => setupVideoPlayer())
     </script>
+    <div data-th-replace="~{components/viewer_controls::viewer-controls}"></div>
+    <video autoplay id="Video-player" loop>
+    </video>
+    <div id="Video-time-container" class="Viewer-controls-container">
+        <div id="Video-time-controls">
+            <span id="Video-current-time" class="Video-time-indicator">--:--</span>
+            <div id="Video-time-slider-control"></div>
+            <span id="Video-duration" class="Video-time-indicator">--:--</span>
+        </div>
+    </div>
 </div>
 </body>
 </html>

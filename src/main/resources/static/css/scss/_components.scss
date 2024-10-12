@@ -7,8 +7,6 @@
   justify-content: center;
   align-items: center;
   position: fixed;
-  top: 3vh;
-  right: 3vw;
   z-index: 200;
 
   .Viewer-button {
@@ -28,6 +26,11 @@
       width: 32px;
     }
   }
+}
+
+#Main-viewer-controls {
+  top: 3vh;
+  right: 3vw;
 }
 
 .Card-metadata {
@@ -112,6 +115,7 @@
 #Page-counter {
   @include card-data;
   position: revert;
+  display: none;
 }
 
 .Loading-spinner {
