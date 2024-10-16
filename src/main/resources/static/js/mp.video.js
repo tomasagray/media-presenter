@@ -3,6 +3,9 @@ import {formatSeconds, getViewportDimensions, onEndSwipe, onStartSwipe, toggleFa
 
 console.log('mp.video.js was picked up')
 
+const playIndicator = $('#Video-play-indicator')
+const playIconSrc = '/img/icon/play/play_32.png'
+const pauseIconSrc = '/img/icon/pause/pause_32.png'
 
 const getVideoLink = (links) => links?.find(link => link.rel === 'data')?.href
 
@@ -97,10 +100,20 @@ const attachImageCycleSwipe = (element) => {
         () => showPrevImage(images)))
 }
 
-const pauseUnpauseVideo = (player) => {
+const playVideo = (player) => {
+    player.trigger('play')
+    playIndicator.attr('src', pauseIconSrc)
+}
+
+const pauseVideo = (player) => {
+    player.trigger('pause')
+    playIndicator.attr('src', playIconSrc)
+}
+
+export const pauseUnpauseVideo = (player) => {
     player[0].paused ?
-        player.trigger('play') :
-        player.trigger('pause')
+        playVideo(player) :
+        pauseVideo(player)
 }
 
 export const setupVideoPlayer = () => {
@@ -143,6 +156,7 @@ export const setupVideoPlayer = () => {
     $(document).on('keyup', (e) => {
         if (e.keyCode === 32) pauseUnpauseVideo(player)
     })
+    $('#Video-play-indicator-button').on('click', () => pauseUnpauseVideo(player))
 }
 
 export const attachVideoCardHandlers = (video) => {

@@ -64,13 +64,33 @@
   }
 }
 
-#Video-time-controls {
-  width: 97%;
+#Video-time-container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
+
+  #Video-play-indicator {
+    width: 24px;
+    cursor: pointer;
+  }
+
+  #Video-time-controls {
+    width: 93%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .Video-time-indicator {
+      margin: 1rem;
+      padding: .25rem .5rem;
+      white-space: nowrap;
+      background-color: rgba(0, 0, 0, .3);
+      border-radius: 3px;
+    }
+  }
 }
 
+// jQueryUI overrides
 .Video-time-slider {
   background-color: rgba(140, 140, 140, .5);
   width: 100%;
@@ -81,14 +101,6 @@
 
 .Video-time-slider-handle {
   border-radius: 50%;
-}
-
-.Video-time-indicator {
-  margin: 1rem;
-  padding: .25rem .5rem;
-  white-space: nowrap;
-  background-color: rgba(0, 0, 0, .3);
-  border-radius: 3px;
 }
 
 .Video-time-range {
