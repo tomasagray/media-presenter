@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Card Tags</title>
+</head>
+<body>
+<div data-th-fragment="card_tags(entity)">
+    <!--/*@thymesVar id="entity" type="net.tomasbot.mp.api.resource.EntityResource"*/-->
+    <div class="Card-tags">
+        <div class="Card-icon-container">
+            <img alt="Favorite"
+                 src="/img/icon/favorite/favorite_32.png"
+                 th:if="${entity.favorite}"/>
+            <img alt="Not Favorite"
+                 src="/img/icon/not_favorite/not_favorite_32.png"
+                 th:unless="${entity.favorite}"/>
+            <img alt="Tags" src="/img/icon/tags/tags_32.png"/>
+        </div>
+        <span class="Card-tag-list">
+              <!--/*@thymesVar id="tag" type="net.tomasbot.mp.model.Tag"*/-->
+              <a class="Card-tag" data-th-each="tag : ${entity.tags}" data-th-href="@{/search/all(q=${tag.name})}"
+                 data-th-text="${tag.name}">
+                  Tag Name
+              </a>
+        </span>
+        <span class="Card-tag" th:if="${#lists.isEmpty(entity.tags)}">
+                (none)
+            </span>
+    </div>
+</div>
+</body>
+</html>

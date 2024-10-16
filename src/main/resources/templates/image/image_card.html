@@ -26,26 +26,7 @@
     </div>
     <div class="Card-metadata">
         <div class="Card-title" data-th-text="${image.title}">Title</div>
-        <div class="Card-tags">
-            <div class="Card-icon-container">
-                <img alt="Favorite"
-                     src="/img/icon/favorite/favorite_32.png"
-                     th:if="${image.favorite}"/>
-                <img alt="Not Favorite"
-                     src="/img/icon/not_favorite/not_favorite_32.png"
-                     th:unless="${image.favorite}"/>
-                <img alt="Tags" src="/img/icon/tags/tags_32.png"/>
-            </div>
-            <span class="Card-tag-list">
-                  <span class="Card-tag" data-th-each="tag : ${image.tags}"
-                        data-th-text="${tag.name}">
-                      Tags
-                  </span>
-            </span>
-            <span class="Card-tag" th:if="${#lists.isEmpty(image.tags)}">
-                (none)
-            </span>
-        </div>
+        <div data-th-replace="~{components/card_tags::card_tags(entity=${image})}">Tags</div>
     </div>
 </div>
 </body>
