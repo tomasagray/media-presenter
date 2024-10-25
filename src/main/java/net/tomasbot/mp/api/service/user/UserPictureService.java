@@ -64,6 +64,12 @@ public class UserPictureService {
     return modeller.toView(picture);
   }
 
+  public UserImageView updatePicture(@NotNull UserImageView imageView) {
+    Picture picture = (Picture) modeller.fromView(imageView);
+    Picture updated = pictureService.updatePicture(picture);
+    return modeller.toView(updated);
+  }
+
   public Collection<UserImageView> getFavoritePictures() {
     return userPreferenceService.getCurrentUserPreferences().getFavoritePictures().stream()
         .map(pictureService::getPicture)

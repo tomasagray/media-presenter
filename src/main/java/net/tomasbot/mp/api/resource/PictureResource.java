@@ -52,9 +52,23 @@ public class PictureResource extends ImageResource<PictureResource> {
       // attach links
       model.add(linkTo(methodOn(PictureController.class).getPicture(id)).withSelfRel());
       model.add(
-          linkTo(methodOn(PictureController.class).togglePictureFavorite(id)).withRel("favorite"));
-      model.add(linkTo(methodOn(PictureController.class).getPictureData(id)).withRel("data"));
+          linkTo(methodOn(PictureController.class).togglePictureFavorite(id))
+              .withRel(FAVORITE_REL));
+      model.add(linkTo(methodOn(PictureController.class).getPictureData(id)).withRel(DATA_REL));
+      model.add(linkTo(methodOn(PictureController.class).updatePicture(model)).withRel(UPDATE_REL));
       return model;
+    }
+
+    public UserImageView fromModel(@NotNull PictureResource pictureResource) {
+      UserImageView imageView = new UserImageView();
+      imageView.setId(pictureResource.getId());
+      imageView.setTitle(pictureResource.getTitle());
+      imageView.setTags(pictureResource.getTags());
+      imageView.setWidth(pictureResource.getWidth());
+      imageView.setHeight(pictureResource.getHeight());
+      imageView.setFilesize(pictureResource.getFilesize());
+      imageView.setFavorite(pictureResource.isFavorite());
+      return imageView;
     }
   }
 }

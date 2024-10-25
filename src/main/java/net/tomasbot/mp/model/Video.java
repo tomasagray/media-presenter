@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -27,7 +28,7 @@ import org.hibernate.type.SqlTypes;
 @RequiredArgsConstructor
 @Entity
 @Indexed
-public class Video {
+public class Video implements Editable {
 
   private final Timestamp added = Timestamp.from(Instant.now());
 
@@ -48,7 +49,7 @@ public class Video {
   @ManyToMany(fetch = FetchType.EAGER)
   @IndexedEmbedded
   @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
-  private Set<Tag> tags;
+  private final Set<Tag> tags = new HashSet<>();
 
   @Convert(converter = FFmpegMetadataConverter.class)
   @Column(columnDefinition = "LONGTEXT")

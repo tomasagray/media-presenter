@@ -19,8 +19,15 @@ public class _GlobalExceptionHandler {
 
   private static String handleError(@NotNull Throwable e) {
     final String message = e.getMessage();
-    logger.error(message);
+    logger.error(message, e);
     return message;
+  }
+
+  @ExceptionHandler(NullPointerException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseBody
+  public String handleNullPointer(@NotNull NullPointerException e) {
+    return handleError(e);
   }
 
   @ExceptionHandler(FileNotFoundException.class)

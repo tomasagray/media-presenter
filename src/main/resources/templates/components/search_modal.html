@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Modal</title>
+</head>
+<body>
+<div th:fragment="search-modal" class="Search-modal" id="search-modal">
+    <div class="Search-form-container">
+        <form action="/search/all" class="Search-form" method="GET">
+            <label for="search-form"></label>
+            <input id="search-form" name="q" placeholder="Search..." type="search"/>
+            <button type="submit">
+                <img alt="Search" src="/img/icon/search/search_64.png"/>
+            </button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

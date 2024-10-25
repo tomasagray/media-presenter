@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Dialog</title>
+</head>
+<body>
+<div data-th-fragment="edit-dialog">
+    <script data-th-inline="javascript" type="module">
+        import {setState} from "/js/mp.state.js";
+        import {addTag, onSaveEditDialog, clearEditDialog} from "/js/mp.js";
+
+
+        $(() => {
+            const input = $('#Tag-input')
+            $('#Tag-container').on('click', () => input.focus())
+            input.on('input', (e) => setState({
+                editedTag: e.target.value
+            }))
+            $('#Tag-editor').on('submit', (e) => {
+                e.preventDefault()
+                addTag()
+            })
+            $('#Save-button').on('click', onSaveEditDialog)
+            $('#Cancel-button').on('click', clearEditDialog)
+        })
+    </script>
+    <div class="Modal-container" id="Edit-dialog">
+        <div class="Dialog-body">
+            <div class="Dialog-section" style="margin-bottom: 1rem;">
+                <label for="Entity-title" style="display: none;">Title</label>
+                <input type="text" id="Entity-title" name="title" placeholder="Enter a title..." disabled>
+            </div>
+            <div class="Dialog-section">
+                <label>Tags</label>
+                <div id="Tag-container" class="Tag-container">
+                    <div id="Tag-list" class="Tag-list"></div>
+                    <form id="Tag-editor" action="#">
+                        <label for="Tag-input" style="display: none"></label>
+                        <input type="text" name="tag_input" id="Tag-input"/>
+                    </form>
+                </div>
+            </div>
+            <div class="Dialog-section" id="Modal-controls">
+                <button class="Save-button" id="Save-button">
+                    <span class="Save-button-label">Save</span>
+                    <span data-th-replace="~{components/loading_spinner::loading-spinner}"></span>
+                </button>
+                <button class="Cancel-button" id="Cancel-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

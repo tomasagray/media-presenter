@@ -2,6 +2,7 @@ package net.tomasbot.mp.user;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.UUID;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,6 +36,19 @@ public class UserComicBookView extends UserView {
       view.setImages(data.getImages());
       view.setTags(data.getTags());
       return view;
+    }
+
+    @Override
+    public ComicBook fromView(@NotNull UserComicBookView data) {
+      Collection<Tag> tags = data.getTags();
+      Collection<Image> pages = data.getImages();
+
+      ComicBook comicBook = new ComicBook();
+      comicBook.setId(data.getId());
+      comicBook.setTitle(data.getTitle());
+      if (tags != null) comicBook.getTags().addAll(tags);
+      if (pages != null) comicBook.getImages().addAll(pages);
+      return comicBook;
     }
   }
 }

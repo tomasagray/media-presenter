@@ -9,14 +9,11 @@
     <script data-th-inline="javascript" type="module">
         import {attachImageViewerHandlers} from "/js/mp.image.js";
 
-        $(() => {
-            attachImageViewerHandlers()
-        })
+        $(() => attachImageViewerHandlers())
     </script>
     <div class="Image-viewer" id="image-viewer">
         <div id="image-viewer-display"></div>
     </div>
-    <div data-th-replace="~{components/viewer_controls::viewer-controls}"></div>
 </div>
 </body>
 </html>

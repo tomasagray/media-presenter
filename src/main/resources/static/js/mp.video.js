@@ -1,11 +1,27 @@
-import {formatSeconds, getViewportDimensions, onEndSwipe, onStartSwipe, toggleFavorite} from "./mp.js";
+import {formatSeconds, getLinkUrl, getViewportDimensions, onEndSwipe, onStartSwipe, toggleFavorite} from "./mp.js";
+import {setState} from "./mp.state.js";
+import {fetchVideoById, loadVideo} from "./mp.video_repo.js";
 
 
 console.log('mp.video.js was picked up')
 
-const playIndicator = $('#Video-play-indicator')
 const playIconSrc = '/img/icon/play/play_32.png'
 const pauseIconSrc = '/img/icon/pause/pause_32.png'
+
+// UI components
+const footerMenu = $('#Footer-menu-container')
+const playerContainer = $('#Video-player-container')
+const player = $('#Video-player')
+const playIndicator = $('#Video-play-indicator')
+const viewerContainer = $('#Viewer-container')
+const closeViewerButton = $('#Close-viewer-button')
+const favoriteButton = $('#Toggle-favorite-button')
+// video player controls
+const playIndicatorButton = $('#Video-play-indicator-button')
+const currentTimeDisplay = $('#Video-current-time')
+const durationDisplay = $('#Video-duration')
+const slider = $('#Video-time-slider-control')
+const timeIndicators = $('.Video-time-indicator')
 
 const getVideoLink = (links) => links?.find(link => link.rel === 'data')?.href
 
@@ -30,14 +46,13 @@ const showPrevImage = (images) =>
 const autoCycleImages = (images) => setInterval(() => showNextImage(images), 1000)
 
 $(window).resize(() => {
-    let display = $('#Video-player-container').css('display')
+    let display = playerContainer.css('display')
     if (display === 'block') adjustVideoPlayerOrientation()
 })
 
 let videoWidth, videoHeight = 0
 
 const adjustVideoPlayerOrientation = () => {
-    const player = $('#Video-player')
     let {width: vw, height: vh} = getViewportDimensions()
     if (vw > vh && videoHeight > videoWidth) {  // landscape
         player.removeClass('CW')
@@ -50,24 +65,44 @@ const adjustVideoPlayerOrientation = () => {
     }
 }
 
-const hideVideoPlayer = () => {
-    $('body').css('overflow', 'revert')
-    let player = $('#Video-player')
-    player.attr('src', null)
-    player[0].load()
-    $('.Footer-menu-container').css('display', 'flex')
-    $('#Video-player-container').css('display', 'none')
+const onUpdateVideo = (updated) => {
+    loadVideo(updated)
+    setState({
+        title: updated.title,
+        tags: updated.tags,
+    })
 }
 
-const showVideoPlayer = (video) => {
+const hideVideoPlayer = () => {
+    viewerContainer.css('display', 'none')
+    footerMenu.css('display', 'flex')
+    playerContainer.css('display', 'none')
+
+    $('body').css('overflow', 'revert')
+    timeIndicators.text('--:--')
+    player.attr('src', null)
+    player[0].load()
+}
+
+const showVideoPlayer = (id) => {
+    let video = fetchVideoById(id).data
     $('body').css('overflow', 'hidden')
-    $('.Viewer-button.close').on('click', hideVideoPlayer)
+
+    closeViewerButton.on('click', hideVideoPlayer)
     attachFavoriteButtonBehavior(video)
 
-    $('.Footer-menu-container').css('display', 'none')
-    $('#Video-player-container').css('display', 'block')
+    setState({
+        id: video.id,
+        title: video.title,
+        tags: video.tags,
+        updateUrl: getLinkUrl(video, 'update'),
+        updateSuccess: onUpdateVideo,
+    })
 
-    let player = $('#Video-player')
+    footerMenu.css('display', 'none')
+    viewerContainer.css('display', 'block')
+    playerContainer.css('display', 'block')
+
     player.on('loadedmetadata', (e) => {
         videoWidth = e.target.videoWidth
         videoHeight = e.target.videoHeight
@@ -80,15 +115,14 @@ const showVideoPlayer = (video) => {
 
 const attachFavoriteButtonBehavior = (entity) => {
     let {favorite} = entity
-    let $favoriteButton = $('#Toggle-video-favorite-button')
-    let link = entity['links'].find(link => link.rel === 'favorite').href
+    let link = getLinkUrl(entity, 'favorite')
 
-    favorite ? $favoriteButton.addClass('favorite')
-        : $favoriteButton.removeClass('favorite')
-    $favoriteButton.unbind().click(() => toggleFavorite(link, (video) => {
-        video['favorite'] ?
-            $favoriteButton.addClass('favorite') :
-            $favoriteButton.removeClass('favorite')
+    favorite ? favoriteButton.addClass('favorite')
+        : favoriteButton.removeClass('favorite')
+    favoriteButton.unbind().click(() => toggleFavorite(link, (video) => {
+        video.favorite ?
+            favoriteButton.addClass('favorite') :
+            favoriteButton.removeClass('favorite')
     }))
 }
 
@@ -117,11 +151,6 @@ export const pauseUnpauseVideo = (player) => {
 }
 
 export const setupVideoPlayer = () => {
-    const player = $('#Video-player')
-    const currentTimeDisplay = $('#Video-current-time')
-    const durationDisplay = $('#Video-duration')
-    const slider = $('#Video-time-slider-control')
-
     // setup tracking bar
     slider.slider({
         range: 'min',
@@ -144,7 +173,7 @@ export const setupVideoPlayer = () => {
         let duration = Math.round(player[0].duration)
         durationDisplay.text(formatSeconds(duration))
     })
-    player.on('timeupdate', (e) => {
+    player.on('timeupdate', () => {
         const currentTime = player[0].currentTime
         const progress = (currentTime / player[0].duration) * 100
 
@@ -156,14 +185,13 @@ export const setupVideoPlayer = () => {
     $(document).on('keyup', (e) => {
         if (e.keyCode === 32) pauseUnpauseVideo(player)
     })
-    $('#Video-play-indicator-button').on('click', () => pauseUnpauseVideo(player))
+    playIndicatorButton.on('click', () => pauseUnpauseVideo(player))
 }
 
-export const attachVideoCardHandlers = (video) => {
-    let {id} = video
+export const attachVideoCardHandlers = (id) => {
     let element = $('#' + id)
     // attach event handlers
-    element.on('click', () => showVideoPlayer(video))
+    element.on('click', () => showVideoPlayer(id))
     attachImageCycleSwipe(element)
 
     let images = element.find('.Display-image')

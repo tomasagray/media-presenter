@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Viewer</title>
+</head>
+<body>
+<div data-th-fragment="viewer" id="Viewer-container" style="display: none;">
+    <div th:replace="~{components/viewer_controls::viewer-controls}"></div>
+    <div th:replace="~{video/video_player::video-player}"></div>
+    <div th:replace="~{image/image_viewer::image-viewer}"></div>
+    <div th:replace="~{components/edit_dialog::edit-dialog}"></div>
+</div>
+</body>
+</html>

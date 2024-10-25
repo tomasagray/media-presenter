@@ -2,7 +2,6 @@ package net.tomasbot.mp.api.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.List;
 import net.tomasbot.mp.model.Tag;
 import net.tomasbot.mp.model.Video;
@@ -74,6 +73,6 @@ public class VideoFileScanner implements FileMetadataScanner<Video> {
   private synchronized void setVideoTags(@NotNull Video video) {
     Path tagPath = videoStorageLocation.relativize(video.getFile());
     final List<Tag> tags = tagService.getTags(tagPath);
-    video.setTags(new HashSet<>(tags));
+    video.getTags().addAll(tags);
   }
 }

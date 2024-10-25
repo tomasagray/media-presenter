@@ -110,4 +110,12 @@ public class ComicBookController {
     UserComicBookView comic = comicBookService.toggleIsComicFavorite(comicId);
     return modeller.toModel(comic);
   }
+
+  @PatchMapping("/comic/update")
+  @ResponseBody
+  public ComicBookResource updateComicBook(@RequestBody ComicBookResource comicResource){
+    UserComicBookView comicView = modeller.fromModel(comicResource);
+    UserComicBookView updated = comicBookService.updateComic(comicView);
+    return modeller.toModel(updated);
+  }
 }

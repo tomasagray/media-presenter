@@ -19,5 +19,7 @@ public abstract class UserView {
       view.setFavorite(true);
       return view;
     }
+
+    public abstract U fromView(@NotNull S data);
   }
 }

@@ -86,13 +86,12 @@ public class ComicFileScanner implements FileMetadataScanner<ComicPage> {
         ComicBook.builder()
             .location(parent)
             .title(comicName)
-            .tags(new HashSet<>(tags)) // ensure mutable
+            //            .tags(new HashSet<>(tags)) // ensure mutable
             .build();
+    comic.getTags().addAll(tags);
     ComicBook saved = comicService.save(comic);
 
-    Set<Image> images = new HashSet<>();
-    images.add(page);
-    saved.setImages(images);
+    saved.addImage(page);
     comicService.save(saved);
     logger.info("Created new Comic Book: {}", saved);
   }

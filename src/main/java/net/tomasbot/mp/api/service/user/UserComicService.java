@@ -80,4 +80,10 @@ public class UserComicService {
   public Optional<UrlResource> getPageData(UUID pageId) {
     return comicService.getPageData(pageId);
   }
+
+  public UserComicBookView updateComic(@NotNull UserComicBookView comicView) {
+    ComicBook comicBook = modeller.fromView(comicView);
+    ComicBook updated = comicService.updateComic(comicBook);
+    return modeller.toView(updated);
+  }
 }

@@ -27,9 +27,11 @@ public class VideoService {
   private static final Logger logger = LogManager.getLogger(VideoService.class);
 
   private final VideoRepository videoRepository;
+  private final TagService tagService;
 
-  public VideoService(VideoRepository videoRepository) {
+  public VideoService(VideoRepository videoRepository, TagService tagService) {
     this.videoRepository = videoRepository;
+    this.tagService = tagService;
   }
 
   @NotNull
@@ -98,5 +100,23 @@ public class VideoService {
         .map(VideoService::toUrl)
         .map(UrlResource::new)
         .orElseThrow();
+  }
+
+  /**
+   * Update the video stored in the database. Right now, only updates tags & title
+   *
+   * @param update The updated video; assumed to be incomplete
+   * @return The updated, complete video
+   */
+  public Video updateVideo(@NotNull Video update) {
+    logger.info("Updating Video: {}", update);
+
+    final UUID videoId = update.getId();
+    return (Video)
+        videoRepository
+            .findById(videoId)
+            .map(existing -> tagService.update(existing, update))
+            .orElseThrow(
+                () -> new IllegalArgumentException("Cannot update non-existent video: " + videoId));
   }
 }

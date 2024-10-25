@@ -22,13 +22,15 @@
         <div data-th-replace="~{components/card_tags::card_tags(entity=${video})}">Tags</div>
     </div>
     <script data-th-inline="javascript" type="module">
-        import {
-            attachVideoCardHandlers,
-        } from "/js/mp.video.js";
+        import {attachVideoCardHandlers} from "/js/mp.video.js";
+        import {loadVideo} from "/js/mp.video_repo.js";
+
 
         $(() => {
             const video = [[${video}]]
-            attachVideoCardHandlers(video)
+
+            loadVideo(video)
+            attachVideoCardHandlers(video.id)
         })
     </script>
 </div>

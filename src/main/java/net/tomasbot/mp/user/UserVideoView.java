@@ -2,6 +2,7 @@ package net.tomasbot.mp.user;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.UUID;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -47,6 +48,17 @@ public class UserVideoView extends UserView {
       view.setTimestamp(data.getAdded());
       view.setDuration(getDuration(data));
       return view;
+    }
+
+    @Override
+    public Video fromView(@NotNull UserVideoView data) {
+      Collection<Tag> tags = data.getTags();
+
+      final Video video = new Video();
+      video.setId(data.getId());
+      video.setTitle(data.getTitle());
+      video.getTags().addAll(tags);
+      return video;
     }
   }
 }

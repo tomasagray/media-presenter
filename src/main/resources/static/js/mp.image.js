@@ -1,31 +1,35 @@
-import {getViewportDimensions, onEndSwipe, onStartSwipe, toggleFavorite} from "./mp.js";
+import {
+    fetchFromRepoAt,
+    getLinksArray,
+    getLinkUrl,
+    getViewportDimensions,
+    onEndSwipe,
+    onStartSwipe,
+    toggleFavorite
+} from "./mp.js";
 import {fetchImageAt, fetchImageAtPosition, fetchImageById, fetchPictureCount, loadImage} from "./mp.image_repo.js";
-import {fetchComic, fetchComicForPage, getComicPages, isComic, loadComic} from "./mp.comic_repo.js";
+import {fetchComic, fetchComicForPage, getComicPageLinks, isComic, loadComic} from "./mp.comic_repo.js";
 import {getState, setState} from "./mp.state.js";
 
 
 console.log('mp.image.js was picked up')
 
-
-const getDataUrl = (entity) => entity.links.find(link => link.rel === 'data')?.href
-
-const getFavoriteUrl = (entity) => entity.links.find(link => link.rel === 'favorite')?.href
-
-const getLinksArray = (_links) => {
-    return Object.entries(_links).map((link) => ({
-        rel: link[0],
-        href: link[1].href
-    }))
-}
+// UI components
+const viewerContainer = $('#Viewer-container')
+const closeButton = $('#Close-viewer-button')
+const favButton = $('#Toggle-favorite-button')
+const pageCounter = $('#Page-counter')
+const imageViewerContainer = $('#image-viewer-container')
+const imageViewer = $('#image-viewer')
+const viewerDisplay = $('#image-viewer-display')
+const footerMenu = $('#Footer-menu-container')
 
 const setFavoriteButtonState = (isFav) => {
-    const favButton = $('#Toggle-image-favorite-button')
     isFav ? favButton.addClass('favorite') :
         favButton.removeClass('favorite')
 }
 
 const updatePageCounter = (pages) => {
-    const pageCounter = $('#Page-counter')
     if (pages) {
         let {current, total} = pages
         let displayPage = current + 1   // 1-indexed
@@ -38,12 +42,12 @@ const updatePageCounter = (pages) => {
 
 const createComicState = (url, prev, pages) => {
     let comic = fetchComicForPage(url)
-    let comicPages = getComicPages(comic)
+    let comicPages = getComicPageLinks(comic)
     let page = comicPages[prev].href
     return {
         url: page,
         isFav: comic.favorite,
-        favLink: getFavoriteUrl(comic),
+        favLink: getLinkUrl(comic, 'favorite'),
         pages: {
             current: prev,
             total: pages.total
@@ -53,23 +57,21 @@ const createComicState = (url, prev, pages) => {
 
 const createPictureState = (prevPicture) => {
     return {
-        url: getDataUrl(prevPicture),
+        url: getLinkUrl(prevPicture, 'data'),
         isFav: prevPicture.favorite,
-        favUrl: getFavoriteUrl(prevPicture),
+        favUrl: getLinkUrl(prevPicture, 'favorite'),
         pages: null,
     }
 }
 
 $(window).resize(() => {
-    let display = $('#image-viewer-container').css('display')
+    let display = imageViewerContainer.css('display')
     if (display === 'block') updateViewerState()
 })
 
 const adjustViewerOrientation = (url) => {
     let img = new Image()
     img.onload = () => {
-        const viewer = $('#image-viewer')
-        const viewerDisplay = $('#image-viewer-display')
         let {width: vw, height: vh} = getViewportDimensions()
 
         if (vw > vh && img.height > img.width) {    // landscape mode
@@ -78,9 +80,9 @@ const adjustViewerOrientation = (url) => {
         } else if (vh > vw && img.width > img.height) {    // portrait mode
             viewerDisplay.removeClass('CCW')
             viewerDisplay.addClass('rotate CW')
-            viewer.addClass('rotateCW')
+            imageViewer.addClass('rotateCW')
         } else {    // reset to default
-            viewer.removeClass('rotateCW')
+            imageViewer.removeClass('rotateCW')
             viewerDisplay.removeClass('rotate CW CCW')
         }
     }
@@ -98,7 +100,7 @@ const updateViewerState = () => {
     adjustViewerOrientation(url)
 
     // set viewer image
-    $('#image-viewer-display').css('background-image', `url(${url})`)
+    viewerDisplay.css('background-image', `url(${url})`)
     setFavoriteButtonState(isFav, favUrl)
     updatePageCounter(pages)
 }
@@ -135,71 +137,107 @@ const showNextImage = () => {
     )
 }
 
+const getComicState = (comic) => {
+    let pages = getComicPageLinks(comic)
+    return {
+        id: comic.id,
+        title: comic.title,
+        tags: comic.tags,
+        url: pages[0].href,
+        pages: {
+            current: 0,
+            total: pages.length
+        },
+        isFav: comic.favorite ?? false,
+        favUrl: getLinkUrl(comic, 'favorite'),
+        updateUrl: getLinkUrl(comic, 'update'),
+        updateSuccess: onUpdateComic,
+    }
+}
+
+const getPictureState = (picture) => {
+    return {
+        id: picture.id,
+        title: picture.title,
+        tags: picture.tags,
+        isFav: picture.favorite,
+        pages: null,
+        url: getLinkUrl(picture, 'data'),
+        favUrl: getLinkUrl(picture, 'favorite'),
+        updateUrl: getLinkUrl(picture, 'update'),
+        updateSuccess: onUpdatePicture,
+    }
+}
+
+const onUpdatePicture = (updated) => {
+    loadImage(normalizeResponse(updated))
+    loadPictureToInterface(updated.id)
+}
+
+const onUpdateComic = (updated) => {
+    loadComic(normalizeResponse(updated))
+    loadComicToInterface(updated.id)
+}
+
+const loadPictureToInterface = (id) => {
+    let _picture = fetchImageById(id)
+    let picture = _picture.data
+    let state = getPictureState(picture)
+    setState(state)
+    updateViewerState()
+}
+
+const loadComicToInterface = (id) => {
+    pageCounter.css('display', 'block')
+    let comic = fetchComic(id)
+    let state = getComicState(comic)
+    setState(state)
+    updateViewerState()
+}
+
 const onShowImageViewer = (id, isComic) => {
     // prevent body scroll
     $('body').css('overflow', 'hidden')
 
-    $('.Viewer-button.close').on('click', () => onHideImageViewer())
-    $('#Toggle-image-favorite-button').on('click tap', () => onFavoriteImage())
+    // menu handlers
+    closeButton.on('click', () => onHideImageViewer())
+    favButton.on('click', () => onFavoriteImage())
 
     // display viewer
-    $('#image-viewer-container').css('display', 'block')
-    $('#image-viewer').css('display', 'block')
+    viewerContainer.css('display', 'block')
+    imageViewerContainer.css('display', 'block')
+    imageViewer.css('display', 'block')
+    footerMenu.css('display', 'none')
 
-    if (isComic) {    // comic display
-        $('#Page-counter').css('display', 'block')
-        let comic = fetchComic(id)
-        let pages = getComicPages(comic)
-        let favUrl = getFavoriteUrl(comic)
-        let state = {
-            url: pages[0].href,
-            isFav: comic.favorite ?? false,
-            favUrl,
-            pages: {
-                current: 0,
-                total: pages.length
-            },
-        }
-        setState(state)
-        updateViewerState()
-    } else { // picture display
-        let _picture = fetchImageById(id)
-        let picture = _picture.data
-        let state = {
-            url: getDataUrl(picture),
-            isFav: picture.favorite,
-            favUrl: getFavoriteUrl(picture),
-            pages: null,
-        }
-        setState(state)
-        updateViewerState()
-    }
+    isComic ? loadComicToInterface(id) :
+        loadPictureToInterface(id)
 }
 
 const onHideImageViewer = () => {
     $('body').css('overflow', 'revert')
-    let container = $('#image-viewer-container')
-    container.css('display', 'none')
-    $('.Footer-menu-container').css('display', 'flex')
-    $('#image-viewer').css('display', 'none')
+    viewerContainer.css('display', 'none')
+    imageViewerContainer.css('display', 'none')
+    footerMenu.css('display', 'flex')
+    imageViewer.css('display', 'none')
+}
+
+const normalizeResponse = (response) => {
+    let {_links, ...rest} = response
+    let links = getLinksArray(_links)
+    return {
+        ...rest,
+        links
+    }
 }
 
 const onFavoriteImage = async () => {
-    const favButton = $('#Toggle-image-favorite-button')
-
     let {favUrl, pages} = getState()
     let isComic = pages !== null
 
     await toggleFavorite(favUrl, (response) => {
-        let {_links, ...rest} = response
-        let links = getLinksArray(_links)
-        let data = {
-            ...rest,
-            links
-        }
-
+        let data = normalizeResponse(response)
         isComic ? loadComic(data) : loadImage(data)
-        response['favorite'] ?
+        response.favorite ?
             favButton.addClass('favorite') :
             favButton.removeClass('favorite')
     })
@@ -213,7 +251,7 @@ export const attachImageHandlers = (image) => {
 }
 
 export const attachImageViewerHandlers = () => {
-    const  container = $('#image-viewer-container')
+    const container = imageViewerContainer
     attachImageCycleSwipe(container)
 
     $(document).on('keydown', (e) => {

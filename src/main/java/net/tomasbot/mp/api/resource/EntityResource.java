@@ -11,6 +11,11 @@ import org.springframework.hateoas.RepresentationModel;
 @EqualsAndHashCode(callSuper = true)
 public abstract class EntityResource<T> extends RepresentationModel<EntityResource<T>> {
 
+  static final String DATA_REL = "data";
+  static final String THUMBNAIL_REL = "thumbnail";
+  static final String FAVORITE_REL = "favorite";
+  static final String UPDATE_REL = "update";
+
   private UUID id;
   private String title;
   private boolean favorite;
