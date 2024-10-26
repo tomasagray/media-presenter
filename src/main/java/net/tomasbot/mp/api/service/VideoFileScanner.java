@@ -24,6 +24,7 @@ public class VideoFileScanner implements FileMetadataScanner<Video> {
   private final ThumbnailService thumbnailService;
   private final TagService tagService;
   private final TranscodingService transcodingService;
+  private final InvalidFilesService invalidFilesService;
 
   @Value("${videos.storage-location}")
   private Path videoStorageLocation;
@@ -32,19 +33,20 @@ public class VideoFileScanner implements FileMetadataScanner<Video> {
       VideoService videoService,
       ThumbnailService thumbnailService,
       TagService tagService,
-      TranscodingService transcodingService) {
+      TranscodingService transcodingService,
+      InvalidFilesService invalidFilesService) {
     this.videoService = videoService;
     this.thumbnailService = thumbnailService;
     this.tagService = tagService;
     this.transcodingService = transcodingService;
+    this.invalidFilesService = invalidFilesService;
   }
 
   @Override
   @Async("fileScanner")
   public void scanFileMetadata(@NotNull Video video) {
+    final Path file = video.getFile();
     try {
-      final Path file = video.getFile();
-
       // metadata
       final FFmpegMetadata metadata = transcodingService.getVideoMetadata(video);
       List<FFmpegStream> streams = metadata.getStreams();
@@ -65,8 +67,9 @@ public class VideoFileScanner implements FileMetadataScanner<Video> {
       videoService.save(video); // ensure video has ID
       thumbnailService.generateVideoThumbnails(video);
       videoService.save(video);
-    } catch (IOException e) {
+    } catch (Throwable e) {
       logger.error("Could not scan Video metadata: {}", e.getMessage(), e);
+      invalidFilesService.addInvalidFile(file, Video.class);
     }
   }
 

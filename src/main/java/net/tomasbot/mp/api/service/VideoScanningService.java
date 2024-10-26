@@ -11,14 +11,11 @@ import java.nio.file.WatchEvent;
 import java.util.*;
 import net.tomasbot.mp.api.service.user.UserVideoService;
 import net.tomasbot.mp.model.Video;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 @Service
 public class VideoScanningService implements ConvertFileScanningService<Video> {
@@ -32,8 +29,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
   private final RecursiveWatcherService watcherService;
   private final FileUtilitiesService fileUtilitiesService;
   private final FileTransferWatcher transferWatcher;
-
-  private final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
+  private final InvalidFilesService invalidFilesService;
 
   @Value("${videos.storage-location}")
   private Path videoStorageLocation;
@@ -45,7 +41,8 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
       TranscodingService transcodingService,
       RecursiveWatcherService watcherService,
       FileUtilitiesService fileUtilitiesService,
-      FileTransferWatcher transferWatcher) {
+      FileTransferWatcher transferWatcher,
+      InvalidFilesService invalidFilesService) {
     this.videoService = videoService;
     this.userVideoService = userVideoService;
     this.videoFileScanner = videoFileScanner;
@@ -53,6 +50,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     this.watcherService = watcherService;
     this.fileUtilitiesService = fileUtilitiesService;
     this.transferWatcher = transferWatcher;
+    this.invalidFilesService = invalidFilesService;
   }
 
   private static void handleTranscodeVideoFailed(Video video, @NotNull Path converted) {
@@ -68,11 +66,6 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
   }
 
   @Override
-  public MultiValueMap<String, Path> getInvalidFiles() {
-    return new LinkedMultiValueMap<>(invalidFiles).deepCopy();
-  }
-
-  @Override
   public void scanFile(@NotNull Path file, @NotNull Collection<Path> existing) {
     try {
       fileUtilitiesService.repairFilename(file);
@@ -85,8 +78,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
       }
     } catch (Throwable e) {
       logger.error("Error scanning video: {}", e.getMessage(), e);
-      String ext = FilenameUtils.getExtension(file.toString());
-      invalidFiles.add(ext, file);
+      invalidFilesService.addInvalidFile(file, Video.class);
     }
   }
 
@@ -111,6 +103,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
       }
     } catch (Throwable e) {
       logger.error("Error scanning video file to add: {}", e.getMessage(), e);
+      invalidFilesService.addInvalidFile(file, Video.class);
     }
   }
 
@@ -170,7 +163,9 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     }
   }
 
-  private void handleDeleteVideo(Video video) {
+  private void handleDeleteVideo(@NotNull Video video) {
+    boolean invalid = invalidFilesService.deleteInvalidFile(video.getFile(), video.getClass());
+    if (invalid) logger.info("Deleted invalid video: {}", video);
     userVideoService.unfavoriteForAllUsers(video);
     videoService.deleteVideo(video);
   }
