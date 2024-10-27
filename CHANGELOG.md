@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upcoming changes will appear here
 
+## [0.2.9] - 2024-10-26
+
+### Added
+
+- Edit tags capability
+
+### Fixed
+
+- Unhandled error when scanning comics & pictures
+- Crash when performing initial search indexing
+
 ## [0.2.8] - 2024-10-03
 
 ### Added
