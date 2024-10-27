@@ -3,7 +3,6 @@ package net.tomasbot.mp.api.service;
 import static java.nio.file.StandardWatchEventKinds.*;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
@@ -18,14 +17,11 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 @Service
 public class ComicScanningService implements FileScanningService {
 
   private static final Logger logger = LogManager.getLogger(ComicScanningService.class);
-  private static final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
 
   private final ImageRepository imageRepository;
   private final ComicBookService comicService;
@@ -33,6 +29,7 @@ public class ComicScanningService implements FileScanningService {
   private final RecursiveWatcherService watcherService;
   private final FileTransferWatcher transferWatcher;
   private final FileUtilitiesService fileUtilitiesService;
+  private final InvalidFilesService invalidFilesService;
 
   @Value("${comics.location}")
   private Path comicsLocation;
@@ -43,13 +40,15 @@ public class ComicScanningService implements FileScanningService {
       ComicFileScanner comicFileScanner,
       RecursiveWatcherService watcherService,
       FileTransferWatcher transferWatcher,
-      FileUtilitiesService fileUtilitiesService) {
+      FileUtilitiesService fileUtilitiesService,
+      InvalidFilesService invalidFilesService) {
     this.imageRepository = imageRepository;
     this.comicService = comicService;
     this.comicFileScanner = comicFileScanner;
     this.watcherService = watcherService;
     this.transferWatcher = transferWatcher;
     this.fileUtilitiesService = fileUtilitiesService;
+    this.invalidFilesService = invalidFilesService;
   }
 
   @Override
@@ -59,7 +58,7 @@ public class ComicScanningService implements FileScanningService {
       logger.trace("Found Comic Book page: {}", file);
       Path parent = file.getParent();
       if (!isPathWithin(comicsLocation, parent)) {
-        throw new UncheckedIOException(new IOException("Path is not within a Comic Book: " + file));
+        throw new IOException("Path is not within a Comic Book: " + file);
       }
       if (!existing.contains(file)) {
         createComicPage(file);
@@ -68,8 +67,7 @@ public class ComicScanningService implements FileScanningService {
       }
     } catch (Throwable e) {
       logger.error("File could not be added to Comic: {}; {}", file, e.getMessage(), e);
-      String ext = FilenameUtils.getExtension(file.toString());
-      invalidFiles.add(ext, file);
+      invalidFilesService.addInvalidFile(file, ComicPage.class);
     }
   }
 
@@ -81,8 +79,9 @@ public class ComicScanningService implements FileScanningService {
               .title(FilenameUtils.getBaseName(file.toString()))
               .build();
       comicFileScanner.scanFileMetadata(page);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
+    } catch (Throwable e) {
+      logger.error("Could not scan Comic Book page: {}: {}", file, e.getMessage(), e);
+      invalidFilesService.addInvalidFile(file, ComicPage.class);
     }
   }
 
@@ -91,12 +90,7 @@ public class ComicScanningService implements FileScanningService {
     Path absChild = child.toAbsolutePath();
     return absChild.startsWith(absParent) && !absChild.equals(absParent);
   }
-
-  @Override
-  public MultiValueMap<String, Path> getInvalidFiles() {
-    return invalidFiles;
-  }
-
+  
   @Override
   public void handleFileEvent(@NotNull Path file, WatchEvent.@NotNull Kind<?> kind) {
     if (ENTRY_CREATE.equals(kind)) {
@@ -111,16 +105,9 @@ public class ComicScanningService implements FileScanningService {
     } else if (ENTRY_MODIFY.equals(kind)) {
       transferWatcher.watchFileTransfer(file, this::createComicPage);
     } else if (ENTRY_DELETE.equals(kind)) {
-      logger.info("Comic Book image was deleted: {}", file);
-      String ext = FilenameUtils.getExtension(file.toString());
-      List<Path> invalidPaths = this.getInvalidFiles().get(ext);
-      if (invalidPaths != null) {
-        boolean removed = invalidPaths.remove(file);
-        if (removed) {
-          logger.info("Deleted invalid file: {}", file);
-          return;
-        }
-      }
+      String prefix =
+          invalidFilesService.deleteInvalidFile(file, ComicPage.class) ? "Invalid " : "";
+      logger.info("{}Comic Book image was deleted: {}", prefix, file);
       handleDeletedImage(file);
     }
   }
@@ -142,7 +129,9 @@ public class ComicScanningService implements FileScanningService {
     }
   }
 
-  private void deleteImage(Image image) {
+  private void deleteImage(@NotNull Image image) {
+    invalidFilesService.deleteInvalidFile(Path.of(image.getUri()), ComicPage.class);
+
     Optional<ComicBook> comicOpt = comicService.getComicBookForPage(image);
     if (comicOpt.isPresent()) {
       ComicBook comicBook = comicOpt.get();

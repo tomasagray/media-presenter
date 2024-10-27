@@ -15,3 +15,7 @@ export const getState = () => {
         ..._state
     }
 }
+
+export const clearState = () => {
+    _state = {}
+}

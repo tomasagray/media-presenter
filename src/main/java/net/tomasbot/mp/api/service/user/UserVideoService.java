@@ -97,4 +97,10 @@ public class UserVideoService {
   public UrlResource getVideoThumb(@NotNull UUID videoId, @NotNull UUID thumbId) {
     return videoService.getVideoThumb(videoId, thumbId);
   }
+
+  public UserVideoView updateVideo(@NotNull UserVideoView videoView) {
+    Video video = videoModeller.fromView(videoView);
+    Video updated = videoService.updateVideo(video);
+    return videoModeller.toView(updated);
+  }
 }

@@ -23,7 +23,7 @@ import org.hibernate.type.SqlTypes;
 @AllArgsConstructor
 @Entity
 @Indexed
-public class Image {
+public class Image implements Editable {
 
   @ManyToMany(fetch = FetchType.EAGER)
   @IndexedEmbedded

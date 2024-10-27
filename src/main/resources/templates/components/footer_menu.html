@@ -5,8 +5,24 @@
     <title>Footer menu</title>
 </head>
 <body>
-<div class="Footer-menu-container" data-th-fragment="footer-menu">
-    <div class="Footer-menu" id="footer-menu">
+<div data-th-fragment="footer-menu">
+    <script type="module">
+        import {
+            onShowSearchModal,
+            onHideSearchModal,
+            setupSelectedNavItem,
+        } from "/js/mp.js";
+
+        $(() => {
+            $('#Search-modal-button').on('click', onShowSearchModal)
+            $(document).on('keyup', e => {
+                if (e.key === 'Escape') onHideSearchModal()
+            })
+            setupSelectedNavItem()
+        })
+    </script>
+    <div class="Footer-menu-container" id="Footer-menu-container">
+        <div class="Footer-menu" id="footer-menu">
         <a href="/" id="home-link">
             <img alt="Home" src="/img/icon/home_unselected/home_unselected_64.png"/>
         </a>
@@ -26,34 +42,8 @@
             <img alt="Search" src="/img/icon/search/search_64.png"/>
         </button>
     </div>
-    <div class="Search-modal-container" id="search-modal-container">
-        <div class="Search-modal">
-            <div class="Search-form-container" id="search-modal">
-                <form action="/search/all" class="Search-form" method="GET">
-                    <label for="search-form"></label>
-                    <input id="search-form" name="q" placeholder="Search..." type="search"/>
-                    <button type="submit">
-                        <img alt="Search" src="/img/icon/search/search_64.png"/>
-                    </button>
-                </form>
-            </div>
-        </div>
+        <div th:replace="~{components/search_modal::search-modal}"></div>
     </div>
-    <script type="module">
-        import {
-            onShowSearchModal,
-            onHideSearchModal,
-            setupSelectedNavItem,
-        } from "/js/mp.js";
-
-        $(() => {
-            $('#Search-modal-button').click(onShowSearchModal)
-            $(document).keyup(e => {
-                if (e.key === 'Escape') onHideSearchModal()
-            })
-            setupSelectedNavItem()
-        })
-    </script>
 </div>
 </body>
 </html>

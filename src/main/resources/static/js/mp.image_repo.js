@@ -1,3 +1,6 @@
+import {fetchFromRepoAt} from "./mp.js";
+
+
 console.log('mp.image_repo.js was picked up')
 
 
@@ -29,6 +32,10 @@ export const fetchImageById = (id) => {
     }
 }
 
+export const fetchImageAtPosition = (pos) => {
+    return fetchFromRepoAt(image_repository, pos)
+}
+
 const getImageLink = (img, rel) => {
     return img.links.filter(link => link.rel === rel)[0]
 }
@@ -36,7 +43,7 @@ const getImageLink = (img, rel) => {
 export const fetchImageAt = (url) => {
     let image = null
     for (let i = 0; i < image_repository.size; i++) {
-        let img = fetchImageAtPosition(i)
+        let img = fetchFromRepoAt(image_repository, i)
         const dataLink = getImageLink(img, 'data')
         if (dataLink.href === url) {
             return {
@@ -46,16 +53,6 @@ export const fetchImageAt = (url) => {
         }
     }
     return image
-}
-
-export const fetchImageAtPosition = (pos) => {
-    let i = 0, requested = null
-    let values = image_repository.values()
-    while (i <= pos) {
-        requested = values.next().value
-        i++
-    }
-    return requested
 }
 
 export const fetchPictureCount = () => {

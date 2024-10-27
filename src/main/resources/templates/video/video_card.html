@@ -19,35 +19,18 @@
     </div>
     <div class="Card-metadata">
         <div class="Card-title" data-th-text="${video.title}">Title</div>
-        <div class="Card-tags">
-            <div class="Card-icon-container">
-                <img alt="Favorite"
-                     src="/img/icon/favorite/favorite_32.png"
-                     th:if="${video.favorite}"/>
-                <img alt="Not Favorite"
-                     src="/img/icon/not_favorite/not_favorite_32.png"
-                     th:unless="${video.favorite}"/>
-                <img alt="Tags" src="/img/icon/tags/tags_32.png"/>
-            </div>
-            <span class="Card-tag-list">
-                  <span class="Card-tag" data-th-each="tag : ${video.tags}"
-                        data-th-text="${tag.name}">
-                      Tags
-                  </span>
-            </span>
-            <span class="Card-tag" th:if="${#lists.isEmpty(video.tags)}">
-                (none)
-            </span>
-        </div>
+        <div data-th-replace="~{components/card_tags::card_tags(entity=${video})}">Tags</div>
     </div>
     <script data-th-inline="javascript" type="module">
-        import {
-            attachVideoCardHandlers,
-        } from "/js/mp.video.js";
+        import {attachVideoCardHandlers} from "/js/mp.video.js";
+        import {loadVideo} from "/js/mp.video_repo.js";
+
 
         $(() => {
             const video = [[${video}]]
-            attachVideoCardHandlers(video)
+
+            loadVideo(video)
+            attachVideoCardHandlers(video.id)
         })
     </script>
 </div>

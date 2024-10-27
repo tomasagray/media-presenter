@@ -22,13 +22,18 @@ public class PictureFileScanner implements FileMetadataScanner<Picture> {
 
   private final PictureService pictureService;
   private final TagService tagService;
+  private final InvalidFilesService invalidFilesService;
 
   @Value("${pictures.location}")
   private Path pictureLocation;
 
-  public PictureFileScanner(PictureService pictureService, TagService tagService) {
+  public PictureFileScanner(
+      PictureService pictureService,
+      TagService tagService,
+      InvalidFilesService invalidFilesService) {
     this.pictureService = pictureService;
     this.tagService = tagService;
+    this.invalidFilesService = invalidFilesService;
   }
 
   @Override
@@ -44,7 +49,8 @@ public class PictureFileScanner implements FileMetadataScanner<Picture> {
       picture.setHeight(image.getHeight());
       pictureService.save(picture);
     } catch (Throwable e) {
-      logger.error("Could not process Picture {}: {}", uri, e.getMessage());
+      logger.error("Could not process Picture {}: {}", uri, e.getMessage(), e);
+      invalidFilesService.addInvalidFile(Path.of(uri), Picture.class);
     }
   }
 

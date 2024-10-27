@@ -102,4 +102,12 @@ public class PictureController {
     UserImageView picture = pictureService.toggleIsPictureFavorite(picId);
     return modeller.toModel(picture);
   }
+
+  @PatchMapping("/picture/update")
+  @ResponseBody
+  public PictureResource updatePicture(@RequestBody PictureResource pictureResource) {
+    UserImageView imageView = modeller.fromModel(pictureResource);
+    UserImageView updated = pictureService.updatePicture(imageView);
+    return modeller.toModel(updated);
+  }
 }

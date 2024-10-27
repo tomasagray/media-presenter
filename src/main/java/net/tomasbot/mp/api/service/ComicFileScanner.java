@@ -26,13 +26,18 @@ public class ComicFileScanner implements FileMetadataScanner<ComicPage> {
 
   private final ComicBookService comicService;
   private final TagService tagService;
+  private final InvalidFilesService invalidFilesService;
 
   @Value("${comics.location}")
   private Path comicsLocation;
 
-  public ComicFileScanner(ComicBookService comicService, TagService tagService) {
+  public ComicFileScanner(
+      ComicBookService comicService,
+      TagService tagService,
+      InvalidFilesService invalidFilesService) {
     this.comicService = comicService;
     this.tagService = tagService;
+    this.invalidFilesService = invalidFilesService;
   }
 
   private boolean imageRequiresParsing(@NotNull Image image) {
@@ -49,12 +54,15 @@ public class ComicFileScanner implements FileMetadataScanner<ComicPage> {
 
   @Override
   @Async("fileScanner")
-  public void scanFileMetadata(@NotNull ComicPage page) throws IOException {
+  public void scanFileMetadata(@NotNull ComicPage page) {
     try {
       if (imageRequiresParsing(page)) parseImage(page);
       assignComicPage(page);
     } catch (IncorrectResultSizeDataAccessException e) {
       logger.error("Duplicate comic book: {}, {}", page, e.getMessage());
+    } catch (Throwable e) {
+      logger.error("Could not parse Comic Book page {}: {}", page, e.getMessage(), e);
+      invalidFilesService.addInvalidFile(Path.of(page.getUri()), ComicPage.class);
     }
   }
 
@@ -86,13 +94,12 @@ public class ComicFileScanner implements FileMetadataScanner<ComicPage> {
         ComicBook.builder()
             .location(parent)
             .title(comicName)
-            .tags(new HashSet<>(tags)) // ensure mutable
+            //            .tags(new HashSet<>(tags)) // ensure mutable
             .build();
+    comic.getTags().addAll(tags);
     ComicBook saved = comicService.save(comic);
 
-    Set<Image> images = new HashSet<>();
-    images.add(page);
-    saved.setImages(images);
+    saved.addImage(page);
     comicService.save(saved);
     logger.info("Created new Comic Book: {}", saved);
   }

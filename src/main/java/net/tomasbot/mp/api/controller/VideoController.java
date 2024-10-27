@@ -141,4 +141,12 @@ public class VideoController {
     UserVideoView video = videoService.toggleVideoFavorite(videoId);
     return modeller.toModel(video);
   }
+
+  @PatchMapping("/video/update")
+  @ResponseBody
+  public VideoResource updateVideo(@RequestBody VideoResource videoResource) {
+    UserVideoView videoView = modeller.fromModel(videoResource);
+    UserVideoView updatedView = videoService.updateVideo(videoView);
+    return modeller.toModel(updatedView);
+  }
 }

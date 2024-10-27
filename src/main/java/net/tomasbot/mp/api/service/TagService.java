@@ -1,11 +1,10 @@
 package net.tomasbot.mp.api.service;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import net.tomasbot.mp.db.PerformerRepository;
 import net.tomasbot.mp.db.TagRepository;
+import net.tomasbot.mp.model.Editable;
 import net.tomasbot.mp.model.Performer;
 import net.tomasbot.mp.model.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -59,5 +58,23 @@ public class TagService {
       tags.add(tag);
     }
     return tags;
+  }
+
+  public synchronized Editable update(@NotNull Editable existing, @NotNull Editable update) {
+    existing.setTitle(update.getTitle());
+
+    Set<Tag> existingTags = existing.getTags();
+    Set<Tag> updateTags = new HashSet<>();
+    for (Tag updateTag : update.getTags()) {
+      if (!existingTags.contains(updateTag)) {
+        Tag savedTag = getOrCreateTag(updateTag.getName());
+        updateTags.add(savedTag);
+      } else {
+        updateTags.add(updateTag);
+      }
+    }
+    existingTags.clear(); // to handle deleted tags
+    existingTags.addAll(updateTags);
+    return existing;
   }
 }

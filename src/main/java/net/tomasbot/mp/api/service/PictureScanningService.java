@@ -13,8 +13,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 @Service
 public class PictureScanningService implements FileScanningService {
@@ -22,23 +20,25 @@ public class PictureScanningService implements FileScanningService {
   private static final Logger logger = LogManager.getLogger(PictureScanningService.class);
 
   private final PictureService pictureService;
-  private static final MultiValueMap<String, Path> invalidFiles = new LinkedMultiValueMap<>();
   private final FileUtilitiesService fileUtilitiesService;
   private final RecursiveWatcherService watcherService;
   private final FileTransferWatcher transferWatcher;
   private final PictureFileScanner pictureFileScanner;
+  private final InvalidFilesService invalidFilesService;
 
   public PictureScanningService(
       PictureService pictureService,
       PictureFileScanner pictureFileScanner,
       FileUtilitiesService fileUtilitiesService,
       RecursiveWatcherService watcherService,
-      FileTransferWatcher transferWatcher) {
+      FileTransferWatcher transferWatcher,
+      InvalidFilesService invalidFilesService) {
     this.pictureService = pictureService;
     this.pictureFileScanner = pictureFileScanner;
     this.fileUtilitiesService = fileUtilitiesService;
     this.watcherService = watcherService;
     this.transferWatcher = transferWatcher;
+    this.invalidFilesService = invalidFilesService;
   }
 
   @Override
@@ -53,19 +53,23 @@ public class PictureScanningService implements FileScanningService {
       }
     } catch (Throwable e) {
       logger.error("Found invalid Picture file: {}", file);
-      String ext = FilenameUtils.getExtension(file.toString());
-      invalidFiles.add(ext, file);
+      invalidFilesService.addInvalidFile(file, Picture.class);
     }
   }
 
   private void createPicture(@NotNull Path file) {
-    Picture picture =
-        Picture.pictureBuilder()
-            .uri(file.toUri())
-            .title(FilenameUtils.getBaseName(file.toString()))
-            .build();
-    logger.info("Adding new Picture: {}", picture);
-    pictureFileScanner.scanFileMetadata(picture);
+    try {
+      Picture picture =
+          Picture.pictureBuilder()
+              .uri(file.toUri())
+              .title(FilenameUtils.getBaseName(file.toString()))
+              .build();
+      logger.info("Adding new Picture: {}", picture);
+      pictureFileScanner.scanFileMetadata(picture);
+    } catch (Throwable e) {
+      logger.error("Could not scan Picture file {}: {}", file, e.getMessage(), e);
+      invalidFilesService.addInvalidFile(file, Picture.class);
+    }
   }
 
   @Override
@@ -84,23 +88,11 @@ public class PictureScanningService implements FileScanningService {
       transferWatcher.watchFileTransfer(file, this::createPicture);
     } else if (ENTRY_DELETE.equals(kind)) {
       logger.info("Deleting Picture at: {}", file);
-      String ext = FilenameUtils.getExtension(file.toString());
-      List<Path> invalidPaths = this.getInvalidFiles().get(ext);
-      if (invalidPaths != null) {
-        boolean removed = invalidPaths.remove(file);
-        if (removed) {
-          logger.info("Invalid file: {} deleted", file);
-          return;
-        }
-      }
+      String deleted = invalidFilesService.deleteInvalidFile(file, Picture.class) ? "Invalid" : "";
+      logger.info("{} Picture deleted at: {}", deleted, file);
       pictureService
           .getPictureByPath(file)
           .forEach(pic -> pictureService.deletePicture(pic.getId()));
     }
-  }
-
-  @Override
-  public MultiValueMap<String, Path> getInvalidFiles() {
-    return invalidFiles;
   }
 }

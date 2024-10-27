@@ -1,4 +1,5 @@
 @import 'mixins';
+@import 'variables';
 
 
 .Viewer-controls-container {
@@ -7,9 +8,8 @@
   justify-content: center;
   align-items: center;
   position: fixed;
-  top: 3vh;
-  right: 3vw;
   z-index: 200;
+  transform: translateX(-2rem);
 
   .Viewer-button {
     display: flex;
@@ -28,6 +28,11 @@
       width: 32px;
     }
   }
+}
+
+#Main-viewer-controls {
+  top: 3vh;
+  right: 3vw;
 }
 
 .Card-metadata {
@@ -112,14 +117,17 @@
 #Page-counter {
   @include card-data;
   position: revert;
+  display: none;
 }
 
 .Loading-spinner {
   display: none;
   position: relative;
-  width: 32px;
-  height: 32px;
-  transform: translate(-40%, -40%);
+
+  img {
+    width: 32px;
+    height: 32px;
+  }
 }
 
 .Loading-spinner span {
@@ -134,7 +142,6 @@
   animation-delay: -0.5s;
 }
 
-$spinnerSize: 24px;
 @keyframes lds-ripple {
   0% {
     top: $spinnerSize;
@@ -163,5 +170,99 @@ $spinnerSize: 24px;
     width: calc($spinnerSize * 2);
     height: calc($spinnerSize * 2);
     opacity: 0;
+  }
+}
+
+#Entity-title {
+  display: block;
+  font-size: x-large;
+  margin-bottom: 2rem;
+  padding: 0;
+}
+
+.Tag-container {
+  border: 1px solid #666;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  cursor: text;
+  overflow-x: scroll;
+  margin: .75rem 0;
+
+  .Tag-list {
+    display: flex;
+    align-items: center;
+
+    .Entity-tag {
+      max-width: 200px;
+      overflow: hidden;
+      white-space: nowrap;
+      border-radius: 5px;
+      background-color: #003eff;
+      padding: 5px;
+      margin: 5px;
+      display: flex;
+      align-items: center;
+      font-family: $default_font;
+      color: white;
+      font-size: medium;
+
+      &:hover {
+        background-color: #022fba;
+
+        &::after {
+          background-color: rgba(120, 120, 120, .4);
+          color: #ccc;
+        }
+      }
+
+      &::after {
+        font-family: $mono_font;
+        content: 'x';
+        background-color: rgba(0, 0, 0, .4);
+        border-radius: 100%;
+        height: 24px;
+        width: 24px;
+        margin-left: 5px;
+        text-align: center;
+      }
+    }
+  }
+
+  #Tag-input {
+    width: 10rem;
+    border: none;
+    background: none;
+    margin-left: 5px;
+  }
+}
+
+.Save-button {
+  @include modal-button;
+
+  background-color: #003eff;
+  overflow: hidden;
+
+  &:hover {
+    background-color: #3c6cff;
+    border-color: white;
+  }
+
+  .Save-button-label {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.Cancel-button {
+  @include modal-button;
+
+  background-color: #aaa;
+  border-color: #666;
+  color: #666;
+
+  &:hover {
+    border-color: #333;
+    color: #333;
   }
 }

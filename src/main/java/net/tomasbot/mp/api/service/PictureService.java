@@ -18,10 +18,13 @@ import org.springframework.stereotype.Service;
 public class PictureService {
 
   private static final Logger logger = LogManager.getLogger(PictureService.class);
-  private final PictureRepository pictureRepo;
 
-  public PictureService(PictureRepository pictureRepo) {
+  private final PictureRepository pictureRepo;
+  private final TagService tagService;
+
+  public PictureService(PictureRepository pictureRepo, TagService tagService) {
     this.pictureRepo = pictureRepo;
+    this.tagService = tagService;
   }
 
   public void save(@NotNull Picture picture) {
@@ -60,6 +63,20 @@ public class PictureService {
     return pictureRepo.findAll().stream()
         .filter(pic -> pic.getUri().getPath().startsWith(path.toString()))
         .toList();
+  }
+
+  public Picture updatePicture(@NotNull Picture update) {
+    logger.info("Updating Picture: {}", update);
+
+    final UUID pictureId = update.getId();
+    return (Picture)
+        pictureRepo
+            .findById(pictureId)
+            .map(existing -> tagService.update(existing, update))
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        "Cannot update non-existent Picture: " + pictureId));
   }
 
   public void deletePicture(@NotNull UUID picId) {

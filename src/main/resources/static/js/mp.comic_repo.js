@@ -12,7 +12,7 @@ export const isComic = (image) => {
         && pageLink.href !== undefined && pageLink.href !== null
 }
 
-export const getComicPages = (comic) => comic.links.filter(link => link.rel.includes('page_'))
+export const getComicPageLinks = (comic) => comic.links.filter(link => link.rel.includes('page_'))
 
 export const loadComic = (comic) => {
     if (comic && comic.id)
@@ -34,7 +34,7 @@ export const fetchComic = (id) => {
 export const fetchComicForPage = (url) => {
     let result = null
     comic_repo.forEach(comic => {
-        let pages = getComicPages(comic)
+        let pages = getComicPageLinks(comic)
         pages.forEach(page => {
             if (page.href === url) {
                 result = comic

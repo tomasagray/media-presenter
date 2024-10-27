@@ -9,26 +9,8 @@
     <script data-th-inline="javascript" type="module">
         import {attachImageViewerHandlers} from "/js/mp.image.js";
 
-        $(() => {
-            attachImageViewerHandlers()
-        })
+        $(() => attachImageViewerHandlers())
     </script>
-    <div class="Viewer-controls-container">
-        <button class="Viewer-button" id="Image-viewer-close-button">
-            <img alt="Close" src="/img/icon/close_button/close_button_64.png"/>
-        </button>
-        <button class="Viewer-button Favorite-button" id="Toggle-image-favorite-button">
-            <img alt="Not favorite" class="Not-favorite"
-                 id="Image-not-favorite" src="/img/icon/not_favorite/not_favorite_64.png"/>
-            <img alt="Favorite" class="Favorite"
-                 id="Image-favorite" src="/img/icon/favorite/favorite_64.png"/>
-            <span class="Loading-spinner">
-                <span></span>
-                <span></span>
-            </span>
-        </button>
-        <div id="Page-counter"></div>
-    </div>
     <div class="Image-viewer" id="image-viewer">
         <div id="image-viewer-display"></div>
     </div>

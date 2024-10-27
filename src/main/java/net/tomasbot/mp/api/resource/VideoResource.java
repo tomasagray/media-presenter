@@ -6,14 +6,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import java.sql.Timestamp;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.UUID;
 import lombok.*;
 import net.tomasbot.mp.api.controller.VideoController;
-import net.tomasbot.mp.model.Tag;
+import net.tomasbot.mp.model.ImageSet;
 import net.tomasbot.mp.user.UserVideoView;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpHeaders;
@@ -25,13 +23,9 @@ import org.springframework.stereotype.Component;
 @EqualsAndHashCode(callSuper = true)
 @JsonRootName(value = "video")
 @Relation(collectionRelation = "videos")
-public class VideoResource extends RepresentationModel<VideoResource> {
+public class VideoResource extends EntityResource<VideoResource> {
 
-  private UUID id;
-  private String title;
   private Timestamp timestamp;
-  private Collection<Tag> tags;
-  private boolean isFavorite;
   private String duration;
 
   @Component
@@ -68,19 +62,32 @@ public class VideoResource extends RepresentationModel<VideoResource> {
       // links
       model.add(
           linkTo(methodOn(VideoController.class).getVideoData(videoId, new HttpHeaders()))
-              .withRel("data"));
-      // add thumb links
-      entity
-          .getThumbnails()
-          .getImages()
-          .forEach(
-              img ->
-                  model.add(
-                      linkTo(methodOn(VideoController.class).getThumbnail(videoId, img.getId()))
-                          .withRel("thumbnail")));
+              .withRel(DATA_REL));
+      model.add(linkTo(methodOn(VideoController.class).updateVideo(model)).withRel(UPDATE_REL));
       model.add(
-          linkTo(methodOn(VideoController.class).toggleVideoFavorite(videoId)).withRel("favorite"));
+          linkTo(methodOn(VideoController.class).toggleVideoFavorite(videoId)).withRel(FAVORITE_REL));
+      // add thumb links
+      ImageSet thumbnails = entity.getThumbnails();
+      if (thumbnails != null) {
+        thumbnails
+            .getImages()
+            .forEach(
+                img ->
+                    model.add(
+                        linkTo(methodOn(VideoController.class).getThumbnail(videoId, img.getId()))
+                            .withRel(THUMBNAIL_REL)));
+      }
+
       return model;
+    }
+
+    public UserVideoView fromModel(@NotNull VideoResource resource) {
+      UserVideoView userVideoView = new UserVideoView();
+      userVideoView.setId(resource.getId());
+      userVideoView.setTitle(resource.getTitle());
+      userVideoView.setTags(resource.getTags());
+      userVideoView.setFavorite(resource.isFavorite());
+      return userVideoView;
     }
   }
 }

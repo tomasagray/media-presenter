@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Viewer Controls</title>
+</head>
+<body>
+<div data-th-fragment="viewer-controls" class="Viewer-controls-container" id="Viewer-controls-container">
+    <script data-th-inline="javascript" type="module">
+        import {resetIdleTimer, showEditDialog} from "/js/mp.js";
+
+        $(() => $(document).on('mousemove click keydown touchstart', resetIdleTimer))
+        $('#Edit-button').on('click', showEditDialog)
+    </script>
+    <button class="Viewer-button close" id="Close-viewer-button">
+        <img alt="Close" src="/img/icon/close_button/close_button_64.png"/>
+    </button>
+    <button class="Viewer-button Favorite-button" id="Toggle-favorite-button">
+        <img alt="Not favorite" class="Not-favorite"
+             id="Image-not-favorite" src="/img/icon/not_favorite/not_favorite_64.png"/>
+        <img alt="Favorite" class="Favorite"
+             id="Image-favorite" src="/img/icon/favorite/favorite_64.png"/>
+        <span data-th-replace="~{components/loading_spinner::loading-spinner}"></span>
+    </button>
+    <button class="Viewer-button Edit-button" id="Edit-button">
+        <img alt="Edit" src="/img/icon/edit/edit_64.png">
+    </button>
+    <div id="Page-counter"></div>
+</div>
+</body>
+</html>

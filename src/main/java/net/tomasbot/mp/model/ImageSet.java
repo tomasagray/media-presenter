@@ -3,14 +3,9 @@ package net.tomasbot.mp.model;
 import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import java.util.*;
+
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -24,11 +19,12 @@ import org.hibernate.type.SqlTypes;
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
 @SuperBuilder
 @Entity
 @Indexed
-public class ImageSet {
+@AllArgsConstructor
+@NoArgsConstructor
+public class ImageSet implements Editable {
 
   private final Timestamp added = Timestamp.from(Instant.now());
 
@@ -40,18 +36,14 @@ public class ImageSet {
 
   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   @ToString.Exclude
-  private Set<Image> images;
+  private final Set<Image> images = new LinkedHashSet<>();
 
   @FullTextField private String title;
 
   @ManyToMany(targetEntity = Tag.class, fetch = FetchType.EAGER)
   @IndexedEmbedded
   @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
-  private Set<Tag> tags;
-
-  public ImageSet() {
-    this.images = new LinkedHashSet<>();
-  }
+  private final Set<Tag> tags = new HashSet<>();
 
   public void addImage(Image image) {
     this.images.add(image);
