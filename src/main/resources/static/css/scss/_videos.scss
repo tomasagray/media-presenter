@@ -90,6 +90,46 @@
   }
 }
 
+#Video-skip-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+
+  #Video-skip-button-container {
+    display: flex;
+    justify-content: space-between;
+
+    .Video-skip-button {
+      background: radial-gradient(circle, rgba(0, 0, 0, .4) 0%, rgba(0, 255, 255, 0) 75%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 64px;
+      color: white;
+      width: 64px;
+      height: 64px;
+      font-size: large;
+      font-weight: bold;
+
+      &::before {
+        position: absolute;
+        top: -5px;
+
+        content: '';
+        width: 64px;
+        height: 64px;
+        background-image: url('/img/icon/skip/skip_64.png');
+        background-position: center;
+      }
+    }
+
+    #Video-rewind-button::before {
+      transform: scaleX(-1);
+    }
+  }
+}
+
 // jQueryUI overrides
 .Video-time-slider {
   background-color: rgba(140, 140, 140, .5);

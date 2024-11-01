@@ -1,4 +1,4 @@
-import {clearState, getState, setState} from "./mp.state.js";
+import {getState, setState} from "./mp.state.js";
 
 
 console.log('mp.js was picked up')
@@ -111,7 +111,7 @@ export const getViewportDimensions = () => {
 
 const idleSeconds = 5
 let idleTimer, displayStyle
-const viewerControls = $('#Viewer-controls-container')
+const viewerControls = $('.Viewer-controls-container')
 const titleEditor = $('#Entity-title')
 const tagInput = $('#Tag-input')
 const tagList = $('#Tag-list')
