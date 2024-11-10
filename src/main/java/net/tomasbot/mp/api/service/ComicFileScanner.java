@@ -85,20 +85,18 @@ public class ComicFileScanner implements FileMetadataScanner<ComicPage> {
 
   private void createComic(@NotNull Image page) {
     Path pageFile = Path.of(page.getUri());
-    Path parent = pageFile.getParent();
-    LinkedList<String> names = getComicNames(parent);
-    String comicName = names.removeLast();
-    List<Tag> tags = tagService.getTags(comicsLocation.relativize(pageFile));
+    Path comicDir = pageFile.getParent();
+    String comicName = getComicNames(comicDir).removeLast();
+    List<Tag> tags = tagService.getTags(comicsLocation.relativize(comicDir));
 
     ComicBook comic =
         ComicBook.builder()
-            .location(parent)
+            .location(comicDir)
             .title(comicName)
-            //            .tags(new HashSet<>(tags)) // ensure mutable
             .build();
     comic.getTags().addAll(tags);
-    ComicBook saved = comicService.save(comic);
 
+    ComicBook saved = comicService.save(comic);
     saved.addImage(page);
     comicService.save(saved);
     logger.info("Created new Comic Book: {}", saved);
