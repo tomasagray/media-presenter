@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TagService {
 
+  private static final int MIN_TAG_LEN = 3;
+  private static final String ALLOWABLE_CHARS = "a-zA-Z0-9' ";
+
   private final TagRepository tagRepository;
   private final PerformerRepository performerRepository;
 
@@ -23,21 +26,44 @@ public class TagService {
     this.performerRepository = performerRepository;
   }
 
+  private static @NotNull String validateTagName(String name) {
+    if (name == null || (name = name.trim()).isEmpty())
+      throw new IllegalArgumentException("Tag name was empty");
+    if (name.length() < MIN_TAG_LEN)
+      throw new IllegalArgumentException(
+          String.format("Tag must be at least %d chars", MIN_TAG_LEN));
+    return name;
+  }
+
+  private static @NotNull String normalizeTagName(String name) {
+    String normalized = name;
+    normalized = validateTagName(normalized);
+
+    // remove punctuation
+    normalized = normalized.replaceAll("[^" + ALLOWABLE_CHARS + "]", "");
+    // capitalize 1st letter
+    normalized = normalized.substring(0, 1).toUpperCase() + normalized.substring(1);
+
+    return validateTagName(normalized);
+  }
+
   public Optional<Tag> fetchTagByName(@NotNull String name) {
-    return tagRepository.findByName(name);
+    return tagRepository.findByNameIgnoreCase(name);
   }
 
   public Optional<Performer> fetchPerformerByName(@NotNull String name) {
-    return performerRepository.findByName(name);
+    return performerRepository.findByNameIgnoreCase(name);
   }
 
   public synchronized Tag addNewTag(@NotNull String name) {
-    Tag tag = new Tag(name);
+    String normalized = normalizeTagName(name);
+    Tag tag = new Tag(normalized);
     return tagRepository.saveAndFlush(tag);
   }
 
   public synchronized Performer addNewPerformer(@NotNull String name) {
-    Performer performer = new Performer(name);
+    String normalized = normalizeTagName(name);
+    Performer performer = new Performer(normalized);
     return performerRepository.saveAndFlush(performer);
   }
 

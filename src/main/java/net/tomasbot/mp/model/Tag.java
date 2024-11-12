@@ -37,9 +37,6 @@ public class Tag {
 
   public Tag(@NotNull String name) {
     this.name = name.trim();
-    if (this.name.isEmpty()) {
-      throw new IllegalArgumentException("Empty Tag: " + name);
-    }
     this.tagId = new Md5Id(this.name);
   }
 

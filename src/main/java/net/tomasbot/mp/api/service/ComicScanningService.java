@@ -126,6 +126,7 @@ public class ComicScanningService implements FileScanningService {
       }
     } else {
       logger.warn("Detected deletion of unknown Comic Book Image: {}", file);
+      invalidFilesService.deleteInvalidFile(file, ComicPage.class);
     }
   }
 
