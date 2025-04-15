@@ -3,11 +3,9 @@ package net.tomasbot.mp.api.service.user;
 import static net.tomasbot.mp.user.UserVideoView.UserVideoModeller;
 
 import java.net.MalformedURLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import net.tomasbot.mp.api.service.VideoService;
+import net.tomasbot.mp.model.Favorite;
 import net.tomasbot.mp.model.UserPreferences;
 import net.tomasbot.mp.model.Video;
 import net.tomasbot.mp.user.UserVideoView;
@@ -62,19 +60,24 @@ public class UserVideoService {
 
   public UserVideoView toggleVideoFavorite(@NotNull UUID videoId) {
     Optional<Video> optional = videoService.getVideo(videoId);
-    if (optional.isEmpty()) {
+    if (optional.isEmpty())
       throw new IllegalArgumentException(
           "Trying to set favorite on non-existent Video: " + videoId);
-    }
+
     Video video = optional.get();
-    if (userPreferenceService.toggleFavorite(video)) {
-      return videoModeller.toFavorite(video);
+    if (!userPreferenceService.isFavorite(video)) {
+      if (userPreferenceService.setFavorite(video)) return videoModeller.toFavorite(video);
+      else throw new SetFavoriteException(video);
+    } else {
+      if (userPreferenceService.removeFavorite(video)) return videoModeller.toView(video);
+      else throw new RemoveFavoriteException(video);
     }
-    return videoModeller.toView(video);
   }
 
   public Collection<UserVideoView> getVideoFavorites() {
     return userPreferenceService.getCurrentUserPreferences().getFavoriteVideos().stream()
+        .sorted(Comparator.comparing(Favorite::getTimestamp).reversed())
+        .map(Favorite::getEntityId)
         .map(videoService::getVideo)
         .filter(Optional::isPresent)
         .map(Optional::get)

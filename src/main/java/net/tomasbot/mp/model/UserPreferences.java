@@ -1,13 +1,11 @@
 package net.tomasbot.mp.model;
 
 import jakarta.persistence.*;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -23,14 +21,14 @@ public class UserPreferences {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @JdbcTypeCode(SqlTypes.VARCHAR)
+  @JdbcTypeCode(SqlTypes.UUID)
   private UUID id;
 
   private String username;
 
-  @ElementCollection @ToString.Exclude private Set<UUID> favoriteVideos;
-  @ElementCollection @ToString.Exclude private Set<UUID> favoritePictures;
-  @ElementCollection @ToString.Exclude private Set<UUID> favoriteComics;
+  @OneToMany @ToString.Exclude private Set<Favorite> favoriteVideos;
+  @OneToMany @ToString.Exclude private Set<Favorite> favoritePictures;
+  @OneToMany @ToString.Exclude private Set<Favorite> favoriteComics;
 
   public UserPreferences(String username) {
     this.username = username;

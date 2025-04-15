@@ -1,5 +1,4 @@
 import {
-    fetchFromRepoAt,
     getLinksArray,
     getLinkUrl,
     getViewportDimensions,

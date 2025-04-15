@@ -2,7 +2,6 @@ package net.tomasbot.mp.db;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import net.tomasbot.mp.model.Image;
 import org.springframework.data.jpa.repository.JpaRepository;

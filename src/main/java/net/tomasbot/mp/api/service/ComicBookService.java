@@ -7,32 +7,41 @@ import net.tomasbot.mp.db.ComicPageRepository;
 import net.tomasbot.mp.model.ComicBook;
 import net.tomasbot.mp.model.ComicPage;
 import net.tomasbot.mp.model.Image;
+import net.tomasbot.mp.model.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(isolation = Isolation.READ_COMMITTED)
 public class ComicBookService {
 
   private static final Logger logger = LogManager.getLogger(ComicBookService.class);
 
   private final ComicBookRepository comicBookRepo;
   private final ComicPageRepository pageRepository;
-  private final TagService tagService;
+  private final TagManagementService tagService;
+  private final PathTagService pathTagService;
+
+  @Value("${comics.location}")
+  private Path comicsLocation;
 
   public ComicBookService(
       ComicBookRepository comicBookRepo,
       ComicPageRepository pageRepository,
-      TagService tagService) {
+      TagManagementService tagService,
+      PathTagService pathTagService) {
     this.comicBookRepo = comicBookRepo;
     this.pageRepository = pageRepository;
     this.tagService = tagService;
+    this.pathTagService = pathTagService;
   }
 
   public Page<ComicBook> getAllComics(int page, int size) {
@@ -77,6 +86,49 @@ public class ComicBookService {
 
   public Optional<UrlResource> getPageData(@NotNull UUID pageId) {
     return pageRepository.findById(pageId).map(image -> UrlResource.from(image.getUri()));
+  }
+
+  public synchronized void assignComicPage(@NotNull ComicPage page) {
+    Path parent = Path.of(page.getUri()).getParent();
+    this.getComicBookAt(parent)
+        .ifPresentOrElse(comic -> addPageToComic(page, comic), () -> createComic(page));
+  }
+
+  @NotNull
+  private LinkedList<String> getComicNames(Path parent) {
+    Path relativized = comicsLocation.relativize(parent);
+    LinkedList<String> names = new LinkedList<>();
+    for (int i = 0; i < relativized.getNameCount(); i++) {
+      names.add(relativized.getName(i).toString());
+    }
+    return names;
+  }
+
+  private void createComic(@NotNull Image page) {
+    Path pageFile = Path.of(page.getUri());
+    Path comicDir = pageFile.getParent();
+    String comicName = getComicNames(comicDir).removeLast();
+    List<Tag> tags = pathTagService.getTagsFrom(comicsLocation.relativize(comicDir));
+
+    ComicBook comic = ComicBook.builder().location(comicDir).title(comicName).build();
+    comic.getTags().addAll(tags);
+
+    ComicBook saved = this.save(comic);
+    saved.addImage(page);
+    this.save(saved);
+    logger.info("Created new Comic Book: {}", saved);
+  }
+
+  private void addPageToComic(@NotNull Image page, @NotNull ComicBook comic) {
+    logger.trace("Adding page: {} to Comic Book: {}", page, comic);
+    Optional<Image> imgOpt =
+        comic.getImages().stream().filter(img -> img.getUri().equals(page.getUri())).findFirst();
+    if (imgOpt.isEmpty()) {
+      comic.addImage(page);
+      this.save(comic);
+    } else {
+      logger.trace("Page: {} is already in Comic Book: {}", page, comic);
+    }
   }
 
   public ComicBook save(@NotNull ComicBook comicBook) {

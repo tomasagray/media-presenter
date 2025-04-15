@@ -20,9 +20,9 @@ public class PictureService {
   private static final Logger logger = LogManager.getLogger(PictureService.class);
 
   private final PictureRepository pictureRepo;
-  private final TagService tagService;
+  private final TagManagementService tagService;
 
-  public PictureService(PictureRepository pictureRepo, TagService tagService) {
+  public PictureService(PictureRepository pictureRepo, TagManagementService tagService) {
     this.pictureRepo = pictureRepo;
     this.tagService = tagService;
   }
@@ -60,9 +60,7 @@ public class PictureService {
   }
 
   public List<Picture> getPictureByPath(@NotNull Path path) {
-    return pictureRepo.findAll().stream()
-        .filter(pic -> pic.getUri().getPath().startsWith(path.toString()))
-        .toList();
+    return pictureRepo.findAllByUri(path.toUri());
   }
 
   public Picture updatePicture(@NotNull Picture update) {

@@ -37,7 +37,6 @@ public class Tag {
 
   public Tag(@NotNull String name) {
     this.name = name.trim();
-    this.tagId = new Md5Id(this.name);
   }
 
   @Override

@@ -21,7 +21,7 @@ public class CreateRequiredDirs implements CommandLineRunner {
   @Value(
       "#{'${pictures.location}, ${comics.location}, ${videos.add-location}, ${videos.storage-location},"
           + " ${videos.convert-location}, ${video.thumbnails.location}'.split(', ')}")
-  private List<Path> required = new ArrayList<>();
+  private final List<Path> required = new ArrayList<>();
 
   @Override
   public void run(String... args) throws Exception {

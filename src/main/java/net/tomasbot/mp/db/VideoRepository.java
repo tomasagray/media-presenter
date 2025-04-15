@@ -1,5 +1,6 @@
 package net.tomasbot.mp.db;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import net.tomasbot.mp.model.Video;
@@ -19,4 +20,7 @@ public interface VideoRepository extends JpaRepository<Video, UUID> {
 
   @Query("SELECT v FROM Video v WHERE v.title IS NULL")
   List<Video> findUnprocessedVideos();
+
+  @Query("SELECT v FROM Video v WHERE v.file = :file")
+  List<Video> findAllByFile(Path file);
 }

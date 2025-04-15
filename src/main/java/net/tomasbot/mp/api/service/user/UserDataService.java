@@ -53,9 +53,10 @@ public class UserDataService {
   public UserData getUserData(String username) {
     UserPreferences preferences = preferenceService.getUserPreferences(username);
     final UserData userData = new UserData(username);
+
     // add video favs
-    preferences
-        .getFavoriteVideos()
+    preferences.getFavoriteVideos().stream()
+        .map(Favorite::getEntityId)
         .forEach(
             videoId -> {
               Optional<Video> videoOptional = videoService.getVideo(videoId);
@@ -68,9 +69,10 @@ public class UserDataService {
                 throw new IllegalArgumentException(
                     "Cannot get user data; invalid Video favorite: " + videoId);
             });
+
     // add picture favs
-    preferences
-        .getFavoritePictures()
+    preferences.getFavoritePictures().stream()
+        .map(Favorite::getEntityId)
         .forEach(
             pictureId -> {
               Optional<Picture> pictureOptional = pictureService.getPicture(pictureId);
@@ -84,9 +86,10 @@ public class UserDataService {
                 throw new IllegalArgumentException(
                     "Cannot get user data; invalid Picture favorite: " + pictureId);
             });
+
     // add comic favs
-    preferences
-        .getFavoriteComics()
+    preferences.getFavoriteComics().stream()
+        .map(Favorite::getEntityId)
         .forEach(
             comicId -> {
               Optional<ComicBook> comicOptional = comicService.getComicBook(comicId);
@@ -99,6 +102,7 @@ public class UserDataService {
                 throw new IllegalArgumentException(
                     "Cannot get user data; invalid ComicBook favorite: " + comicId);
             });
+
     return userData;
   }
 

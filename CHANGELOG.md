@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upcoming changes will appear here
 
+### Added
+
+- Skip +/- 10s controls for videos
+
 ## [0.2.9] - 2024-10-26
 
 ### Added

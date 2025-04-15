@@ -27,9 +27,9 @@ public class VideoService {
   private static final Logger logger = LogManager.getLogger(VideoService.class);
 
   private final VideoRepository videoRepository;
-  private final TagService tagService;
+  private final TagManagementService tagService;
 
-  public VideoService(VideoRepository videoRepository, TagService tagService) {
+  public VideoService(VideoRepository videoRepository, TagManagementService tagService) {
     this.videoRepository = videoRepository;
     this.tagService = tagService;
   }
@@ -82,9 +82,7 @@ public class VideoService {
   }
 
   public List<Video> getVideoByPath(@NotNull Path path) {
-    return videoRepository.findAll().stream()
-        .filter(video -> video.getFile().equals(path))
-        .toList();
+    return videoRepository.findAllByFile(path);
   }
 
   public void deleteVideo(@NotNull Video video) {
