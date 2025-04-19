@@ -2,12 +2,15 @@ package net.tomasbot.mp.api.service;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import net.tomasbot.mp.db.TagRepository;
 import net.tomasbot.mp.model.Tag;
 import org.apache.logging.log4j.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -65,5 +68,40 @@ public class TagCreationService {
     String normalized = normalizeTagName(name);
     Tag tag = new Tag(normalized);
     return tagRepository.saveAndFlush(tag);
+  }
+
+  @Scheduled(fixedRate = 3, timeUnit = TimeUnit.HOURS)
+  public synchronized void updateTagRefCounts() {
+    logger.info("Updating tag reference counts...");
+    tagRepository.findAll().forEach(this::updateTagRefCount);
+  }
+
+  public void updateTagRefCount(@NotNull Tag tag) {
+    final String name = tag.getName();
+    final int refCount = tag.getReferenceCount();
+    final int total = getActualRefCount(tag);
+
+    tag.setReferenceCount(total);
+    tagRepository.save(tag);
+
+    logger.info("Tag: [{}] is used {} times", name, total);
+    if (refCount != total)
+      logger.warn(
+          "Tag: [{}] reference count mismatch: was {}, should be {}; corrected",
+          name,
+          refCount,
+          total);
+  }
+
+  private int getActualRefCount(Tag tag) {
+    int videoReferenceCount = tagRepository.findVideoReferenceCount(tag);
+    int imageReferenceCount = tagRepository.findImageReferenceCount(tag);
+    int imageSetReferenceCount = tagRepository.findImageSetReferenceCount(tag);
+
+    return videoReferenceCount + imageReferenceCount + imageSetReferenceCount;
+  }
+
+  public List<Tag> findTagsStartingWith(String name) {
+    return tagRepository.findTagsByNameStartingWith(name + "%");
   }
 }

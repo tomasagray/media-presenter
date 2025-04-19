@@ -2,6 +2,8 @@
 @import 'variables';
 
 
+$tagSizeLimit: 200px;
+
 .Viewer-controls-container {
   display: flex;
   flex-direction: column;
@@ -181,7 +183,7 @@
 }
 
 .Tag-container {
-  border: 1px solid #666;
+  position: relative;
   border-radius: 5px;
   display: flex;
   align-items: center;
@@ -191,10 +193,11 @@
 
   .Tag-list {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
 
     .Entity-tag {
-      max-width: 200px;
+      max-width: $tagSizeLimit;
       overflow: hidden;
       white-space: nowrap;
       border-radius: 5px;
@@ -232,12 +235,52 @@
       }
     }
   }
+}
 
-  #Tag-input {
-    width: 10rem;
+#Tag-input {
+  width: $tagSizeLimit;
+  border: none;
+  background-color: rgba(0, 0, 0, .2);
+
+  &:focus-visible {
     border: none;
-    background: none;
-    margin-left: 5px;
+    outline: none;
+    background-color: rgba(140, 140, 140, .2)
+  }
+}
+
+.Tag-suggestion-container {
+  position: absolute;
+  background-color: #222;
+  border-radius: 0 0 10px 10px;
+  display: flex;
+  box-shadow: 3px 6px 10px rgba(0, 0, 0, .6);
+  max-height: $tagSizeLimit;
+  width: $tagSizeLimit;
+  overflow-y: scroll;
+
+  &.hidden {
+    display: none;
+  }
+
+  .Tag-suggestions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: -moz-available;
+
+    li {
+      padding: 1rem;
+
+      &:hover {
+        cursor: pointer;
+        background-color: rgba(120, 120, 120, .2);
+      }
+
+      &.placeholder {
+        opacity: .5;
+      }
+    }
   }
 }
 

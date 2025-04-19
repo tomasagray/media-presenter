@@ -8,15 +8,20 @@
 <div data-th-fragment="edit-dialog">
     <script data-th-inline="javascript" type="module">
         import {setState} from "/js/mp.state.js";
-        import {addTag, onSaveEditDialog, clearEditDialog} from "/js/mp.js";
+        import {addTag, onSaveEditDialog, clearEditDialog, onSearchValueChange} from "/js/mp.js";
 
 
         $(() => {
             const input = $('#Tag-input')
+
+            input.on('input', (e) => {
+                const value = e.target.value
+                onSearchValueChange(value)
+                setState({
+                    editedTag: value
+                })
+            })
             $('#Tag-container').on('click', () => input.focus())
-            input.on('input', (e) => setState({
-                editedTag: e.target.value
-            }))
             $('#Tag-editor').on('submit', (e) => {
                 e.preventDefault()
                 addTag()
@@ -35,11 +40,18 @@
                 <label>Tags</label>
                 <div id="Tag-container" class="Tag-container">
                     <div id="Tag-list" class="Tag-list"></div>
-                    <form id="Tag-editor" action="#">
-                        <label for="Tag-input" style="display: none"></label>
-                        <input type="text" name="tag_input" id="Tag-input"/>
-                    </form>
                 </div>
+            </div>
+            <div class="Dialog-section">
+                <form id="Tag-editor" action="#" style="position:relative;">
+                    <label for="Tag-input" style="display: block; margin-bottom: 5px">
+                        Add new Tag
+                    </label>
+                    <input type="text" name="tag_input" id="Tag-input" autocomplete="off"/>
+                    <div id="Tag-suggestion-container" class="Tag-suggestion-container hidden">
+                        <ul id="Tag-suggestions" class="Tag-suggestions"></ul>
+                    </div>
+                </form>
             </div>
             <div class="Dialog-section" id="Modal-controls">
                 <button class="Save-button" id="Save-button">

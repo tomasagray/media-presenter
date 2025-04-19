@@ -11,7 +11,6 @@ export const loadImages = (images) => {
 }
 
 export const loadImage = (image) => {
-    // console.log('loading image', image)
     if (image && image.id)
         image_repository.set(image.id, image)
 }
