@@ -103,28 +103,23 @@
     .Video-skip-button {
       background: radial-gradient(circle, rgba(0, 0, 0, .4) 0%, rgba(0, 255, 255, 0) 75%);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       margin: 0 64px;
       color: white;
-      width: 64px;
-      height: 64px;
+      width: 128px;
+      height: 128px;
       font-size: large;
       font-weight: bold;
 
-      &::before {
+      img {
         position: absolute;
-        top: -5px;
-
-        content: '';
-        width: 64px;
-        height: 64px;
-        background-image: url('/img/icon/skip/skip_64.png');
-        background-position: center;
+        margin-bottom: .75rem;
       }
     }
 
-    #Video-rewind-button::before {
+    #Video-rewind-button > img {
       transform: scaleX(-1);
     }
   }

@@ -63,22 +63,18 @@
 }
 
 @mixin rotate90 {
+  transform: none;
+
   &.rotate {
-    position: relative;
     width: 100vh;
     height: 100vw;
 
     &.CCW {
-      transform: rotate(-90deg);
-      top: -30%;
-      left: 20%;
+      transform: translate(25vw, -25%) rotate(-90deg);
     }
 
     &.CW {
-      transform: rotate(90deg);
-      height: 100%;
-      width: 100%;
-      left: -5%;
+      transform: rotate(90deg) translate(12vw, 12vh);
     }
   }
 }

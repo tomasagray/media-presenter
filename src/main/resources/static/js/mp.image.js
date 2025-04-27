@@ -1,11 +1,4 @@
-import {
-    getLinksArray,
-    getLinkUrl,
-    getViewportDimensions,
-    onEndSwipe,
-    onStartSwipe,
-    toggleFavorite
-} from "./mp.js";
+import {getLinksArray, getLinkUrl, getViewportDimensions, onEndSwipe, onStartSwipe, toggleFavorite} from "./mp.js";
 import {fetchImageAt, fetchImageAtPosition, fetchImageById, fetchPictureCount, loadImage} from "./mp.image_repo.js";
 import {fetchComic, fetchComicForPage, getComicPageLinks, isComic, loadComic} from "./mp.comic_repo.js";
 import {getState, setState} from "./mp.state.js";
@@ -76,13 +69,21 @@ const adjustViewerOrientation = (url) => {
         if (vw > vh && img.height > img.width) {    // landscape mode
             viewerDisplay.removeClass('CW')
             viewerDisplay.addClass('rotate CCW')
+
+            // fix for iPads
+            if (navigator.platform.includes('Mac')) {
+                $('#image-viewer-display').css('transform', 'translate(15vw, -15%) rotate(-90deg)')
+            }
         } else if (vh > vw && img.width > img.height) {    // portrait mode
             viewerDisplay.removeClass('CCW')
             viewerDisplay.addClass('rotate CW')
-            imageViewer.addClass('rotateCW')
         } else {    // reset to default
-            imageViewer.removeClass('rotateCW')
             viewerDisplay.removeClass('rotate CW CCW')
+
+            // undo fix for iPads
+            if (navigator.platform.includes('Mac')) {
+                $('#image-viewer-display').css('transform', '')
+            }
         }
     }
     img.src = url
