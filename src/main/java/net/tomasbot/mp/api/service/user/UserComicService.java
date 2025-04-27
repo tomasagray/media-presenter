@@ -1,11 +1,9 @@
 package net.tomasbot.mp.api.service.user;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import net.tomasbot.mp.api.service.ComicBookService;
 import net.tomasbot.mp.model.ComicBook;
+import net.tomasbot.mp.model.Favorite;
 import net.tomasbot.mp.user.UserComicBookView;
 import net.tomasbot.mp.user.UserComicBookView.UserComicModeller;
 import org.jetbrains.annotations.NotNull;
@@ -58,18 +56,23 @@ public class UserComicService {
 
   public UserComicBookView toggleIsComicFavorite(@NotNull UUID comicId) {
     Optional<ComicBook> optional = comicService.getComicBook(comicId);
-    if (optional.isEmpty()) {
+    if (optional.isEmpty())
       throw new IllegalArgumentException("Trying to favorite non-existent Comic Book: " + comicId);
-    }
+
     ComicBook comic = optional.get();
-    if (userPreferenceService.toggleFavorite(comic)) {
-      return modeller.toFavorite(comic);
+    if (!userPreferenceService.isFavorite(comic)) {
+      if (userPreferenceService.setFavorite(comic)) return modeller.toFavorite(comic);
+      else throw new SetFavoriteException(comic);
+    } else {
+      if (userPreferenceService.removeFavorite(comic)) return modeller.toView(comic);
+      else throw new RemoveFavoriteException(comic);
     }
-    return modeller.toView(comic);
   }
 
   public Collection<UserComicBookView> getFavoriteComics() {
     return userPreferenceService.getCurrentUserPreferences().getFavoriteComics().stream()
+        .sorted(Comparator.comparing(Favorite::getTimestamp).reversed())
+        .map(Favorite::getEntityId)
         .map(comicService::getComicBook)
         .filter(Optional::isPresent)
         .map(Optional::get)

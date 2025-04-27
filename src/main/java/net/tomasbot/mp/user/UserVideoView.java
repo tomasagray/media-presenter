@@ -2,7 +2,6 @@ package net.tomasbot.mp.user;
 
 import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.UUID;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -1,4 +1,4 @@
-import {clearState, getState, setState} from "./mp.state.js";
+import {getState, setState} from "./mp.state.js";
 
 
 console.log('mp.js was picked up')
@@ -111,7 +111,7 @@ export const getViewportDimensions = () => {
 
 const idleSeconds = 5
 let idleTimer, displayStyle
-const viewerControls = $('#Viewer-controls-container')
+const viewerControls = $('.Viewer-controls-container')
 const titleEditor = $('#Entity-title')
 const tagInput = $('#Tag-input')
 const tagList = $('#Tag-list')
@@ -184,6 +184,14 @@ export const addTag = () => {
     let name = tagInput.val()
     let tags = editedTags ?? []
 
+    // check for duplicate
+    for (let i = 0; i < tags.length; i++) {
+        if (tags[i].name === name) {
+            tagInput.val('')
+            return
+        }
+    }
+
     setState({
         editedEntity: {
             ...editedEntity,
@@ -213,6 +221,40 @@ const deleteTag = (id) => {
         }
     })
     resetTagEditor()
+}
+
+const suggestionContainer = $('#Tag-suggestion-container')
+const tagSuggestions = $('#Tag-suggestions')
+
+const onSelectTagSuggestion = (value) => {
+    suggestionContainer.addClass('hidden')
+    tagInput.val(value)
+    addTag()
+}
+
+export const onSearchValueChange = (value) => {
+    if (value === '') {
+        suggestionContainer.addClass('hidden')
+        return
+    }
+
+    $.ajax({
+        url: '/tags/search',
+        data: {q: value},
+    }).done(tags => {
+        tagSuggestions.html('')
+
+        if (tags && tags.length > 0) {
+            suggestionContainer.removeClass('hidden')
+            tags.filter(tag => tag.name !== value).forEach(tag => {
+                const li = document.createElement('li')
+                li.className = 'Tag-suggestion'
+                li.innerHTML = tag.name
+                li.onclick = (e) => onSelectTagSuggestion($(e.target).text())
+                tagSuggestions.append(li)
+            })
+        }
+    })
 }
 
 export const clearEditDialog = () => {

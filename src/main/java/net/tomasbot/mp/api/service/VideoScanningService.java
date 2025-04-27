@@ -83,8 +83,18 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
   }
 
   private void createVideo(@NotNull Path file) {
-    final Video video = new Video(file);
-    videoFileScanner.scanFileMetadata(video);
+    try {
+      if (!videoService.getVideoByPath(file).isEmpty()) {
+        logger.error("Video already exists at path: {}", file);
+        return;
+      }
+
+      final Video video = new Video(file);
+      videoFileScanner.scanFileMetadata(video);
+    } catch (IOException e) {
+      logger.error("Could not parse Video at: {}", file);
+      invalidFilesService.addInvalidFile(file, Video.class);
+    }
   }
 
   @Override

@@ -23,13 +23,15 @@ import org.jetbrains.annotations.NotNull;
 @Indexed
 public class Tag {
 
-  @FullTextField protected final String name;
-
   @EmbeddedId
   @DocumentId(identifierBridge = @IdentifierBridgeRef(type = Md5IdBridge.class))
   @GenericGenerator(name = "tag_id_gen", strategy = "net.tomasbot.mp.db.Md5IdGenerator")
   @GeneratedValue(generator = "tag_id_gen")
   protected Md5Id tagId;
+
+  @FullTextField protected final String name;
+
+  private int referenceCount;
 
   public Tag() {
     this.name = null;
@@ -37,10 +39,19 @@ public class Tag {
 
   public Tag(@NotNull String name) {
     this.name = name.trim();
-    if (this.name.isEmpty()) {
-      throw new IllegalArgumentException("Empty Tag: " + name);
-    }
-    this.tagId = new Md5Id(this.name);
+  }
+
+  public int increaseRefCount(int amount) {
+    this.referenceCount += amount;
+    return this.referenceCount;
+  }
+
+  public int increaseRefCount() {
+    return increaseRefCount(1);
+  }
+
+  public int decreaseRefCount() {
+    return increaseRefCount(-1);
   }
 
   @Override

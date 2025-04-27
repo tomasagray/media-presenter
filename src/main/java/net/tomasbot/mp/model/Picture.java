@@ -3,7 +3,6 @@ package net.tomasbot.mp.model;
 import jakarta.persistence.Entity;
 import java.net.URI;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.Hibernate;

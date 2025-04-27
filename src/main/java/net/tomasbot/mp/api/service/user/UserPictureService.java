@@ -2,11 +2,9 @@ package net.tomasbot.mp.api.service.user;
 
 import static net.tomasbot.mp.user.UserImageView.UserImageModeller;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import net.tomasbot.mp.api.service.PictureService;
+import net.tomasbot.mp.model.Favorite;
 import net.tomasbot.mp.model.Picture;
 import net.tomasbot.mp.user.UserImageView;
 import org.jetbrains.annotations.NotNull;
@@ -54,14 +52,17 @@ public class UserPictureService {
 
   public UserImageView toggleIsPictureFavorite(@NotNull UUID picId) {
     Optional<Picture> optional = pictureService.getPicture(picId);
-    if (optional.isEmpty()) {
+    if (optional.isEmpty())
       throw new IllegalArgumentException("Trying to favorite non-existent Picture: " + picId);
-    }
+
     Picture picture = optional.get();
-    if (userPreferenceService.toggleFavorite(picture)) {
-      return modeller.toFavorite(picture);
+    if (!userPreferenceService.isFavorite(picture)) {
+      if (userPreferenceService.setFavorite(picture)) return modeller.toFavorite(picture);
+      else throw new SetFavoriteException(picture);
+    } else {
+      if (userPreferenceService.removeFavorite(picture)) return modeller.toView(picture);
+      else throw new RemoveFavoriteException(picture);
     }
-    return modeller.toView(picture);
   }
 
   public UserImageView updatePicture(@NotNull UserImageView imageView) {
@@ -72,6 +73,8 @@ public class UserPictureService {
 
   public Collection<UserImageView> getFavoritePictures() {
     return userPreferenceService.getCurrentUserPreferences().getFavoritePictures().stream()
+        .sorted(Comparator.comparing(Favorite::getTimestamp).reversed())
+        .map(Favorite::getEntityId)
         .map(pictureService::getPicture)
         .filter(Optional::isPresent)
         .map(Optional::get)

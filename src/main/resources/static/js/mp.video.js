@@ -200,3 +200,12 @@ export const attachVideoCardHandlers = (id) => {
     element.on('mouseenter', () => timer = autoCycleImages(images))
     element.on('mouseleave', () => clearInterval(timer))
 }
+
+export const skipVideoTime = (skip) => {
+    let targetTime = player[0].currentTime + skip
+    if (targetTime <= 0 || targetTime >= player[0].duration)
+        targetTime = 0
+
+    console.log('skipping video to ', targetTime)
+    player[0].currentTime = targetTime
+}

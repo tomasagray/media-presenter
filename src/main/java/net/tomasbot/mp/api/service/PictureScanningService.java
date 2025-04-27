@@ -2,6 +2,7 @@ package net.tomasbot.mp.api.service;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
@@ -59,6 +60,11 @@ public class PictureScanningService implements FileScanningService {
 
   private void createPicture(@NotNull Path file) {
     try {
+      if (!pictureService.getPictureByPath(file).isEmpty()) {
+        logger.error("Picture already exists for path: {}", file);
+        return;
+      }
+
       Picture picture =
           Picture.pictureBuilder()
               .uri(file.toUri())
@@ -66,8 +72,8 @@ public class PictureScanningService implements FileScanningService {
               .build();
       logger.info("Adding new Picture: {}", picture);
       pictureFileScanner.scanFileMetadata(picture);
-    } catch (Throwable e) {
-      logger.error("Could not scan Picture file {}: {}", file, e.getMessage(), e);
+    } catch (IOException e) {
+      logger.error("Could not parse Picture at: {}", file);
       invalidFilesService.addInvalidFile(file, Picture.class);
     }
   }

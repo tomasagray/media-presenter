@@ -70,7 +70,8 @@ public class RecursiveWatcherService {
           path,
           new FileVisitor<>() {
             @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+            public @NotNull FileVisitResult preVisitDirectory(
+                Path dir, @NotNull BasicFileAttributes attrs) {
               if (ignorePaths.contains(dir)) {
                 return FileVisitResult.SKIP_SUBTREE;
               } else {
@@ -80,7 +81,8 @@ public class RecursiveWatcherService {
             }
 
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+            public @NotNull FileVisitResult visitFile(
+                Path file, @NotNull BasicFileAttributes attrs) {
               if (onScanFile != null) {
                 onScanFile.accept(file);
               }
@@ -88,13 +90,13 @@ public class RecursiveWatcherService {
             }
 
             @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) {
+            public @NotNull FileVisitResult visitFileFailed(Path file, @NotNull IOException exc) {
               logger.error("Visiting file {} failed: {}", file, exc.getMessage(), exc);
               return FileVisitResult.CONTINUE;
             }
 
             @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+            public @NotNull FileVisitResult postVisitDirectory(Path dir, IOException exc) {
               return FileVisitResult.CONTINUE;
             }
           });
@@ -119,7 +121,8 @@ public class RecursiveWatcherService {
           path,
           new SimpleFileVisitor<>() {
             @Override
-            public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attr) {
+            public @NotNull FileVisitResult preVisitDirectory(
+                Path path, @NotNull BasicFileAttributes attr) {
               unregisterWatch(path);
               return FileVisitResult.CONTINUE;
             }

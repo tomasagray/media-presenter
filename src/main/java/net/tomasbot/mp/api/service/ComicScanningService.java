@@ -73,6 +73,11 @@ public class ComicScanningService implements FileScanningService {
 
   private void createComicPage(@NotNull Path file) {
     try {
+      if (!comicService.getComicBooksAt(file).isEmpty()) {
+        logger.error("Comic Book already exists for path: {}", file);
+        return;
+      }
+
       ComicPage page =
           ComicPage.pageBuilder()
               .uri(file.toUri())
@@ -126,6 +131,7 @@ public class ComicScanningService implements FileScanningService {
       }
     } else {
       logger.warn("Detected deletion of unknown Comic Book Image: {}", file);
+      invalidFilesService.deleteInvalidFile(file, ComicPage.class);
     }
   }
 

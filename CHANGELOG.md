@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upcoming changes will appear here
 
+## [0.3.0] - 2025-04-27
+
+### Added
+
+- Tag prediction
+- Skip +/- 10s controls for videos
+- Timestamping for Favorites
+
+### Fixed
+
+- Race condition when adding new Tags during file scan
+- Fix image display alignment in viewer modal
+
 ## [0.2.9] - 2024-10-26
 
 ### Added
@@ -123,4 +136,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- File scanning thread count: 9 -> 50
+- File scanning thread count: 9 → 50
