@@ -42,11 +42,11 @@ public class UserDataService {
       @NotNull Function<UUID, Optional<? extends T>> idLookup,
       @NotNull Function<Path, Collection<T>> pathLookup,
       @NotNull UserData.Favorite fav) {
-    Optional<? extends T> optional = idLookup.apply(fav.id());
+    Optional<? extends T> optional = idLookup.apply(fav.getId());
     if (optional.isPresent()) {
       return List.of(optional.get());
     } else {
-      return pathLookup.apply(fav.path());
+      return pathLookup.apply(fav.getPath());
     }
   }
 

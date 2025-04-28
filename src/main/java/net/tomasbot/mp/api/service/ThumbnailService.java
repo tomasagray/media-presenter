@@ -8,7 +8,7 @@ import java.util.List;
 import net.tomasbot.mp.model.Image;
 import net.tomasbot.mp.model.Video;
 import net.tomasbot.mp.plugin.ffmpeg.FFmpegPlugin;
-import net.tomasbot.mp.plugin.ffmpeg.metadata.FFmpegStream;
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

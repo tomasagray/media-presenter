@@ -2,8 +2,8 @@ package net.tomasbot.mp.integration.plugin.ffmpeg;
 
 import java.net.URI;
 import java.nio.file.Path;
-import net.tomasbot.mp.plugin.ffmpeg.SimpleTranscodeRequest;
-import net.tomasbot.mp.plugin.ffmpeg.TranscodeRequestParser;
+import net.tomasbot.ffmpeg_wrapper.request.SimpleTranscodeRequest;
+import net.tomasbot.ffmpeg_wrapper.TranscodeRequestParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;

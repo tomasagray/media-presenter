@@ -1,13 +1,21 @@
 package net.tomasbot.mp.plugin.ffmpeg;
 
+import net.tomasbot.ffmpeg_wrapper.FFmpeg;
+import net.tomasbot.ffmpeg_wrapper.FFprobe;
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
+import net.tomasbot.ffmpeg_wrapper.request.SimpleTranscodeRequest;
+import net.tomasbot.ffmpeg_wrapper.request.ThumbnailRequest;
+import net.tomasbot.ffmpeg_wrapper.request.TranscodeRequest;
+import net.tomasbot.ffmpeg_wrapper.task.FFmpegStreamTask;
+import net.tomasbot.ffmpeg_wrapper.task.LoggableThread;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.LocalTime;
 import java.util.concurrent.ConcurrentSkipListMap;
-import net.tomasbot.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
 
 @Component
 public class FFmpegPlugin {
@@ -18,13 +26,12 @@ public class FFmpegPlugin {
   private final ConcurrentSkipListMap<Path, FFmpegStreamTask> streamingTasks =
       new ConcurrentSkipListMap<>();
 
-  // TODO: make this its own JAR
   public FFmpegPlugin(@NotNull final FFmpegPluginProperties pluginProperties) {
-
     this.pluginProperties = pluginProperties;
+
     // Create executable instances
-    this.ffmpeg = new FFmpeg(pluginProperties.getFfmpegLocation());
-    this.ffprobe = new FFprobe(pluginProperties.getFfprobeLocation());
+    this.ffmpeg = new FFmpeg(pluginProperties.getFfmpegLocation(), pluginProperties.getBaseArgs());
+    this.ffprobe = new FFprobe(pluginProperties.getFfprobeLocation(), pluginProperties.getFfprobeBaseArgs());
   }
 
   /**
@@ -34,7 +41,8 @@ public class FFmpegPlugin {
    * @param playlistPath The output location for stream data
    * @return The path of the playlist file produced by FFMPEG
    */
-  public LoggableThread streamUris(@NotNull final Path playlistPath, @NotNull final URI... uris) {
+  public LoggableThread streamUris(@NotNull final Path playlistPath, @NotNull final URI... uris)
+          throws InterruptedException {
 
     // Get absolute path for task key
     final Path absolutePath = playlistPath.toAbsolutePath();
@@ -43,8 +51,10 @@ public class FFmpegPlugin {
     // todo - make a real request
     SimpleTranscodeRequest request = SimpleTranscodeRequest.builder().build();
     final FFmpegStreamTask streamTask = ffmpeg.getHlsStreamTask(request);
+
     // Add to collection
     streamingTasks.put(absolutePath, streamTask);
+
     // Return playlist file path
     return streamTask;
   }
@@ -78,7 +88,7 @@ public class FFmpegPlugin {
    *
    * @param outputPath The path of the stream data
    */
-  public boolean interruptStreamingTask(@NotNull final Path outputPath) {
+  public boolean interruptStreamingTask(@NotNull final Path outputPath) throws InterruptedException {
 
     // Get absolute path for task key
     final Path absolutePath = outputPath.toAbsolutePath();
@@ -118,9 +128,12 @@ public class FFmpegPlugin {
   }
 
   public Path createThumbnail(
-      @NotNull Path video, @NotNull Path thumb, @NotNull LocalTime time, int w, int h)
-      throws IOException {
-    return ffmpeg.createThumbnail(video, thumb, time, w, h);
+          @NotNull Path video, @NotNull Path thumb, @NotNull LocalTime time, int w, int h) throws IOException {
+    ThumbnailRequest request =
+            ThumbnailRequest.builder()
+                    .video(video)
+                    .thumbnail(thumb).width(w).height(h).at(time).build();
+    return ffmpeg.createThumbnail(request);
   }
 
   public String getTitle() {
@@ -136,7 +149,7 @@ public class FFmpegPlugin {
    *
    * @param absolutePath The path of the streaming task
    */
-  private void checkTaskAlreadyExecuting(@NotNull final Path absolutePath) {
+  private void checkTaskAlreadyExecuting(@NotNull final Path absolutePath) throws InterruptedException {
 
     // Check if a task is already working in path
     FFmpegStreamTask prevTask = streamingTasks.get(absolutePath);

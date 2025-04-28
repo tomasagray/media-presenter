@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.tomasbot.mp.db.converter.FFmpegMetadataConverter;
 import net.tomasbot.mp.db.converter.PathConverter;
-import net.tomasbot.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
