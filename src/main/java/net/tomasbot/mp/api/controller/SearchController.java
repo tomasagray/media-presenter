@@ -49,9 +49,9 @@ public class SearchController {
   public String searchAllFor(
       @NotNull Model model,
       @RequestParam(value = "q", defaultValue = "") String query,
-      @RequestParam(value = "offset", defaultValue = "0") int offset,
+      @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "limit", defaultValue = "12") int limit) {
-    SearchAllResult results = searchService.searchAllFor(query, PageRequest.of(offset, limit));
+    SearchAllResult results = searchService.searchAllFor(query, PageRequest.of(page, limit));
     if (results.isEmpty()) {
       model.addAttribute("query", query);
       return "empty_search";
@@ -84,9 +84,9 @@ public class SearchController {
   public String searchVideosFor(
       @NotNull Model model,
       @RequestParam(value = "q", defaultValue = "") String query,
-      @RequestParam(value = "offset", defaultValue = "0") int offset,
+      @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "limit", defaultValue = "12") int limit) {
-    SearchAllResult results = searchService.searchVideosFor(query, PageRequest.of(offset, limit));
+    SearchAllResult results = searchService.searchVideosFor(query, PageRequest.of(page, limit));
     if (results.isEmpty()) {
       model.addAttribute("query", query);
       return "empty_search";
@@ -107,9 +107,9 @@ public class SearchController {
   public String searchPicturesFor(
       @NotNull Model model,
       @RequestParam(value = "q", defaultValue = "") String query,
-      @RequestParam(value = "page", defaultValue = "0") int offset,
+      @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "limit", defaultValue = "12") int limit) {
-    SearchAllResult results = searchService.searchPicturesFor(query, PageRequest.of(offset, limit));
+    SearchAllResult results = searchService.searchPicturesFor(query, PageRequest.of(page, limit));
     if (results.isEmpty()) {
       model.addAttribute("query", query);
       return "empty_search";
@@ -120,7 +120,7 @@ public class SearchController {
         pictureModeller.toCollectionModel(pictures.getContent());
 
     model.addAttribute("page_title", "Pictures: " + query);
-    model.addAttribute("images", pictureModel);
+    model.addAttribute("images", pictureModel.getContent());
     navigationLinkModeller.addPagingAttributes(model, pictures);
 
     return "image/image_list";
@@ -130,9 +130,9 @@ public class SearchController {
   public String searchComicsFor(
       @NotNull Model model,
       @RequestParam(value = "q", defaultValue = "") String query,
-      @RequestParam(value = "page", defaultValue = "0") int offset,
+      @RequestParam(value = "page", defaultValue = "0") int page,
       @RequestParam(value = "limit", defaultValue = "12") int limit) {
-    SearchAllResult results = searchService.searchComicsFor(query, PageRequest.of(offset, limit));
+    SearchAllResult results = searchService.searchComicsFor(query, PageRequest.of(page, limit));
     if (results.isEmpty()) {
       model.addAttribute("query", query);
       return "empty_search";
@@ -143,7 +143,7 @@ public class SearchController {
         comicModeller.toCollectionModel(comics.getContent());
 
     model.addAttribute("page_title", "Comic Books: " + query);
-    model.addAttribute("images", comicModel);
+    model.addAttribute("comics", comicModel.getContent());
     navigationLinkModeller.addPagingAttributes(model, comics);
 
     return "image/image_list";

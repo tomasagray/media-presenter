@@ -23,7 +23,7 @@ export const onEndSwipe = (e, onSwipeLeft, onSwipeRight) => {
 let listener = null
 export const onShowSearchModal = () => {
     $('#search-modal').css('display', 'flex')
-    $('#search-form').focus()
+    $('#search-form-input').focus()
     setTimeout(() => {  // prevent race condition
         onClickOutside('.Search-form-container')
         document.addEventListener('click', listener)

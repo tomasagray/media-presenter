@@ -6,10 +6,20 @@
 </head>
 <body>
 <div th:fragment="search-modal" class="Search-modal" id="search-modal">
+    <script type="text/javascript">
+        $(() => {
+            // ensure no trailing space in the search string
+            $('#search-form').submit(() => {
+                let search = $('#search-form-input')
+                let query = search.val() || ''
+                search.val(query.trim())
+            })
+        })
+    </script>
     <div class="Search-form-container">
-        <form action="/search/all" class="Search-form" method="GET">
-            <label for="search-form"></label>
-            <input id="search-form" name="q" placeholder="Search..." type="search"/>
+        <form id="search-form" action="/search/all" class="Search-form" method="GET">
+            <label for="search-form-input"></label>
+            <input id="search-form-input" name="q" placeholder="Search..." type="search"/>
             <button type="submit">
                 <img alt="Search" src="/img/icon/search/search_64.png"/>
             </button>
