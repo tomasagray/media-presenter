@@ -1,0 +1,14 @@
+<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "https://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+<aspectj>
+
+    <weaver>
+        <!-- only weave classes in our application-specific packages and sub-packages -->
+        <include within="net.tomasbot.mp.api.service.ComicBookService"/>
+    </weaver>
+
+    <aspects>
+        <!-- weave in just this aspect -->
+        <aspect name="net.tomasbot.mp.api.service.RandomEntityTimer"/>
+    </aspects>
+
+</aspectj>
