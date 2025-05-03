@@ -54,13 +54,12 @@ let videoWidth, videoHeight = 0
 
 const adjustVideoPlayerOrientation = () => {
     let {width: vw, height: vh} = getViewportDimensions()
+
     if (vw > vh && videoHeight > videoWidth) {  // landscape
-        player.removeClass('CW')
-        player.addClass('rotate CCW')
+        player.removeClass('CW').addClass('rotate CCW')
     } else if (vh > vw && videoWidth > videoHeight) {   // portrait
-        player.removeClass('CCW')
-        player.addClass('rotate CW')
-    } else {
+        player.removeClass('CCW').addClass('rotate CW')
+    } else {    // default
         player.removeClass('rotate CW CCW')
     }
 }
