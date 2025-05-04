@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upcoming changes will appear here
 
+## [0.3.1] - 2025-05-3
+
+### Changed
+
+- Switch to external FFmpeg wrapper library
+
+### Fixed
+
+- Ensured minimum Tag length
+- Comic duplicates
+- Video player rotated orientation
+- Search results: images and comics now display properly, video pagination works, all entity types are represented on
+  global search page
+- Bug: could not upload user data
+
 ## [0.3.0] - 2025-04-27
 
 ### Added
