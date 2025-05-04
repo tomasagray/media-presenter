@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 import net.tomasbot.mp.model.ImageSet;
 import net.tomasbot.mp.model.Tag;
 import net.tomasbot.mp.model.Video;
-import net.tomasbot.mp.plugin.ffmpeg.metadata.FFmpegFormat;
-import net.tomasbot.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegFormat;
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 

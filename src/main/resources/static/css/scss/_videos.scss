@@ -47,8 +47,15 @@
       height: 100vw;
 
       &.CCW {
-        top: -20%;
-        left: 15%;
+        transform: translate(50vh, -25vw) rotate(-90deg);
+
+        @media screen and (min-width: $phone_max) and (max-width: $tablet_landscape_max) {
+          transform: rotate(-90deg) translate(20vh, 15vw);
+        }
+
+        @media screen and (min-width: $tablet_landscape_max) and (max-width: $small_desktop_max) {
+          transform: translate(20vh, -15vw) rotate(-90deg);
+        }
       }
     }
   }

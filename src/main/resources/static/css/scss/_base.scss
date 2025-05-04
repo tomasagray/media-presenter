@@ -35,4 +35,10 @@ input {
   border: 1px solid #aaa;
   background-color: rgba(0, 0, 0, .4);
   color: whitesmoke;
+
+  &:focus-visible {
+    border: none;
+    outline: none;
+    background-color: rgba(140, 140, 140, .2)
+  }
 }

@@ -2,7 +2,7 @@ package net.tomasbot.mp.db.converter;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import net.tomasbot.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
 import net.tomasbot.mp.util.JsonParser;
 
 @Converter

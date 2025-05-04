@@ -1,4 +1,7 @@
+lib/
+reset/
 _dev/
+
 .sass-cache**
 *.css.map
 

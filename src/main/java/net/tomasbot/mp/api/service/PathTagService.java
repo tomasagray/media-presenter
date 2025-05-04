@@ -1,11 +1,14 @@
 package net.tomasbot.mp.api.service;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import net.tomasbot.mp.model.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+import static net.tomasbot.mp.api.service.TagCreationService.MIN_TAG_LEN;
 
 @Service
 public class PathTagService {
@@ -22,8 +25,11 @@ public class PathTagService {
 
     for (int i = 0; i < names; i++) {
       String name = resolved.getName(i).toString().trim();
-      Tag tag = tagService.getOrCreateTag(name);
-      tags.add(tag);
+
+        if (name.length() >= MIN_TAG_LEN) {
+            Tag tag = tagService.getOrCreateTag(name);
+            tags.add(tag);
+        }
     }
 
     return tags;

@@ -1,18 +1,11 @@
 package net.tomasbot.mp.api.service;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegFormat;
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegStream;
+import net.tomasbot.ffmpeg_wrapper.request.SimpleTranscodeRequest;
 import net.tomasbot.mp.model.Video;
 import net.tomasbot.mp.plugin.ffmpeg.FFmpegPlugin;
-import net.tomasbot.mp.plugin.ffmpeg.LoggableThread;
-import net.tomasbot.mp.plugin.ffmpeg.SimpleTranscodeRequest;
-import net.tomasbot.mp.plugin.ffmpeg.metadata.FFmpegFormat;
-import net.tomasbot.mp.plugin.ffmpeg.metadata.FFmpegMetadata;
-import net.tomasbot.mp.plugin.ffmpeg.metadata.FFmpegStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +14,13 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 @Service
 public class TranscodingService {
@@ -84,23 +84,20 @@ public class TranscodingService {
             .to(convertPath)
             .videoCodec(videoCodec)
             .audioCodec(audioCodec)
+                .onEvent(logger::trace)
+                .onError(logger::error)
+                .onComplete(exitCode -> {
+                  if (exitCode == 0) {
+                    onSucceed.accept(convertPath);
+                  } else {
+                    onFail.accept(convertPath);
+                  }
+                })
             .additionalArgs(Map.of("-metadata", "title=" + title))
             .build();
 
     // perform transcode
-    final LoggableThread streamTask = ffmpegPlugin.transcode(request);
-    streamTask
-        .onLoggableEvent(logger::trace)
-        .onError(logger::error)
-        .onComplete(
-            exitCode -> {
-              if (exitCode == 0) {
-                onSucceed.accept(convertPath);
-              } else {
-                onFail.accept(convertPath);
-              }
-            })
-        .start();
+    ffmpegPlugin.transcode(request).start();
   }
 
   @NotNull

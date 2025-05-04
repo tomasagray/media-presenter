@@ -1,7 +1,5 @@
 package net.tomasbot.mp.api.service;
 
-import java.nio.file.Path;
-import java.util.*;
 import net.tomasbot.mp.db.ComicBookRepository;
 import net.tomasbot.mp.db.ComicPageRepository;
 import net.tomasbot.mp.model.ComicBook;
@@ -17,7 +15,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.nio.file.Path;
+import java.util.*;
 
 @Service
 @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -88,6 +90,7 @@ public class ComicBookService {
     return pageRepository.findById(pageId).map(image -> UrlResource.from(image.getUri()));
   }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRES_NEW)
   public synchronized void assignComicPage(@NotNull ComicPage page) {
     Path parent = Path.of(page.getUri()).getParent();
     this.getComicBookAt(parent)

@@ -70,6 +70,7 @@ const adjustViewerOrientation = (url) => {
             viewerDisplay.removeClass('CW')
             viewerDisplay.addClass('rotate CCW')
 
+            // TODO: move this to @media rule?
             // fix for iPads
             if (navigator.platform.includes('Mac')) {
                 $('#image-viewer-display').css('transform', 'translate(15vw, -15%) rotate(-90deg)')

@@ -1,13 +1,9 @@
 package net.tomasbot.mp.api.service;
 
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import net.tomasbot.mp.db.TagRepository;
 import net.tomasbot.mp.model.Tag;
-import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,13 +12,19 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
+
 @Service
 @Scope(value = SCOPE_SINGLETON)
 public class TagCreationService {
 
   private static final Logger logger = LogManager.getLogger(TagCreationService.class);
 
-  private static final int MIN_TAG_LEN = 3;
+    public static final int MIN_TAG_LEN = 3;
   private static final String ALLOWABLE_CHARS = "a-zA-Z0-9' ";
 
   private final TagRepository tagRepository;

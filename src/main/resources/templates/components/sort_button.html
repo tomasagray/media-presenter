@@ -5,10 +5,11 @@
     <title>Sort Button</title>
 </head>
 <body>
+<!--/*@thymesVar id="currentUrl" type="java.lang.String"*/-->"*/-->
 <a data-th-fragment="sortButton(link, text)"
    data-th-href="${link}"
    data-th-text="${text}"
-   th:class="'Sort-button'  + (${link == #ctx.springRequestContext.requestUri} ? ' current': '')">
+   th:class="'Sort-button'  + (${link == currentUrl} ? ' current': '')">
     Button text.
 </a>
 </body>
