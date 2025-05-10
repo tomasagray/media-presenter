@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -20,17 +21,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional(isolation = Isolation.READ_COMMITTED)
 public class ComicBookService {
 
   private static final Logger logger = LogManager.getLogger(ComicBookService.class);
+  private static final int RANDOM_PAGE_SIZE = 100;
 
   private final ComicBookRepository comicBookRepo;
   private final ComicPageRepository pageRepository;
   private final TagManagementService tagService;
   private final PathTagService pathTagService;
+  private final Set<ComicBook> randomComics = new HashSet<>();
 
   @Value("${comics.location}")
   private Path comicsLocation;
@@ -54,8 +58,21 @@ public class ComicBookService {
     return comicBookRepo.findLatest(PageRequest.of(page, size));
   }
 
+  @Scheduled(fixedRate = 30, timeUnit = TimeUnit.SECONDS)
+  public void setRandomPictures() {
+    final PageRequest request = PageRequest.of(0, RANDOM_PAGE_SIZE);
+    List<ComicBook> random = comicBookRepo.findRandomComics(request);
+
+    randomComics.clear();
+    randomComics.addAll(random);
+  }
+
   public List<ComicBook> getRandomComics(int count) {
-    return comicBookRepo.findRandomComics(PageRequest.ofSize(count));
+    if (randomComics.isEmpty()) {
+      return comicBookRepo.findRandomComics(PageRequest.ofSize(count));
+    }
+
+    return RandomEntitySelector.selectRandom(randomComics, count);
   }
 
   public Optional<ComicBook> getComicBook(UUID bookId) {
