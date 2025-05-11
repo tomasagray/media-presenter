@@ -1,12 +1,5 @@
 package net.tomasbot.mp.api.service;
 
-import static java.nio.file.StandardWatchEventKinds.*;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.WatchEvent;
-import java.util.*;
 import net.tomasbot.mp.model.Picture;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +7,14 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.WatchEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import static java.nio.file.StandardWatchEventKinds.*;
 
 @Service
 public class PictureScanningService implements FileScanningService {
@@ -59,23 +60,18 @@ public class PictureScanningService implements FileScanningService {
   }
 
   private void createPicture(@NotNull Path file) {
-    try {
-      if (!pictureService.getPictureByPath(file).isEmpty()) {
-        logger.error("Picture already exists for path: {}", file);
-        return;
-      }
-
-      Picture picture =
-          Picture.pictureBuilder()
-              .uri(file.toUri())
-              .title(FilenameUtils.getBaseName(file.toString()))
-              .build();
-      logger.info("Adding new Picture: {}", picture);
-      pictureFileScanner.scanFileMetadata(picture);
-    } catch (IOException e) {
-      logger.error("Could not parse Picture at: {}", file);
-      invalidFilesService.addInvalidFile(file, Picture.class);
+    if (!pictureService.getPictureByPath(file).isEmpty()) {
+      logger.error("Picture already exists for path: {}", file);
+      return;
     }
+
+    Picture picture =
+        Picture.pictureBuilder()
+            .uri(file.toUri())
+            .title(FilenameUtils.getBaseName(file.toString()))
+            .build();
+    logger.info("Adding new Picture: {}", picture);
+    pictureFileScanner.scanFileMetadata(picture);
   }
 
   @Override
