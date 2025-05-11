@@ -1,14 +1,5 @@
 package net.tomasbot.mp.api.service;
 
-import static java.nio.file.StandardWatchEventKinds.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.WatchEvent;
-import java.util.*;
 import net.tomasbot.mp.api.service.user.UserVideoService;
 import net.tomasbot.mp.model.Video;
 import org.apache.logging.log4j.LogManager;
@@ -16,6 +7,17 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.WatchEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import static java.nio.file.StandardWatchEventKinds.*;
 
 @Service
 public class VideoScanningService implements ConvertFileScanningService<Video> {
@@ -83,18 +85,13 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
   }
 
   private void createVideo(@NotNull Path file) {
-    try {
-      if (!videoService.getVideoByPath(file).isEmpty()) {
-        logger.error("Video already exists at path: {}", file);
-        return;
-      }
-
-      final Video video = new Video(file);
-      videoFileScanner.scanFileMetadata(video);
-    } catch (IOException e) {
-      logger.error("Could not parse Video at: {}", file);
-      invalidFilesService.addInvalidFile(file, Video.class);
+    if (!videoService.getVideoByPath(file).isEmpty()) {
+      logger.error("Video already exists at path: {}", file);
+      return;
     }
+
+    final Video video = new Video(file);
+    videoFileScanner.scanFileMetadata(video);
   }
 
   @Override
