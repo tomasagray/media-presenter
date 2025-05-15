@@ -64,6 +64,7 @@ dependencies {
 
     // Other
     implementation 'commons-io:commons-io:2.14.0'
+    implementation 'org.sejda.imageio:webp-imageio:0.1.6'
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
