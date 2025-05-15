@@ -3,6 +3,7 @@ package net.tomasbot.mp.api.service;
 import net.tomasbot.mp.api.service.user.UserVideoService;
 import net.tomasbot.mp.model.Tag;
 import net.tomasbot.mp.model.Video;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -158,17 +159,36 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
   private void moveVideoToStorage(@NotNull Video video) throws IOException {
     final Path file = video.getFile();
     final Path filename = file.getFileName();
-    final File storedVideoFile = videoStorageLocation.resolve(filename).toFile();
+
+    File storedVideoFile = videoStorageLocation.resolve(filename).toFile();
+    // detect collision
+    if (storedVideoFile.exists()) {
+      storedVideoFile = getMitigatedFilename(storedVideoFile);
+    }
 
     // save temporary tags; will be read in createVideo()
     transferTags.put(storedVideoFile.toPath(), video.getTags());
 
     logger.info("Renaming video file {} to: {}", file, storedVideoFile);
-
     final boolean renamed = file.toFile().renameTo(storedVideoFile);
     if (!renamed) {
       throw new IOException("Could not move video from 'add' to 'storage'");
     }
+  }
+
+  @NotNull
+  private File getMitigatedFilename(@NotNull final File storedVideoFile) {
+    final String storedVideoFileName = storedVideoFile.getName();
+    final String filename = FilenameUtils.removeExtension(storedVideoFileName);
+    final String extension = FilenameUtils.getExtension(storedVideoFileName);
+
+    File mitigated = storedVideoFile;
+    for (int i = 1; mitigated.exists(); i++) {
+      String mitigatedName = String.format("%s (%d).%s", filename, i, extension);
+      mitigated = videoStorageLocation.resolve(mitigatedName).toFile();
+    }
+
+    return mitigated;
   }
 
   public void handleAddVideoEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
