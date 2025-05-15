@@ -26,10 +26,10 @@ public class PathTagService {
     for (int i = 0; i < names; i++) {
       String name = resolved.getName(i).toString().trim();
 
-        if (name.length() >= MIN_TAG_LEN) {
-            Tag tag = tagService.getOrCreateTag(name);
-            tags.add(tag);
-        }
+      if (name.length() >= MIN_TAG_LEN) {
+        Tag tag = tagService.getOrCreateTag(name);
+        tags.add(tag);
+      }
     }
 
     return tags;

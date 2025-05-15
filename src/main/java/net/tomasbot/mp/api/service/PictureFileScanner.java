@@ -47,7 +47,7 @@ public class PictureFileScanner implements FileMetadataScanner<Picture> {
       picture.setHeight(image.getHeight());
       pictureService.save(picture);
     } catch (Throwable e) {
-      logger.error("Could not scan Picture metadata: {}", e.getMessage());
+      logger.error("Could not scan Picture metadata at {} : {}", uri, e.getMessage());
       logger.debug(e);
       invalidFilesService.addInvalidFile(Path.of(uri), Picture.class);
     }

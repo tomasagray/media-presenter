@@ -58,9 +58,11 @@ public class TagCreationService {
       isolation = Isolation.READ_COMMITTED,
       propagation = Propagation.REQUIRED,
       readOnly = true)
-  public synchronized Optional<Tag> fetchTagByName(@NotNull String name) {
-    logger.trace("Getting tag with name: {}", name);
-    return tagRepository.findByNameIgnoreCase(name);
+  public synchronized Optional<Tag> fetchTagByName(@NotNull final String name) {
+    final String normalizedName = normalizeTagName(name);
+    logger.trace("Getting tag with name: {}", normalizedName);
+
+    return tagRepository.findByNameIgnoreCase(normalizedName);
   }
 
   @Transactional(isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
