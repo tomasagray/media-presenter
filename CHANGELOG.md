@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upcoming changes will appear here
 
+## [0.3.3] - 2025-05-15
+
+### Fixed
+
+- Automatically rename videos when moving if a video with that name already exists
+- Attach Tags to Videos when adding via the "add" directory
+
+### Added
+
+- Support for *.webp images
+
 ## [0.3.2] - 2025-05-10
 
 ### Fixed
