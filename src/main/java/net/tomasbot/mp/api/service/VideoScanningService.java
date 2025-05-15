@@ -1,7 +1,9 @@
 package net.tomasbot.mp.api.service;
 
 import net.tomasbot.mp.api.service.user.UserVideoService;
+import net.tomasbot.mp.model.Tag;
 import net.tomasbot.mp.model.Video;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -14,8 +16,8 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -32,19 +34,26 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
   private final FileUtilitiesService fileUtilitiesService;
   private final FileTransferWatcher transferWatcher;
   private final InvalidFilesService invalidFilesService;
+  private final PathTagService pathTagService;
+
+  private final Map<Path, Set<Tag>> transferTags = new ConcurrentHashMap<>();
+
+  @Value("${videos.add-location}")
+  private Path videoAddLocation;
 
   @Value("${videos.storage-location}")
   private Path videoStorageLocation;
 
   VideoScanningService(
-      VideoService videoService,
-      UserVideoService userVideoService,
-      VideoFileScanner videoFileScanner,
-      TranscodingService transcodingService,
-      RecursiveWatcherService watcherService,
-      FileUtilitiesService fileUtilitiesService,
-      FileTransferWatcher transferWatcher,
-      InvalidFilesService invalidFilesService) {
+          VideoService videoService,
+          UserVideoService userVideoService,
+          VideoFileScanner videoFileScanner,
+          TranscodingService transcodingService,
+          RecursiveWatcherService watcherService,
+          FileUtilitiesService fileUtilitiesService,
+          FileTransferWatcher transferWatcher,
+          InvalidFilesService invalidFilesService,
+          PathTagService pathTagService) {
     this.videoService = videoService;
     this.userVideoService = userVideoService;
     this.videoFileScanner = videoFileScanner;
@@ -53,6 +62,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     this.fileUtilitiesService = fileUtilitiesService;
     this.transferWatcher = transferWatcher;
     this.invalidFilesService = invalidFilesService;
+    this.pathTagService = pathTagService;
   }
 
   private static void handleTranscodeVideoFailed(Video video, @NotNull Path converted) {
@@ -84,13 +94,17 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     }
   }
 
-  private void createVideo(@NotNull Path file) {
+  private synchronized void createVideo(@NotNull Path file) {
     if (!videoService.getVideoByPath(file).isEmpty()) {
       logger.error("Video already exists at path: {}", file);
       return;
     }
 
+    // apply Tags obtained from "add" directory
     final Video video = new Video(file);
+    Set<Tag> addedTags = transferTags.remove(file);
+    if (addedTags != null) video.getTags().addAll(addedTags);
+
     videoFileScanner.scanFileMetadata(video);
   }
 
@@ -100,13 +114,19 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     try {
       fileUtilitiesService.repairFilename(file);
       final Video video = new Video(file);
+
+      // set temporary tags
+      Path relativized = videoAddLocation.relativize(file);
+      List<Tag> tags = pathTagService.getTagsFrom(relativized);
+      video.getTags().addAll(tags);
+
       if (transcodingService.requiresTranscode(video)) {
         transcodingService.transcodeVideo(
             video,
-            (converted) -> finalizeTranscodeVideo(file, converted),
-            (converted) -> handleTranscodeVideoFailed(video, converted));
+                (converted) -> finalizeTranscodeVideo(video, converted),
+                (converted) -> handleTranscodeVideoFailed(video, converted));
       } else {
-        moveVideoToStorage(file);
+        moveVideoToStorage(video);
       }
     } catch (Throwable e) {
       logger.error("Error scanning video file to add: {}", e.getMessage(), e);
@@ -114,27 +134,61 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     }
   }
 
-  private void finalizeTranscodeVideo(@NotNull Path file, @NotNull Path converted) {
+  private synchronized void finalizeTranscodeVideo(@NotNull Video video, @NotNull Path converted) {
     try {
       if (converted.toFile().exists()) {
-        moveVideoToStorage(converted);
-        Files.delete(file); // delete original
+        Video convertedVideo = new Video(converted);
+        convertedVideo.getTags().addAll(video.getTags());
+
+        moveVideoToStorage(convertedVideo);
+
+        Path originalVideoFile = video.getFile();
+        logger.info("Deleting original video file after transcode: {}", originalVideoFile);
+        boolean deleted = originalVideoFile.toFile().delete();
+        if (!deleted || originalVideoFile.toFile().exists()) {
+          logger.error("Could not delete original video file after transcode: {}", originalVideoFile);
+        }
       } else {
-        throw new IOException("Could not locate transcoded video: " + converted);
+        logger.error("Could not locate transcoded video: {}", converted);
       }
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
   }
 
-  private void moveVideoToStorage(@NotNull Path file) throws IOException {
+  private void moveVideoToStorage(@NotNull Video video) throws IOException {
+    final Path file = video.getFile();
     final Path filename = file.getFileName();
-    final File videoFile = videoStorageLocation.resolve(filename).toFile();
-    logger.info("Renaming video file {} to: {}", file, videoFile);
-    final boolean renamed = file.toFile().renameTo(videoFile);
+
+    File storedVideoFile = videoStorageLocation.resolve(filename).toFile();
+    // detect collision
+    if (storedVideoFile.exists()) {
+      storedVideoFile = getMitigatedFilename(storedVideoFile);
+    }
+
+    // save temporary tags; will be read in createVideo()
+    transferTags.put(storedVideoFile.toPath(), video.getTags());
+
+    logger.info("Renaming video file {} to: {}", file, storedVideoFile);
+    final boolean renamed = file.toFile().renameTo(storedVideoFile);
     if (!renamed) {
       throw new IOException("Could not move video from 'add' to 'storage'");
     }
+  }
+
+  @NotNull
+  private File getMitigatedFilename(@NotNull final File storedVideoFile) {
+    final String storedVideoFileName = storedVideoFile.getName();
+    final String filename = FilenameUtils.removeExtension(storedVideoFileName);
+    final String extension = FilenameUtils.getExtension(storedVideoFileName);
+
+    File mitigated = storedVideoFile;
+    for (int i = 1; mitigated.exists(); i++) {
+      String mitigatedName = String.format("%s (%d).%s", filename, i, extension);
+      mitigated = videoStorageLocation.resolve(mitigatedName).toFile();
+    }
+
+    return mitigated;
   }
 
   public void handleAddVideoEvent(@NotNull Path path, @NotNull WatchEvent.Kind<?> kind) {
