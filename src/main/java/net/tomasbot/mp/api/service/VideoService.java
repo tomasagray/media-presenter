@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -31,10 +32,12 @@ public class VideoService {
   private final VideoRepository videoRepository;
   private final TagManagementService tagService;
   private final Set<Video> randomVideos = new HashSet<>();
+  private final ThumbnailService thumbnailService;
 
-  public VideoService(VideoRepository videoRepository, TagManagementService tagService) {
+  public VideoService(VideoRepository videoRepository, TagManagementService tagService, ThumbnailService thumbnailService) {
     this.videoRepository = videoRepository;
     this.tagService = tagService;
+    this.thumbnailService = thumbnailService;
   }
 
   @NotNull
@@ -52,6 +55,10 @@ public class VideoService {
 
   public void saveAll(@NotNull Iterable<? extends Video> videos) {
     videoRepository.saveAll(videos);
+  }
+
+  public List<Video> getAll() {
+    return videoRepository.findAll();
   }
 
   public Page<Video> getAll(int page, int pageSize) {
@@ -101,8 +108,9 @@ public class VideoService {
     return videoRepository.findAllByFile(path);
   }
 
-  public void deleteVideo(@NotNull Video video) {
+  public void deleteVideo(@NotNull Video video) throws IOException {
     logger.info("Deleting Video: {}", video);
+    thumbnailService.deleteThumbs(video);
     videoRepository.delete(video);
   }
 

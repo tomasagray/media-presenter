@@ -50,6 +50,10 @@ public class ComicBookService {
     this.pathTagService = pathTagService;
   }
 
+  public List<ComicBook> getAllComics() {
+    return comicBookRepo.findAll();
+  }
+
   public Page<ComicBook> getAllComics(int page, int size) {
     return comicBookRepo.findAll(PageRequest.of(page, size));
   }

@@ -38,6 +38,10 @@ public class PictureService {
     pictureRepo.saveAll(pictures);
   }
 
+  public List<Picture> getAll() {
+    return pictureRepo.findAll();
+  }
+
   public Page<Picture> getAll(int page, int pageSize) {
     return pictureRepo.findAll(PageRequest.of(page, pageSize));
   }

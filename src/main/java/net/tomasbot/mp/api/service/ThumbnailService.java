@@ -1,28 +1,36 @@
 package net.tomasbot.mp.api.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.time.LocalTime;
-import java.util.List;
+import lombok.Getter;
+import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegStream;
+import net.tomasbot.mp.db.ImageRepository;
 import net.tomasbot.mp.model.Image;
+import net.tomasbot.mp.model.ImageSet;
 import net.tomasbot.mp.model.Video;
 import net.tomasbot.mp.plugin.ffmpeg.FFmpegPlugin;
-import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalTime;
+import java.util.*;
 
 @Service
 public class ThumbnailService {
 
   private static final Logger logger = LogManager.getLogger(ThumbnailService.class);
 
+  private final ImageRepository imageRepository;
   private final FFmpegPlugin ffmpeg;
 
+  @Getter
   @Value("${video.thumbnails.location}")
   private Path thumbLocation;
 
@@ -32,8 +40,19 @@ public class ThumbnailService {
   @Value("${video.thumbnails.height}")
   private int defaultHeight;
 
-  public ThumbnailService(FFmpegPlugin ffmpeg) {
+  public ThumbnailService(ImageRepository imageRepository, FFmpegPlugin ffmpeg) {
+    this.imageRepository = imageRepository;
     this.ffmpeg = ffmpeg;
+  }
+
+  public Optional<Image> getThumbnailAt(@NotNull Path path) {
+    List<Image> thumbs = imageRepository.findByUri(path.toUri());
+
+    if (thumbs.isEmpty()) return Optional.empty();
+    if (thumbs.size() > 1)
+      throw new IllegalArgumentException("Found multiple thumbnail entries for same location: " + path);
+
+    return Optional.of(thumbs.get(0));
   }
 
   public void generateVideoThumbnails(@NotNull Video video) throws IOException {
@@ -63,13 +82,14 @@ public class ThumbnailService {
     Path thumbnail =
         ffmpeg.createThumbnail(
             video.getFile(), thumb, LocalTime.ofSecondOfDay(thumbPos), defaultWidth, defaultHeight);
-    return Image.builder()
+    Image image = Image.builder()
         .uri(thumbnail.toUri())
         .width(defaultWidth)
         .height(defaultHeight)
         .filesize(thumbnail.toFile().length())
         .title(FilenameUtils.getBaseName(thumbnail.toString()))
         .build();
+    return imageRepository.save(image);
   }
 
   @NotNull
@@ -90,5 +110,49 @@ public class ThumbnailService {
     } else {
       return 10;
     }
+  }
+
+  @Transactional
+  public void deleteThumbs(@NotNull Video video) throws IOException {
+    ImageSet thumbnails = video.getThumbnails();
+    if (thumbnails != null) {
+      Set<Image> images = thumbnails.getImages();
+      if (images != null && !images.isEmpty())
+        deleteThumbs(images);
+    }
+
+    // delete thumbnail dir; assumes dir = videoId
+    deleteThumbnailDir(video);
+  }
+
+  public void deleteThumbs(@NotNull Collection<Image> images) throws IOException {
+    int deleted = 0;
+    Iterator<Image> iterator = images.iterator();
+    while (iterator.hasNext()) {
+      Image thumbnail = iterator.next();
+      logger.info("Deleting thumbnail: {}", thumbnail);
+
+      iterator.remove();
+      deleteThumbnail(thumbnail);
+      deleted++;
+    }
+
+    logger.info("Deleted {} thumbnails", deleted);
+  }
+
+  public void deleteThumbnail(@NotNull Image thumb) throws IOException {
+    File file = Path.of(thumb.getUri()).toFile();
+    if (file.exists()) {
+      boolean deleted = file.delete();
+      if (!deleted) throw new IOException("Could not delete thumbnail file at: " + file);
+    }
+
+    imageRepository.delete(thumb);
+  }
+
+  private void deleteThumbnailDir(@NotNull Video video) throws IOException {
+    Path thumbDir = thumbLocation.resolve(video.getId().toString());
+    logger.info("Deleting thumbnail directory at: {}", thumbDir);
+    Files.delete(thumbDir);
   }
 }
