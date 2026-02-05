@@ -1,0 +1,6 @@
+DROP
+DATABASE IF EXISTS mp_dev;
+CREATE
+DATABASE mp_dev;
+GRANT ALL PRIVILEGES ON mp_dev.* TO
+'mp'@'%';
