@@ -12,6 +12,11 @@
     <module name="media-presenter.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="net.tomasbot.mp.MpApplication" />
     <option name="VM_PARAMETERS" value="-Dspring.profiles.active=dev-persistent -Dlogging.level.org.springframework=INFO -javaagent:./lib/spring-instrument-6.2.6.jar" />
+      <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+          <option name="credential"/>
+          <option name="region"/>
+          <option name="useCurrentConnection" value="false"/>
+      </extension>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
