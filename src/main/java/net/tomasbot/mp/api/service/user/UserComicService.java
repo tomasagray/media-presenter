@@ -1,7 +1,8 @@
 package net.tomasbot.mp.api.service.user;
 
-import java.util.*;
+import lombok.extern.slf4j.Slf4j;
 import net.tomasbot.mp.api.service.ComicBookService;
+import net.tomasbot.mp.api.service.RandomComicService;
 import net.tomasbot.mp.model.ComicBook;
 import net.tomasbot.mp.model.Favorite;
 import net.tomasbot.mp.user.UserComicBookView;
@@ -12,18 +13,26 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.*;
+
+@Slf4j
 @Service
 @Transactional
 public class UserComicService {
 
   private final UserPreferenceService userPreferenceService;
   private final ComicBookService comicService;
+  private final RandomComicService randomComicService;
   private final UserComicModeller modeller;
 
   public UserComicService(
-          UserPreferenceService userPreferenceService, ComicBookService comicService, UserComicModeller modeller) {
+          UserPreferenceService userPreferenceService,
+          ComicBookService comicService,
+          RandomComicService randomComicService,
+          UserComicModeller modeller) {
     this.userPreferenceService = userPreferenceService;
     this.comicService = comicService;
+    this.randomComicService = randomComicService;
     this.modeller = modeller;
   }
 
@@ -46,8 +55,11 @@ public class UserComicService {
     return comics.stream().map(this::getUserComicBookView).toList();
   }
 
-  public List<UserComicBookView> getRandomUserComics(int count) {
-    return comicService.getRandomComics(count).stream().map(this::getUserComicBookView).toList();
+  public List<UserComicBookView> getRandomUserComics() {
+    List<ComicBook> randomCollection = randomComicService.getRandomCollection();
+    if (randomCollection.isEmpty())
+      randomCollection = comicService.getRandomComics(18);
+    return randomCollection.stream().map(this::getUserComicBookView).toList();
   }
 
   public Optional<UserComicBookView> getUserComicBook(UUID comicId) {

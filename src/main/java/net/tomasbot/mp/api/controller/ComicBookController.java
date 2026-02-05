@@ -1,10 +1,5 @@
 package net.tomasbot.mp.api.controller;
 
-import static net.tomasbot.mp.api.resource.ComicBookResource.ComicBookModeller;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
 import net.tomasbot.mp.api.resource.ComicBookResource;
 import net.tomasbot.mp.api.service.user.UserComicService;
 import net.tomasbot.mp.user.UserComicBookView;
@@ -16,6 +11,12 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+
+import static net.tomasbot.mp.api.resource.ComicBookResource.ComicBookModeller;
 
 @Controller
 @RequestMapping("/comics")
@@ -63,7 +64,7 @@ public class ComicBookController {
   @GetMapping(value = "/random", produces = MediaType.APPLICATION_JSON_VALUE)
   public String getRandomComics(
       @RequestParam(name = "count", defaultValue = "15") int count, @NotNull Model model) {
-    List<UserComicBookView> comics = comicBookService.getRandomUserComics(count);
+    List<UserComicBookView> comics = comicBookService.getRandomUserComics().stream().limit(count).toList();
     CollectionModel<ComicBookResource> resources = modeller.toCollectionModel(comics);
 
     model.addAttribute("page_title", "Comic Books");
@@ -87,7 +88,7 @@ public class ComicBookController {
   }
 
   @GetMapping(value = "/comic/{comicId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ComicBookResource getComic(@PathVariable("comicId") UUID comicId) {
+  public ComicBookResource getComic(@PathVariable UUID comicId) {
     return comicBookService
         .getUserComicBook(comicId)
         .map(modeller::toModel)
@@ -98,7 +99,7 @@ public class ComicBookController {
       value = "/comic/page/{pageId}/data",
       produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
   @ResponseBody
-  public UrlResource getPageData(@PathVariable("pageId") UUID pageId) {
+  public UrlResource getPageData(@PathVariable UUID pageId) {
     return comicBookService
         .getPageData(pageId)
         .orElseThrow(() -> new IllegalArgumentException("Comic page not found: " + pageId));

@@ -1,9 +1,7 @@
 package net.tomasbot.mp.api.service.user;
 
-import static net.tomasbot.mp.user.UserImageView.UserImageModeller;
-
-import java.util.*;
 import net.tomasbot.mp.api.service.PictureService;
+import net.tomasbot.mp.api.service.RandomPictureService;
 import net.tomasbot.mp.model.Favorite;
 import net.tomasbot.mp.model.Picture;
 import net.tomasbot.mp.user.UserImageView;
@@ -13,18 +11,27 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.*;
+
+import static net.tomasbot.mp.user.UserImageView.UserImageModeller;
+
 @Service
 @Transactional
 public class UserPictureService {
 
   private final UserPreferenceService userPreferenceService;
   private final PictureService pictureService;
+  private final RandomPictureService randomPictureService;
   private final UserImageModeller modeller;
 
   public UserPictureService(
-          UserPreferenceService userPreferenceService, PictureService pictureService, UserImageModeller modeller) {
+          UserPreferenceService userPreferenceService,
+          PictureService pictureService,
+          RandomPictureService randomPictureService,
+          UserImageModeller modeller) {
     this.userPreferenceService = userPreferenceService;
     this.pictureService = pictureService;
+    this.randomPictureService = randomPictureService;
     this.modeller = modeller;
   }
 
@@ -32,8 +39,11 @@ public class UserPictureService {
     return pictureService.getLatestPictures(page, size).map(this::getUserImageView);
   }
 
-  public List<UserImageView> getRandomUserPictures(int count) {
-    return pictureService.getRandomPictures(count).stream().map(this::getUserImageView).toList();
+  public List<UserImageView> getRandomUserPictures() {
+    List<Picture> randomCollection = randomPictureService.getRandomCollection();
+    if (randomCollection.isEmpty())
+      randomCollection = pictureService.getRandomPictures(18);
+    return randomCollection.stream().map(this::getUserImageView).toList();
   }
 
   public Optional<UserImageView> getUserPicture(@NotNull UUID picId) {

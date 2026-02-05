@@ -1,10 +1,5 @@
 package net.tomasbot.mp.api.controller;
 
-import static net.tomasbot.mp.api.resource.PictureResource.PictureResourceModeller;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
 import net.tomasbot.mp.api.resource.PictureResource;
 import net.tomasbot.mp.api.service.user.UserPictureService;
 import net.tomasbot.mp.user.UserImageView;
@@ -16,6 +11,12 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+
+import static net.tomasbot.mp.api.resource.PictureResource.PictureResourceModeller;
 
 @Controller
 @RequestMapping("pictures")
@@ -55,7 +56,7 @@ public class PictureController {
   @GetMapping(value = "/random")
   public String getRandomPictures(
       @RequestParam(name = "size", defaultValue = "15") int size, @NotNull Model model) {
-    List<UserImageView> pictures = pictureService.getRandomUserPictures(size);
+    List<UserImageView> pictures = pictureService.getRandomUserPictures().stream().limit(size).toList();
     CollectionModel<PictureResource> resources = modeller.toCollectionModel(pictures);
 
     model.addAttribute("page_title", "Pictures");
@@ -79,7 +80,7 @@ public class PictureController {
   }
 
   @GetMapping(value = "/picture/{picId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public PictureResource getPicture(@PathVariable("picId") UUID picId) {
+  public PictureResource getPicture(@PathVariable UUID picId) {
     return pictureService
         .getUserPicture(picId)
         .map(modeller::toModel)
@@ -90,7 +91,7 @@ public class PictureController {
       value = "/picture/{picId}/data",
       produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
   @ResponseBody
-  public UrlResource getPictureData(@PathVariable("picId") UUID picId) {
+  public UrlResource getPictureData(@PathVariable UUID picId) {
     return pictureService
         .getPictureData(picId)
         .orElseThrow(() -> new IllegalArgumentException("Picture not found: " + picId));
