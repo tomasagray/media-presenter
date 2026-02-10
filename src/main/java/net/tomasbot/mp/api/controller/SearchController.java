@@ -99,6 +99,7 @@ public class SearchController {
     model.addAttribute("page_title", "Videos: " + query);
     model.addAttribute("videos", videoModel);
     navigationLinkModeller.addPagingAttributes(model, videos);
+    navigationLinkModeller.addSortNavLinks(model, VideoController.LINK_PREFIX);
 
     return "video/video_list";
   }
@@ -122,6 +123,7 @@ public class SearchController {
     model.addAttribute("page_title", "Pictures: " + query);
     model.addAttribute("images", pictureModel.getContent());
     navigationLinkModeller.addPagingAttributes(model, pictures);
+    navigationLinkModeller.addSortNavLinks(model, PictureController.LINK_PREFIX);
 
     return "image/image_list";
   }
@@ -145,6 +147,7 @@ public class SearchController {
     model.addAttribute("page_title", "Comic Books: " + query);
     model.addAttribute("comics", comicModel.getContent());
     navigationLinkModeller.addPagingAttributes(model, comics);
+    navigationLinkModeller.addSortNavLinks(model, ComicBookController.LINK_PREFIX);
 
     return "image/image_list";
   }

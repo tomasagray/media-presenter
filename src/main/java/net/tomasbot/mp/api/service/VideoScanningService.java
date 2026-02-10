@@ -225,9 +225,14 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
   }
 
   private void handleDeleteVideo(@NotNull Video video) {
-    boolean invalid = invalidFilesService.deleteInvalidFile(video.getFile(), video.getClass());
-    if (invalid) logger.info("Deleted invalid video: {}", video);
-    userVideoService.unfavoriteForAllUsers(video);
-    videoService.deleteVideo(video);
+    try {
+      boolean invalid = invalidFilesService.deleteInvalidFile(video.getFile(), video.getClass());
+      if (invalid) logger.info("Deleted invalid video: {}", video);
+      userVideoService.unfavoriteForAllUsers(video);
+      videoService.deleteVideo(video);
+    } catch (IOException e) {
+      logger.error("Could not delete {}: {}", video, e.getMessage());
+      logger.debug(e);
+    }
   }
 }

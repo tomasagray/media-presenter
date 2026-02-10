@@ -1,10 +1,11 @@
-import {getLinksArray, getLinkUrl, getViewportDimensions, onEndSwipe, onStartSwipe, toggleFavorite} from "./mp.js";
-import {fetchImageAt, fetchImageAtPosition, fetchImageById, fetchPictureCount, loadImage} from "./mp.image_repo.js";
-import {fetchComic, fetchComicForPage, getComicPageLinks, isComic, loadComic} from "./mp.comic_repo.js";
-import {getState, setState} from "./mp.state.js";
+import {toggleFavorite} from "../mp.endpoints.js";
+import {fetchImageAt, fetchImageAtPosition, fetchImageById, fetchPictureCount, loadImage} from "../data/mp.image_repo.js";
+import {fetchComic, fetchComicForPage, getComicPageLinks, isComic, loadComic} from "../data/mp.comic_repo.js";
+import {getState, setState} from "../data/mp.state.js";
+import {getLinksArray, getLinkUrl, getViewportDimensions, onEndSwipe, onStartSwipe} from "../mp.util";
 
 
-console.log('mp.image.js was picked up')
+console.debug('mp.image.js was picked up')
 
 // UI components
 const viewerContainer = $('#Viewer-container')

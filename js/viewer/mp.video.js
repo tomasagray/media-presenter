@@ -1,13 +1,16 @@
-import {formatSeconds, getLinkUrl, getViewportDimensions, onEndSwipe, onStartSwipe, toggleFavorite} from "./mp.js";
-import {setState} from "./mp.state.js";
-import {fetchVideoById, loadVideo} from "./mp.video_repo.js";
+import {setState} from "../data/mp.state.js";
+import {fetchVideoById, loadVideo} from "../data/mp.video_repo.js";
+import {formatSeconds, getLinkUrl, getViewportDimensions, onEndSwipe, onStartSwipe} from "../mp.util";
+import {toggleFavorite} from "../mp.endpoints";
 
 
-console.log('mp.video.js was picked up')
+console.debug('mp.video.js was picked up')
+
+const idleSeconds = 5
+const viewerControls = $('.Viewer-controls-container')
 
 const playIconSrc = '/img/icon/play/play_32.png'
 const pauseIconSrc = '/img/icon/pause/pause_32.png'
-
 // UI components
 const footerMenu = $('#Footer-menu-container')
 const playerContainer = $('#Video-player-container')
@@ -22,7 +25,6 @@ const currentTimeDisplay = $('#Video-current-time')
 const durationDisplay = $('#Video-duration')
 const slider = $('#Video-time-slider-control')
 const timeIndicators = $('.Video-time-indicator')
-
 const getVideoLink = (links) => links?.find(link => link.rel === 'data')?.href
 
 const cycleImages = (images, getNext) => {
@@ -207,4 +209,19 @@ export const skipVideoTime = (skip) => {
 
     console.log('skipping video to ', targetTime)
     player[0].currentTime = targetTime
+}
+
+let idleTimer, displayStyle
+const hideViewerControls = () => {
+    displayStyle = viewerControls.css('display')
+    viewerControls.fadeOut('fast')
+}
+
+export const resetIdleTimer = () => {
+    clearTimeout(idleTimer)
+    idleTimer = setTimeout(hideViewerControls, idleSeconds * 1_000)
+    viewerControls.stop().css({
+        'opacity': 1,
+        'display': displayStyle ?? 'flex',
+    })
 }

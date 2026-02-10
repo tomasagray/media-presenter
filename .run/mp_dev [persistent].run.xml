@@ -4,7 +4,7 @@
       <env name="CONFIG_ROOT" value="/projectdata/mp/dev/persistent/config/" />
       <env name="DATA_ROOT" value="/projectdata/mp/dev/persistent/data" />
       <env name="DB_PASSWORD" value="media" />
-      <env name="DB_URL" value="jdbc:mysql://192.168.0.107:30306/mp_dev" />
+        <env name="DB_URL" value="jdbc:mysql://192.168.0.239:30306/mp_dev"/>
       <env name="DB_USER" value="mp" />
       <env name="REMEMBER_ME_KEY" value="remember_me" />
     </envs>
@@ -12,6 +12,11 @@
     <module name="media-presenter.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="net.tomasbot.mp.MpApplication" />
     <option name="VM_PARAMETERS" value="-Dspring.profiles.active=dev-persistent -Dlogging.level.org.springframework=INFO -javaagent:./lib/spring-instrument-6.2.6.jar" />
+      <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+          <option name="credential"/>
+          <option name="region"/>
+          <option name="useCurrentConnection" value="false"/>
+      </extension>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

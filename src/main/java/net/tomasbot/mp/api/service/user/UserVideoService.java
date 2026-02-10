@@ -1,9 +1,6 @@
 package net.tomasbot.mp.api.service.user;
 
-import static net.tomasbot.mp.user.UserVideoView.UserVideoModeller;
-
-import java.net.MalformedURLException;
-import java.util.*;
+import net.tomasbot.mp.api.service.RandomVideoService;
 import net.tomasbot.mp.api.service.VideoService;
 import net.tomasbot.mp.model.Favorite;
 import net.tomasbot.mp.model.UserPreferences;
@@ -15,21 +12,29 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.MalformedURLException;
+import java.util.*;
+
+import static net.tomasbot.mp.user.UserVideoView.UserVideoModeller;
+
 @Service
 @Transactional
 public class UserVideoService {
 
   private final VideoService videoService;
   private final UserPreferenceService userPreferenceService;
+  private final RandomVideoService randomVideoService;
   private final UserVideoModeller videoModeller;
 
   public UserVideoService(
-      VideoService videoService,
-      UserPreferenceService userPreferenceService,
-      UserVideoModeller videoModeller) {
+          VideoService videoService,
+          UserPreferenceService userPreferenceService,
+          RandomVideoService randomVideoService,
+          UserVideoModeller videoModeller) {
     this.videoService = videoService;
     this.userPreferenceService = userPreferenceService;
     this.videoModeller = videoModeller;
+    this.randomVideoService = randomVideoService;
   }
 
   public Page<UserVideoView> getAllUserVideos(int page, int size) {
@@ -44,8 +49,11 @@ public class UserVideoService {
     return videoService.getVideo(videoId).map(this::getUserVideoView);
   }
 
-  public List<UserVideoView> getRandomUserVideos(int count) {
-    return videoService.getRandom(count).stream().map(this::getUserVideoView).toList();
+  public List<UserVideoView> getRandomUserVideos() {
+    List<Video> randomVideos = randomVideoService.getRandomCollection();
+    if (randomVideos.isEmpty())
+      randomVideos = videoService.getRandom(18);
+    return randomVideos.stream().map(this::getUserVideoView).toList();
   }
 
   public UserVideoView getUserVideoView(@NotNull Video video) {

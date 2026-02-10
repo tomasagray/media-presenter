@@ -9,32 +9,34 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
 public class VideoService {
 
   private static final Logger logger = LogManager.getLogger(VideoService.class);
-  private static final int RANDOM_PAGE_SIZE = 100;
 
   private final VideoRepository videoRepository;
   private final TagManagementService tagService;
-  private final Set<Video> randomVideos = new HashSet<>();
+  private final ThumbnailService thumbnailService;
 
-  public VideoService(VideoRepository videoRepository, TagManagementService tagService) {
+  public VideoService(
+          VideoRepository videoRepository, TagManagementService tagService, ThumbnailService thumbnailService) {
     this.videoRepository = videoRepository;
     this.tagService = tagService;
+    this.thumbnailService = thumbnailService;
   }
 
   @NotNull
@@ -54,6 +56,10 @@ public class VideoService {
     videoRepository.saveAll(videos);
   }
 
+  public List<Video> getAll() {
+    return videoRepository.findAll();
+  }
+
   public Page<Video> getAll(int page, int pageSize) {
     return videoRepository.findAll(PageRequest.of(page, pageSize));
   }
@@ -62,21 +68,8 @@ public class VideoService {
     return videoRepository.findAllByOrderByAddedDesc(PageRequest.of(page, pageSize));
   }
 
-  @Scheduled(fixedRate = 30, timeUnit = TimeUnit.SECONDS)
-  public void setRandomPictures() {
-    final PageRequest request = PageRequest.of(0, RANDOM_PAGE_SIZE);
-    List<Video> random = videoRepository.findRandom(request);
-
-    randomVideos.clear();
-    randomVideos.addAll(random);
-  }
-
   public List<Video> getRandom(int count) {
-    if (randomVideos.isEmpty()) {
-      return videoRepository.findRandom(PageRequest.ofSize(count));
-    }
-
-    return RandomEntitySelector.selectRandom(randomVideos, count);
+    return videoRepository.findRandom(PageRequest.ofSize(count));
   }
 
   public List<Video> getUnprocessedVideos() {
@@ -101,8 +94,9 @@ public class VideoService {
     return videoRepository.findAllByFile(path);
   }
 
-  public void deleteVideo(@NotNull Video video) {
+  public void deleteVideo(@NotNull Video video) throws IOException {
     logger.info("Deleting Video: {}", video);
+    thumbnailService.deleteThumbs(video);
     videoRepository.delete(video);
   }
 

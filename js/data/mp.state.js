@@ -1,4 +1,4 @@
-console.log('mp.state.js was picked up')
+console.debug('mp.state.js was picked up')
 
 
 let _state = {}

@@ -21,16 +21,11 @@
         <div class="Card-title" data-th-text="${video.title}">Title</div>
         <div data-th-replace="~{components/card_tags::card_tags(entity=${video})}">Tags</div>
     </div>
-    <script data-th-inline="javascript" type="module">
-        import {attachVideoCardHandlers} from "/js/mp.video.js";
-        import {loadVideo} from "/js/mp.video_repo.js";
-
-
+    <script data-th-inline="javascript">
         $(() => {
             const video = [[${video}]]
-
-            loadVideo(video)
-            attachVideoCardHandlers(video.id)
+            mp.videoRepo.loadVideo(video)
+            mp.video.attachVideoCardHandlers(video.id)
         })
     </script>
 </div>

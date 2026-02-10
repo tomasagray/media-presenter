@@ -1,7 +1,5 @@
 package net.tomasbot.mp.api.controller;
 
-import java.util.Collection;
-import java.util.List;
 import net.tomasbot.mp.api.resource.ComicBookResource;
 import net.tomasbot.mp.api.resource.ComicBookResource.ComicBookModeller;
 import net.tomasbot.mp.api.resource.PictureResource;
@@ -19,6 +17,9 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.Collection;
+import java.util.List;
 
 @Controller
 public class HomeController {
@@ -55,11 +56,11 @@ public class HomeController {
 
   @GetMapping({"/", "/home"})
   public String getHomePage(@NotNull Model model) {
-    List<UserVideoView> videos = videoService.getRandomUserVideos(DEFAULT_ITEM_COUNT);
+    List<UserVideoView> videos = videoService.getRandomUserVideos().stream().limit(DEFAULT_ITEM_COUNT).toList();
     CollectionModel<VideoResource> videoResources = videoModeller.toCollectionModel(videos);
-    List<UserImageView> pictures = pictureService.getRandomUserPictures(DEFAULT_ITEM_COUNT);
+    List<UserImageView> pictures = pictureService.getRandomUserPictures().stream().limit(DEFAULT_ITEM_COUNT).toList();
     CollectionModel<PictureResource> pictureResources = pictureModeller.toCollectionModel(pictures);
-    List<UserComicBookView> comics = comicBookService.getRandomUserComics(DEFAULT_ITEM_COUNT);
+    List<UserComicBookView> comics = comicBookService.getRandomUserComics().stream().limit(DEFAULT_ITEM_COUNT).toList();
     CollectionModel<ComicBookResource> comicResources = comicModeller.toCollectionModel(comics);
 
     model.addAttribute("page_title", "Home");

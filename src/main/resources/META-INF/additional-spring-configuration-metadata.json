@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "application.config.rand-collection-max",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of pre-loaded random entity collections."
+  }
+] }

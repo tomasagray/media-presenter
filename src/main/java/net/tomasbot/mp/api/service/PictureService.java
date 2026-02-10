@@ -8,22 +8,20 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PictureService {
 
   private static final Logger logger = LogManager.getLogger(PictureService.class);
-  private static final int RANDOM_PAGE_SIZE = 100;
 
   private final PictureRepository pictureRepo;
   private final TagManagementService tagService;
-  private final Set<Picture> randomPictures = new HashSet<>();
 
   public PictureService(PictureRepository pictureRepo, TagManagementService tagService) {
     this.pictureRepo = pictureRepo;
@@ -38,6 +36,10 @@ public class PictureService {
     pictureRepo.saveAll(pictures);
   }
 
+  public List<Picture> getAll() {
+    return pictureRepo.findAll();
+  }
+
   public Page<Picture> getAll(int page, int pageSize) {
     return pictureRepo.findAll(PageRequest.of(page, pageSize));
   }
@@ -46,21 +48,8 @@ public class PictureService {
     return pictureRepo.findLatest(PageRequest.of(page, pageSize));
   }
 
-  @Scheduled(fixedRate = 30, timeUnit = TimeUnit.SECONDS)
-  public void setRandomPictures() {
-    final PageRequest request = PageRequest.of(0, RANDOM_PAGE_SIZE);
-    List<Picture> random = pictureRepo.findRandom(request);
-
-    randomPictures.clear();
-    randomPictures.addAll(random);
-  }
-
   public List<Picture> getRandomPictures(int count) {
-    if (randomPictures.isEmpty()) {
-      return pictureRepo.findRandom(PageRequest.ofSize(count));
-    }
-
-    return RandomEntitySelector.selectRandom(randomPictures, count);
+    return pictureRepo.findRandom(PageRequest.ofSize(count));
   }
 
   public List<Picture> getUnprocessedPictures() {

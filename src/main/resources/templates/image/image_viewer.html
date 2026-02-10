@@ -6,10 +6,8 @@
 </head>
 <body>
 <div class="Image-viewer-container" data-th-fragment="image-viewer" id="image-viewer-container">
-    <script data-th-inline="javascript" type="module">
-        import {attachImageViewerHandlers} from "/js/mp.image.js";
-
-        $(() => attachImageViewerHandlers())
+    <script data-th-inline="javascript">
+        $(() => mp.image.attachImageViewerHandlers())
     </script>
     <div class="Image-viewer" id="image-viewer">
         <div id="image-viewer-display"></div>

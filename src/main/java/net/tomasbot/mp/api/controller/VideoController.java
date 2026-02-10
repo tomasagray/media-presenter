@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/videos")
 public class VideoController {
 
-  private static final String LINK_PREFIX = "/videos";
+  static final String LINK_PREFIX = "/videos";
 
   private final UserVideoService videoService;
   private final VideoResource.VideoResourceModeller modeller;
@@ -65,7 +65,7 @@ public class VideoController {
   @GetMapping(value = "/random")
   public String getRandomVideos(
       @RequestParam(name = "count", defaultValue = "15") int count, @NotNull Model model) {
-    List<UserVideoView> videos = videoService.getRandomUserVideos(count);
+    List<UserVideoView> videos = videoService.getRandomUserVideos();
     CollectionModel<VideoResource> resources = modeller.toCollectionModel(videos);
 
     model.addAttribute("page_title", "Videos");

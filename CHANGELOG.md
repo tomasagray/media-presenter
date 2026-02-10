@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upcoming changes will appear here
 
+## [0.3.4] - 2026-02-10
+
+### Fixed
+
+- Fixed random entity retrieval performance, reliability
+- Limited display length of entity titles
+- Refactored JavaScript code
+
+### Added
+
+- Added top navigation links to type-specific search pages
+- TrashCollectorService to cleanup stray thumbnails, etc.
+
 ## [0.3.3] - 2025-05-15
 
 ### Fixed

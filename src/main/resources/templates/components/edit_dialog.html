@@ -6,28 +6,24 @@
 </head>
 <body>
 <div data-th-fragment="edit-dialog">
-    <script data-th-inline="javascript" type="module">
-        import {setState} from "/js/mp.state.js";
-        import {addTag, onSaveEditDialog, clearEditDialog, onSearchValueChange} from "/js/mp.js";
-
-
+    <script data-th-inline="javascript">
         $(() => {
             const input = $('#Tag-input')
 
             input.on('input', (e) => {
                 const value = e.target.value
-                onSearchValueChange(value)
-                setState({
+                mp.editModal.onSearchValueChange(value)
+                mp.state.setState({
                     editedTag: value
                 })
             })
             $('#Tag-container').on('click', () => input.focus())
             $('#Tag-editor').on('submit', (e) => {
                 e.preventDefault()
-                addTag()
+                mp.editModal.addTag()
             })
-            $('#Save-button').on('click', onSaveEditDialog)
-            $('#Cancel-button').on('click', clearEditDialog)
+            $('#Save-button').on('click', mp.editModal.onSaveEditDialog)
+            $('#Cancel-button').on('click', mp.editModal.clearEditDialog)
         })
     </script>
     <div class="Modal-container" id="Edit-dialog">
