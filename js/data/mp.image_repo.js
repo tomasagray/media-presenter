@@ -1,8 +1,7 @@
-import {fetchFromRepoAt} from "./mp.js";
+import {fetchFromRepoAt} from "../mp.util";
 
 
-console.log('mp.image_repo.js was picked up')
-
+console.debug('mp.image_repo.js was picked up')
 
 const image_repository = new Map()
 

@@ -5,15 +5,14 @@
 </head>
 <body>
 <div class="Page-container">
-    <script data-th-inline="javascript" type="module">
-        import {loadImages} from "/js/mp.image_repo.js";
-        import {loadComics} from "/js/mp.comic_repo.js";
-
+    <script data-th-inline="javascript">
         const images = [[${pictures}]]
-        loadImages(images)
-
         const comics = [[${comics}]]
-        loadComics(comics)
+
+        $(() => {
+            mp.imageRepo.loadImages(images)
+            mp.comicRepo.loadComics(comics)
+        })
     </script>
     <div th:if="${not #lists.isEmpty(videos)}">
         <h1>Videos</h1>

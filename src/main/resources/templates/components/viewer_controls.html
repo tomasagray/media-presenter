@@ -6,11 +6,11 @@
 </head>
 <body>
 <div data-th-fragment="viewer-controls" class="Viewer-controls-container" id="Viewer-controls-container">
-    <script data-th-inline="javascript" type="module">
-        import {resetIdleTimer, showEditDialog} from "/js/mp.js";
-
-        $(() => $(document).on('mousemove click keydown touchstart', resetIdleTimer))
-        $('#Edit-button').on('click', showEditDialog)
+    <script data-th-inline="javascript">
+        $(() => {
+            $(document).on('mousemove click keydown touchstart', mp.util.resetIdleTimer)
+            $('#Edit-button').on('click', mp.editModal.showEditDialog)
+        })
     </script>
     <button class="Viewer-button close" id="Close-viewer-button">
         <img alt="Close" src="/img/icon/close_button/close_button_64.png"/>

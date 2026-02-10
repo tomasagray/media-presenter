@@ -1,7 +1,7 @@
-import {fetchFromRepoAt} from "./mp.js";
+import {fetchFromRepoAt} from "../mp.util";
 
 
-console.log('mp.video_repo.js was picked up')
+console.debug('mp.video_repo.js was picked up')
 
 const video_repository = new Map()
 

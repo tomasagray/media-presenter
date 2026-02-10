@@ -6,12 +6,10 @@
 </head>
 <body>
 <div class="Picture-card" data-th-fragment="imageCard(extraText)">
-    <script data-th-inline="javascript" type="module">
-        import {attachImageHandlers} from "/js/mp.image.js";
-
+    <script data-th-inline="javascript">
         $(() => {
             let image = [[${image}]]
-            attachImageHandlers(image)
+            mp.image.attachImageHandlers(image)
         })
     </script>
     <!--/*@thymesVar id="image" type="net.tomasbot.mp.api.resource.ImageResource<T>"*/-->

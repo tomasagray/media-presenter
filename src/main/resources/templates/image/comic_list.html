@@ -6,11 +6,11 @@
 <body>
 <div class="Page-container">
     <div data-th-replace="~{components/sort_bar::sort-bar}"></div>
-    <script data-th-inline="javascript" type="module">
-        import {loadComics} from "/js/mp.comic_repo.js";
-
+    <script data-th-inline="javascript">
         const comics = [[${comics}]]
-        loadComics(comics)
+        $(() =>
+            mp.comicRepo.loadComics(comics)
+        )
     </script>
     <div>
         <div class="Picture-card-container">

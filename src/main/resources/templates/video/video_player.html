@@ -6,16 +6,14 @@
 </head>
 <body>
 <div data-th-fragment="video-player" id="Video-player-container">
-    <script data-th-inline="javascript" type="module">
-        import {setupVideoPlayer, skipVideoTime} from "/js/mp.video.js";
-
+    <script data-th-inline="javascript">
         const videoSkipSeconds = 10
 
         $(() => {
-            setupVideoPlayer()
+            mp.video.setupVideoPlayer()
 
-            $('#Video-rewind-button').on('click', () => skipVideoTime(-1 * videoSkipSeconds))
-            $('#Video-fast-forward-button').on('click', () => skipVideoTime(videoSkipSeconds))
+            $('#Video-rewind-button').on('click', () => mp.video.skipVideoTime(-1 * videoSkipSeconds))
+            $('#Video-fast-forward-button').on('click', () => mp.video.skipVideoTime(videoSkipSeconds))
         })
     </script>
     <video autoplay id="Video-player" loop>

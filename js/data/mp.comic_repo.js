@@ -1,10 +1,10 @@
-console.log('mp.comic_repo.js was picked up')
+console.debug('mp.comic_repo.js was picked up')
 
 
 const comic_repo = new Map()
 
 export const isComic = (image) => {
-    if (image === null) return false
+    if (!image) return false
     let {links} = image
     if (!links) return false
     let pageLink = links.find(link => link.rel.includes('page_'))
@@ -19,17 +19,11 @@ export const loadComic = (comic) => {
         comic_repo.set(comic.id, comic)
 }
 
-export const loadComics = (comics) => {
-    comics && comics.forEach(comic => loadComic(comic))
-}
+export const loadComics = (comics) => comics && comics.forEach(comic => loadComic(comic))
 
-export const fetchComics = () => {
-    return comic_repo
-}
+export const fetchComics = () => comic_repo
 
-export const fetchComic = (id) => {
-    return comic_repo.get(id)
-}
+export const fetchComic = (id) => comic_repo.get(id)
 
 export const fetchComicForPage = (url) => {
     let result = null
