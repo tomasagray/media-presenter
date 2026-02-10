@@ -22,7 +22,7 @@ import static net.tomasbot.mp.api.resource.ComicBookResource.ComicBookModeller;
 @RequestMapping("/comics")
 public class ComicBookController {
 
-  private static final String LINK_PREFIX = "/comics";
+  static final String LINK_PREFIX = "/comics";
 
   private final UserComicService comicBookService;
   private final ComicBookModeller modeller;

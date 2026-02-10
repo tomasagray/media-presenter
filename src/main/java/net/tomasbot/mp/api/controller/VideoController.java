@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/videos")
 public class VideoController {
 
-  private static final String LINK_PREFIX = "/videos";
+  static final String LINK_PREFIX = "/videos";
 
   private final UserVideoService videoService;
   private final VideoResource.VideoResourceModeller modeller;

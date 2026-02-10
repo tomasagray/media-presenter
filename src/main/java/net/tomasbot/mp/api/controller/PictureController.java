@@ -22,7 +22,7 @@ import static net.tomasbot.mp.api.resource.PictureResource.PictureResourceModell
 @RequestMapping("pictures")
 public class PictureController {
 
-  private static final String LINK_PREFIX = "/pictures";
+  static final String LINK_PREFIX = "/pictures";
 
   private final UserPictureService pictureService;
   private final PictureResourceModeller modeller;
