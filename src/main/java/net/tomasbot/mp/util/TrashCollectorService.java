@@ -1,9 +1,9 @@
 package net.tomasbot.mp.util;
 
-import net.tomasbot.mp.api.service.ComicBookService;
-import net.tomasbot.mp.api.service.PictureService;
 import net.tomasbot.mp.api.service.ThumbnailService;
-import net.tomasbot.mp.api.service.VideoService;
+import net.tomasbot.mp.api.service.user.UserComicService;
+import net.tomasbot.mp.api.service.user.UserPictureService;
+import net.tomasbot.mp.api.service.user.UserVideoService;
 import net.tomasbot.mp.model.ComicBook;
 import net.tomasbot.mp.model.Image;
 import net.tomasbot.mp.model.Picture;
@@ -21,9 +21,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -31,16 +31,16 @@ public class TrashCollectorService {
 
   private static final Logger logger = LogManager.getLogger(TrashCollectorService.class);
 
-  private final VideoService videoService;
+  private final UserVideoService videoService;
   private final ThumbnailService thumbnailService;
-  private final PictureService pictureService;
-  private final ComicBookService comicService;
+  private final UserPictureService pictureService;
+  private final UserComicService comicService;
 
   public TrashCollectorService(
-          VideoService videoService,
+          UserVideoService videoService,
           ThumbnailService thumbnailService,
-          PictureService pictureService,
-          ComicBookService comicService) {
+          UserPictureService pictureService,
+          UserComicService comicService) {
     this.videoService = videoService;
     this.thumbnailService = thumbnailService;
     this.pictureService = pictureService;
@@ -48,25 +48,24 @@ public class TrashCollectorService {
   }
 
   /**
-   * Scans video repository for entries which do not correspond to an existing
-   * location on the filesystem, and deletes them.
+   * Scans the video repository for entries which do not correspond to an existing
+   * location on the filesystem and deletes them.
    */
   @Transactional
   public void cleanVideoTrash() throws IOException {
     int deleted = 0;
     logger.info("Beginning purge of broken video entries in database...");
 
-    List<Video> videos = videoService.getAll();
+    List<Video> videos = videoService.getAllVideos();
     for (Video video : videos) {
-      File videoFile = video.getFile().toFile();
+      File videoFile = video.getLocation().toFile();
       logger.info("Checking video at: {}", videoFile);
 
       if (videoFile.exists()) logger.info("Found video file at: {}", videoFile);
       else {
         logger.warn("Could not find video at: {}; deleting database entry...", videoFile);
 
-        thumbnailService.deleteThumbs(video.getThumbnails().getImages());
-        videoService.deleteVideo(video);
+        videoService.deleteVideo(video.getId());
         deleted++;
       }
     }
@@ -103,7 +102,7 @@ public class TrashCollectorService {
   @Transactional
   public void cleanPictureTrash() {
     int deleted = 0;
-    List<Picture> all = pictureService.getAll();
+    List<Picture> all = pictureService.getAllPictures();
 
     for (Picture picture : all) {
       logger.info("Checking Picture: {}", picture);
@@ -120,7 +119,7 @@ public class TrashCollectorService {
   }
 
   @Transactional
-  public void cleanComicsTrash() {
+  public void cleanComicsTrash() throws IOException {
     int deleted = 0;
     List<ComicBook> comics = comicService.getAllComics();
 
@@ -129,11 +128,13 @@ public class TrashCollectorService {
 
       // check missing pages
       int missing = 0;
-      Set<Image> pages = comic.getImages();
-      for (Image page : pages) {
+      List<Image> pages = new ArrayList<>(comic.getImages());
+
+      for (int i = 0; i < pages.size(); i++) {
+        Image page = pages.get(i);
         Path path = Path.of(page.getUri());
         if (!path.toFile().exists()) {
-          logger.info("Image not found at: {}; deleting from Comic...", page);
+          logger.info("Image not found at: {}; deleting page #{} from Comic...", i + 1, page);
           pictureService.deletePicture(page.getId());
           missing++;
         }
@@ -143,7 +144,7 @@ public class TrashCollectorService {
       File location = comic.getLocation().toFile();
       if (!location.exists() || pages.size() - missing <= 0) {
         logger.info("Comic: {} is empty; deleting...", comic);
-        comicService.delete(comic);
+        comicService.deleteComic(comic.getId());
         deleted++;
       }
 
