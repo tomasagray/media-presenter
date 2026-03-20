@@ -63,7 +63,7 @@ public class UserDataService {
               if (videoOptional.isPresent()) {
                 Video video = videoOptional.get();
                 UserData.Favorite favorite =
-                    new UserData.Favorite(videoId, video.getTitle(), video.getFile());
+                    new UserData.Favorite(videoId, video.getTitle(), video.getLocation());
                 userData.getFavoriteVideos().add(favorite);
               } else
                 throw new IllegalArgumentException(

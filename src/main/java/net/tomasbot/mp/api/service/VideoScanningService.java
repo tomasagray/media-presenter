@@ -142,7 +142,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 
         moveVideoToStorage(convertedVideo);
 
-        Path originalVideoFile = video.getFile();
+        Path originalVideoFile = video.getLocation();
         logger.info("Deleting original video file after transcode: {}", originalVideoFile);
         boolean deleted = originalVideoFile.toFile().delete();
         if (!deleted || originalVideoFile.toFile().exists()) {
@@ -157,7 +157,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
   }
 
   private void moveVideoToStorage(@NotNull Video video) throws IOException {
-    final Path file = video.getFile();
+    final Path file = video.getLocation();
     final Path filename = file.getFileName();
 
     File storedVideoFile = videoStorageLocation.resolve(filename).toFile();
@@ -226,7 +226,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
 
   private void handleDeleteVideo(@NotNull Video video) {
     try {
-      boolean invalid = invalidFilesService.deleteInvalidFile(video.getFile(), video.getClass());
+      boolean invalid = invalidFilesService.deleteInvalidFile(video.getLocation(), video.getClass());
       if (invalid) logger.info("Deleted invalid video: {}", video);
       userVideoService.unfavoriteForAllUsers(video);
       videoService.deleteVideo(video);

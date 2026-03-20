@@ -7,10 +7,13 @@
 <body>
 <div data-th-fragment="edit-dialog">
     <script data-th-inline="javascript">
+        // TODO: handle ESC key
         $(() => {
             const input = $('#Tag-input')
 
+            // setup input handlers
             input.on('input', (e) => {
+                e.preventDefault()
                 const value = e.target.value
                 mp.editModal.onSearchValueChange(value)
                 mp.state.setState({
@@ -23,39 +26,40 @@
                 mp.editModal.addTag()
             })
             $('#Save-button').on('click', mp.editModal.onSaveEditDialog)
+            $('#Delete-button').on('click', mp.editModal.onDeleteEntity)
             $('#Cancel-button').on('click', mp.editModal.clearEditDialog)
         })
     </script>
     <div class="Modal-container" id="Edit-dialog">
-        <div class="Dialog-body">
-            <div class="Dialog-section" style="margin-bottom: 1rem;">
+        <div class="Dialog-body" style="display: flex; justify-content: space-between;">
+            <div class="Dialog-section" style="margin-bottom: 1rem; margin-right: 2rem;">
                 <label for="Entity-title" style="display: none;">Title</label>
                 <input type="text" id="Entity-title" name="title" placeholder="Enter a title..." disabled>
-            </div>
-            <div class="Dialog-section">
-                <label>Tags</label>
+                <label for="Tag-input">Tags</label>
                 <div id="Tag-container" class="Tag-container">
                     <div id="Tag-list" class="Tag-list"></div>
                 </div>
-            </div>
-            <div class="Dialog-section">
                 <form id="Tag-editor" action="#" style="position:relative;">
-                    <label for="Tag-input" style="display: block; margin-bottom: 5px">
-                        Add new Tag
-                    </label>
-                    <input type="text" name="tag_input" id="Tag-input" autocomplete="off"/>
+                    <input type="text" name="tag_input" id="Tag-input" autocomplete="off"
+                           placeholder="Add new  tag..."/>
                     <div id="Tag-suggestion-container" class="Tag-suggestion-container hidden">
                         <ul id="Tag-suggestions" class="Tag-suggestions"></ul>
                     </div>
                 </form>
             </div>
             <div class="Dialog-section" id="Modal-controls">
+                <button class="Delete-button" id="Delete-button">
+                    <span>Delete</span>
+                    <span data-th-replace="~{components/loading_spinner::loading-spinner}"></span>
+                </button>
                 <button class="Save-button" id="Save-button">
                     <span class="Save-button-label">Save</span>
                     <span data-th-replace="~{components/loading_spinner::loading-spinner}"></span>
                 </button>
-                <button class="Cancel-button" id="Cancel-button">Cancel</button>
             </div>
+            <button class="Cancel-button" id="Cancel-button">
+                <img alt="Cancel" src="/img/icon/close_button/close_button_64.png">
+            </button>
         </div>
     </div>
 </div>

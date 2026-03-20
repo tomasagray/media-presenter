@@ -44,7 +44,6 @@ $tagSizeLimit: 200px;
     margin-bottom: .25rem;
     max-width: 280px;
 
-    font-weight: bold;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -129,6 +128,8 @@ $tagSizeLimit: 200px;
 .Loading-spinner {
   display: none;
   position: relative;
+  width: 100%;
+  height: 100%;
 
   img {
     width: 32px;
@@ -181,9 +182,10 @@ $tagSizeLimit: 200px;
 
 #Entity-title {
   display: block;
-  font-size: x-large;
   margin-bottom: 2rem;
   padding: 0;
+  font-size: xx-large;
+  font-weight: bold;
 }
 
 .Tag-container {
@@ -199,6 +201,8 @@ $tagSizeLimit: 200px;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    max-height: 9rem;
+    overflow-y: scroll;
 
     .Entity-tag {
       max-width: $tagSizeLimit;
@@ -243,11 +247,11 @@ $tagSizeLimit: 200px;
 
 #Tag-input {
   width: $tagSizeLimit;
-  border: none;
-  background-color: rgba(0, 0, 0, .2);
+  border: 1px solid rgba(80, 80, 80, .1);
+  background-color: rgba(100, 100, 100, .2);
 
   &:focus-visible {
-    border: none;
+    //border: none;
     outline: none;
     background-color: rgba(140, 140, 140, .2)
   }
@@ -255,8 +259,9 @@ $tagSizeLimit: 200px;
 
 .Tag-suggestion-container {
   position: absolute;
+  left: 6px;
   background-color: #222;
-  border-radius: 0 0 10px 10px;
+  border-radius: 10px;
   display: flex;
   box-shadow: 3px 6px 10px rgba(0, 0, 0, .6);
   max-height: $tagSizeLimit;
@@ -271,7 +276,7 @@ $tagSizeLimit: 200px;
     list-style: none;
     margin: 0;
     padding: 0;
-    width: -moz-available;
+    width: 100%;
 
     li {
       padding: 1rem;
@@ -290,12 +295,11 @@ $tagSizeLimit: 200px;
 
 .Save-button {
   @include modal-button;
-
-  background-color: #003eff;
+  background-color: #3c6cff;
   overflow: hidden;
 
   &:hover {
-    background-color: #3c6cff;
+    background-color: #003eff;
     border-color: white;
   }
 
@@ -305,15 +309,30 @@ $tagSizeLimit: 200px;
   }
 }
 
-.Cancel-button {
+.Delete-button {
   @include modal-button;
 
-  background-color: #aaa;
-  border-color: #666;
-  color: #666;
+  background-color: #ff0000;
+  margin-bottom: 1.5rem;
 
   &:hover {
-    border-color: #333;
-    color: #333;
+    border: 1px solid yellow;
+    color: yellow;
+  }
+}
+
+.Cancel-button {
+  position: absolute;
+  opacity: .6;
+  top: 2.5rem;
+  right: 2.5rem;
+
+  img {
+    width: 28px;
+    height: 28px;
+  }
+
+  &:hover {
+    opacity: .9;
   }
 }

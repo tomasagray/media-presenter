@@ -4,6 +4,7 @@ import net.tomasbot.mp.db.RandomPictureCollectionRepo;
 import net.tomasbot.mp.model.Picture;
 import net.tomasbot.mp.model.RandomEntityCollection;
 import net.tomasbot.mp.model.RandomPictureCollection;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static net.tomasbot.mp.model.RandomEntityCollection.COLLECTION_SIZE;
@@ -65,5 +67,15 @@ public class RandomPictureService implements RandomEntityService<Picture> {
             .map(RandomPictureCollection::getPictures)
             .flatMap(Set::stream)
             .toList();
+  }
+
+  @Override
+  public void deleteContaining(@NotNull UUID entityId) {
+    repository.findAll()
+            .stream()
+            .filter(collection ->
+                    collection.getPictures().stream().anyMatch(pic -> pic.getId().equals(entityId)))
+            .map(RandomEntityCollection::getId)
+            .forEach(repository::deleteById);
   }
 }

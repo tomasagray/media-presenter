@@ -1,11 +1,6 @@
 package net.tomasbot.mp.api.resource;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.sql.Timestamp;
-import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,6 +12,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.*;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @NoArgsConstructor
@@ -80,6 +81,11 @@ public class ComicBookResource extends ImageResource<ComicBookResource> {
               .withRel(FAVORITE_REL));
       model.add(
           linkTo(methodOn(ComicBookController.class).updateComicBook(model)).withRel(UPDATE_REL));
+      model.add(linkTo(ComicBookController.class)
+              .slash("comic")
+              .slash(comicId)
+              .slash("delete")
+              .withRel(DELETE_REL));
 
       return model;
     }

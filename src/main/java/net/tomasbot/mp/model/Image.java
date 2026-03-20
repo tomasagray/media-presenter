@@ -1,20 +1,25 @@
 package net.tomasbot.mp.model;
 
 import jakarta.persistence.*;
+import lombok.*;
+import net.tomasbot.mp.db.converter.UriConverter;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.type.SqlTypes;
+
 import java.net.URI;
+import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import lombok.*;
-import net.tomasbot.mp.db.converter.UriConverter;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.*;
-import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -76,5 +81,10 @@ public class Image implements Editable {
         getWidth(),
         getFilesize(),
         getUri());
+  }
+
+  @Override
+  public Path getLocation() {
+    return uri != null ? Path.of(uri) : null;
   }
 }

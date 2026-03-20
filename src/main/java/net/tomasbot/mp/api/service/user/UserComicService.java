@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.*;
 
 @Slf4j
@@ -92,6 +93,17 @@ public class UserComicService {
         .toList();
   }
 
+  public void unfavoriteForAllUsers(ComicBook comic) {
+    userPreferenceService.getCurrentUserPreferences().getFavoriteComics().stream()
+            .filter(favorite -> favorite.getEntityId().equals(comic.getId()))
+            .forEach(favorite -> userPreferenceService.removeFavorite(favorite.getEntityId()));
+  }
+
+  // === Passthru methods ===
+  public List<ComicBook> getAllComics() {
+    return comicService.getAllComics();
+  }
+
   public Optional<UrlResource> getPageData(UUID pageId) {
     return comicService.getPageData(pageId);
   }
@@ -100,5 +112,25 @@ public class UserComicService {
     ComicBook comicBook = modeller.fromView(comicView);
     ComicBook updated = comicService.updateComic(comicBook);
     return modeller.toView(updated);
+  }
+
+  public void recycleComic(@NotNull UUID comicId) throws IOException {
+    Optional<ComicBook> comicOpt = comicService.getComicBook(comicId);
+    if (comicOpt.isPresent()) {
+      ComicBook comic = comicOpt.get();
+      this.unfavoriteForAllUsers(comic);
+      randomComicService.deleteContaining(comicId);
+      comicService.recycleComic(comic);
+    }
+  }
+
+  public void deleteComic(@NotNull UUID comicId) throws IOException {
+    Optional<ComicBook> comicOpt = comicService.getComicBook(comicId);
+    if (comicOpt.isPresent()) {
+      ComicBook comic = comicOpt.get();
+      this.unfavoriteForAllUsers(comic);
+      randomComicService.deleteContaining(comicId);
+      comicService.delete(comic);
+    }
   }
 }

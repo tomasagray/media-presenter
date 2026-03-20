@@ -62,7 +62,7 @@ public class WatchVideoStorageDirectory implements CommandLineRunner {
   public void run(String... args) throws Exception {
     initializeVideoStorageLocation(videoStorageLocation);
     List<Path> existing =
-        videoService.getAll(0, Integer.MAX_VALUE).stream().map(Video::getFile).toList();
+        videoService.getAll(0, Integer.MAX_VALUE).stream().map(Video::getLocation).toList();
 
     logger.info("Initializing video storage watcher at: '{}'", videoStorageLocation);
     final Instant jobStart = Instant.now();

@@ -153,6 +153,7 @@ const getComicState = (comic) => {
         isFav: comic.favorite ?? false,
         favUrl: getLinkUrl(comic, 'favorite'),
         updateUrl: getLinkUrl(comic, 'update'),
+        deleteUrl: getLinkUrl(comic, 'delete'),
         updateSuccess: onUpdateComic,
     }
 }
@@ -167,6 +168,7 @@ const getPictureState = (picture) => {
         url: getLinkUrl(picture, 'data'),
         favUrl: getLinkUrl(picture, 'favorite'),
         updateUrl: getLinkUrl(picture, 'update'),
+        deleteUrl: getLinkUrl(picture, 'delete'),
         updateSuccess: onUpdatePicture,
     }
 }

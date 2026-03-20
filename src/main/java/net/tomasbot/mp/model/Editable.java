@@ -1,5 +1,6 @@
 package net.tomasbot.mp.model;
 
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.UUID;
 
@@ -12,4 +13,6 @@ public interface Editable {
   void setTitle(String title);
 
   Set<Tag> getTags();
+
+  Path getLocation();
 }

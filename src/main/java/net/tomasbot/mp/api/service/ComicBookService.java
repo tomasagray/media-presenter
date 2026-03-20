@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -31,19 +32,22 @@ public class ComicBookService {
   private final ComicPageRepository pageRepository;
   private final TagManagementService tagService;
   private final PathTagService pathTagService;
+  private final RecyclingService recyclingService;
 
   @Value("${comics.location}")
   private Path comicsLocation;
 
   public ComicBookService(
-      ComicBookRepository comicBookRepo,
-      ComicPageRepository pageRepository,
-      TagManagementService tagService,
-      PathTagService pathTagService) {
+          ComicBookRepository comicBookRepo,
+          ComicPageRepository pageRepository,
+          TagManagementService tagService,
+          PathTagService pathTagService,
+          RecyclingService recyclingService) {
     this.comicBookRepo = comicBookRepo;
     this.pageRepository = pageRepository;
     this.tagService = tagService;
     this.pathTagService = pathTagService;
+    this.recyclingService = recyclingService;
   }
 
   public List<ComicBook> getAllComics() {
@@ -158,5 +162,15 @@ public class ComicBookService {
                 () ->
                     new IllegalArgumentException(
                         "Cannot update non-existent Comic Book: " + comicId));
+  }
+
+  public void deleteComic(@NotNull UUID comicId) {
+    logger.info("Deleting Comic Book: {}", comicId);
+    comicBookRepo.deleteById(comicId);
+  }
+
+  public void recycleComic(@NotNull ComicBook comic) throws IOException {
+    logger.info("Recycling Comic Book: {}", comic.getId());
+    recyclingService.recycle(comic);
   }
 }

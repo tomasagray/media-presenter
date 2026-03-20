@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.time.LocalTime;
 import java.util.*;
@@ -81,7 +82,7 @@ public class ThumbnailService {
       throws IOException {
     Path thumbnail =
         ffmpeg.createThumbnail(
-            video.getFile(), thumb, LocalTime.ofSecondOfDay(thumbPos), defaultWidth, defaultHeight);
+                video.getLocation(), thumb, LocalTime.ofSecondOfDay(thumbPos), defaultWidth, defaultHeight);
     Image image = Image.builder()
         .uri(thumbnail.toUri())
         .width(defaultWidth)
@@ -141,18 +142,26 @@ public class ThumbnailService {
   }
 
   public void deleteThumbnail(@NotNull Image thumb) throws IOException {
-    File file = Path.of(thumb.getUri()).toFile();
-    if (file.exists()) {
-      boolean deleted = file.delete();
-      if (!deleted) throw new IOException("Could not delete thumbnail file at: " + file);
+    try {
+      File file = Path.of(thumb.getUri()).toFile();
+      if (file.exists()) {
+        boolean deleted = file.delete();
+        if (!deleted) throw new IOException("Could not delete thumbnail file at: " + file);
+      }
+    } catch (NoSuchFileException ignore) {
+      // has already been deleted
     }
 
     imageRepository.delete(thumb);
   }
 
   private void deleteThumbnailDir(@NotNull Video video) throws IOException {
-    Path thumbDir = thumbLocation.resolve(video.getId().toString());
-    logger.info("Deleting thumbnail directory at: {}", thumbDir);
-    Files.delete(thumbDir);
+    try {
+      Path thumbDir = thumbLocation.resolve(video.getId().toString());
+      logger.info("Deleting thumbnail directory at: {}", thumbDir);
+      Files.delete(thumbDir);
+    } catch (NoSuchFileException ignore) {
+      // has already been deleted
+    }
   }
 }

@@ -1,12 +1,9 @@
 package net.tomasbot.mp.model;
 
 import jakarta.persistence.*;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.*;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import net.tomasbot.mp.db.converter.PathConverter;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
@@ -15,6 +12,11 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.hibernate.type.SqlTypes;
+
+import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.*;
 
 @Getter
 @Setter
@@ -44,6 +46,9 @@ public class ImageSet implements Editable {
   @IndexedEmbedded
   @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
   private final Set<Tag> tags = new HashSet<>();
+
+  @Convert(converter = PathConverter.class)
+  private Path location;
 
   public void addImage(Image image) {
     this.images.add(image);

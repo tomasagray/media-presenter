@@ -1,11 +1,13 @@
 package net.tomasbot.mp.api.service;
 
 import net.tomasbot.mp.model.RandomEntityCollection;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public interface RandomEntityService<T> {
 
@@ -24,4 +26,6 @@ public interface RandomEntityService<T> {
   }
 
   List<T> getRandomCollection();
+
+  void deleteContaining(@NotNull UUID entityId);
 }

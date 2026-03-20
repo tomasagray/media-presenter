@@ -4,6 +4,7 @@ import net.tomasbot.mp.db.RandomComicCollectionRepo;
 import net.tomasbot.mp.model.ComicBook;
 import net.tomasbot.mp.model.RandomComicBookCollection;
 import net.tomasbot.mp.model.RandomEntityCollection;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -63,5 +65,15 @@ public class RandomComicService implements RandomEntityService<ComicBook> {
             .map(RandomComicBookCollection::getComics)
             .flatMap(Set::stream)
             .toList();
+  }
+
+  @Override
+  public void deleteContaining(@NotNull UUID entityId) {
+    repository.findAll()
+            .stream()
+            .filter(collection ->
+                    collection.getComics().stream().anyMatch(comic -> comic.getId().equals(entityId)))
+            .map(RandomEntityCollection::getId)
+            .forEach(repository::deleteById);
   }
 }

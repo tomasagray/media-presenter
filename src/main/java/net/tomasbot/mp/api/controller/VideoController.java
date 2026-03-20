@@ -1,10 +1,5 @@
 package net.tomasbot.mp.api.controller;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import net.tomasbot.mp.api.resource.VideoResource;
 import net.tomasbot.mp.api.service.user.UserVideoService;
 import net.tomasbot.mp.user.UserVideoView;
@@ -18,6 +13,12 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/videos")
@@ -90,7 +91,7 @@ public class VideoController {
 
   @GetMapping("/video/{videoId}")
   @ResponseBody
-  public VideoResource getVideo(@PathVariable("videoId") UUID videoId) {
+  public VideoResource getVideo(@PathVariable UUID videoId) {
     return videoService
         .getUserVideo(videoId)
         .map(modeller::toModel)
@@ -98,8 +99,7 @@ public class VideoController {
   }
 
   @GetMapping("/video/{videoId}/data")
-  public ResponseEntity<ResourceRegion> getVideoData(
-      @PathVariable("videoId") UUID videoId, @RequestHeader HttpHeaders headers)
+  public ResponseEntity<ResourceRegion> getVideoData(@PathVariable UUID videoId, @RequestHeader HttpHeaders headers)
       throws IOException {
     UrlResource video = videoService.getVideoData(videoId);
     ResourceRegion region = getResourceRegion(video, headers);
@@ -129,8 +129,7 @@ public class VideoController {
   }
 
   @GetMapping(value = "/video/{videoId}/thumb/{thumbId}", produces = MediaType.IMAGE_JPEG_VALUE)
-  public ResponseEntity<UrlResource> getThumbnail(
-      @PathVariable("videoId") UUID videoId, @PathVariable("thumbId") UUID thumbId) {
+  public ResponseEntity<UrlResource> getThumbnail(@PathVariable UUID videoId, @PathVariable UUID thumbId) {
     UrlResource thumb = videoService.getVideoThumb(videoId, thumbId);
     return ResponseEntity.ok(thumb);
   }
@@ -148,5 +147,11 @@ public class VideoController {
     UserVideoView videoView = modeller.fromModel(videoResource);
     UserVideoView updatedView = videoService.updateVideo(videoView);
     return modeller.toModel(updatedView);
+  }
+
+  @DeleteMapping("/video/{videoId}/delete")
+  @ResponseStatus(HttpStatus.OK)
+  public void recycleVideo(@PathVariable UUID videoId) throws IOException {
+    videoService.recycleVideo(videoId);
   }
 }

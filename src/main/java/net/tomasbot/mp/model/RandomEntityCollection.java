@@ -7,6 +7,7 @@ import org.jspecify.annotations.NonNull;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.UUID;
 
 @Getter
 public abstract class RandomEntityCollection<T> {
@@ -14,6 +15,8 @@ public abstract class RandomEntityCollection<T> {
   public static final int COLLECTION_SIZE = 18;
 
   private final Timestamp created = Timestamp.from(Instant.now());
+
+  public abstract Long getId();
 
   public abstract void add(@NotNull T entity);
 

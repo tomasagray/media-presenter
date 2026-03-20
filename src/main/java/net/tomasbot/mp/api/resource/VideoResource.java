@@ -1,12 +1,6 @@
 package net.tomasbot.mp.api.resource;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 import com.fasterxml.jackson.annotation.JsonRootName;
-import java.sql.Timestamp;
-import java.time.Duration;
-import java.util.UUID;
 import lombok.*;
 import net.tomasbot.mp.api.controller.VideoController;
 import net.tomasbot.mp.model.ImageSet;
@@ -16,6 +10,13 @@ import org.springframework.hateoas.server.core.Relation;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.util.UUID;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Data
 @NoArgsConstructor
@@ -66,6 +67,11 @@ public class VideoResource extends EntityResource<VideoResource> {
       model.add(linkTo(methodOn(VideoController.class).updateVideo(model)).withRel(UPDATE_REL));
       model.add(
           linkTo(methodOn(VideoController.class).toggleVideoFavorite(videoId)).withRel(FAVORITE_REL));
+      model.add(linkTo(VideoController.class)
+              .slash("video")
+              .slash(videoId)
+              .slash("delete")
+              .withRel(DELETE_REL));
       // add thumb links
       ImageSet thumbnails = entity.getThumbnails();
       if (thumbnails != null) {

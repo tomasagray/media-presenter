@@ -11,9 +11,15 @@ const tagInput = $('#Tag-input')
 const tagList = $('#Tag-list')
 const editDialog = $('#Edit-dialog')
 
+// save button
 const saveButton = $('#Save-button')
 const saveButtonLabel = $('#Save-button span')
 const saveSpinner = $('#Save-button .Loading-spinner')
+// delete button
+const deleteButton = $('#Delete-button')
+const deleteButtonLabel = $('#Delete-button span')
+const deleteSpinner = $('#Delete-button .Loading-spinner')
+// tag suggestions
 const suggestionContainer = $('#Tag-suggestion-container')
 const tagSuggestions = $('#Tag-suggestions')
 
@@ -151,15 +157,22 @@ export const clearEditDialog = () => {
     unlockEditModal()
 }
 
-const lockEditDialog = () => {
+const lockEditModal = (purpose) => {
     saveButton.prop('disabled', true)
+    deleteButton.prop('disabled', true)
     tagInput.prop('disabled', true)
-    saveButtonLabel.css('display', 'none')
-    saveSpinner.css('display', 'inline-block')
+    if (purpose === 'delete') {
+        deleteButtonLabel.css('display', 'none')
+        deleteSpinner.css('display', 'inline-block')
+    } else {
+        saveButtonLabel.css('display', 'none')
+        saveSpinner.css('display', 'inline-block')
+    }
 }
 
 const unlockEditModal = () => {
     saveButton.prop('disabled', false)
+    deleteButton.prop('disabled', false)
     saveButtonLabel.css('display', 'flex')
     saveSpinner.css('display', 'none')
     tagInput.prop('disabled', false)
@@ -187,9 +200,33 @@ const updateEntity = (link, entity, done) => {
 
 export const onSaveEditDialog = () => {
     const {editedEntity, updateUrl, updateSuccess} = getState()
-    lockEditDialog()
+    lockEditModal('save')
     updateEntity(updateUrl, editedEntity, response => {
         unlockEditModal()
         updateSuccess && updateSuccess(response)
     })
+}
+
+export const onDeleteEntity = () => {
+    console.log('state', getState())
+
+    const {editedEntity, deleteUrl} = getState()
+    console.log('deleting entity', editedEntity, deleteUrl)
+    lockEditModal('delete')
+
+    // send delete request
+    const request = {
+        url: deleteUrl,
+        method: 'DELETE',
+    }
+    $.ajax(request)
+        .done(response => {
+            console.log('deleted entity', response)
+            window.location.reload()
+        })
+        // TODO: show error message
+        .fail(err => {
+            console.error('failed deleting!', err.statusText)
+            unlockEditModal()
+        })
 }
