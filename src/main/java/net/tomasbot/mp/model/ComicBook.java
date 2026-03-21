@@ -1,18 +1,16 @@
 package net.tomasbot.mp.model;
 
 import jakarta.persistence.Entity;
-
-import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
+import java.util.Objects;
+
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @SuperBuilder
 @Entity
@@ -29,5 +27,10 @@ public class ComicBook extends ImageSet {
   @Override
   public int hashCode() {
     return getClass().hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return String.format("[ID=%s, title=%s, added=%s]", getId(), getTitle(), getAdded());
   }
 }

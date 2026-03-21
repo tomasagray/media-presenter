@@ -58,6 +58,14 @@ public class ImageSet implements Editable {
     return images.stream().filter(img -> img.getId().equals(imageId)).findFirst().orElse(null);
   }
 
+  public void removeImage(Image image) {
+    this.images.remove(image);
+  }
+
+  public boolean isEmpty() {
+    return images.isEmpty();
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

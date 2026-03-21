@@ -4,13 +4,12 @@ import net.tomasbot.mp.api.service.ThumbnailService;
 import net.tomasbot.mp.api.service.user.UserComicService;
 import net.tomasbot.mp.api.service.user.UserPictureService;
 import net.tomasbot.mp.api.service.user.UserVideoService;
-import net.tomasbot.mp.model.ComicBook;
-import net.tomasbot.mp.model.Image;
-import net.tomasbot.mp.model.Picture;
-import net.tomasbot.mp.model.Video;
+import net.tomasbot.mp.db.ComicPageRepository;
+import net.tomasbot.mp.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,16 +34,19 @@ public class TrashCollectorService {
   private final ThumbnailService thumbnailService;
   private final UserPictureService pictureService;
   private final UserComicService comicService;
+  private final ComicPageRepository comicPageRepo;
 
   public TrashCollectorService(
           UserVideoService videoService,
           ThumbnailService thumbnailService,
           UserPictureService pictureService,
-          UserComicService comicService) {
+          UserComicService comicService,
+          ComicPageRepository comicPageRepo) {
     this.videoService = videoService;
     this.thumbnailService = thumbnailService;
     this.pictureService = pictureService;
     this.comicService = comicService;
+    this.comicPageRepo = comicPageRepo;
   }
 
   /**
@@ -59,10 +61,9 @@ public class TrashCollectorService {
     List<Video> videos = videoService.getAllVideos();
     for (Video video : videos) {
       File videoFile = video.getLocation().toFile();
-      logger.info("Checking video at: {}", videoFile);
+      logger.trace("Checking video at: {}", videoFile);
 
-      if (videoFile.exists()) logger.info("Found video file at: {}", videoFile);
-      else {
+      if (!videoFile.exists()) {
         logger.warn("Could not find video at: {}; deleting database entry...", videoFile);
 
         videoService.deleteVideo(video.getId());
@@ -80,16 +81,14 @@ public class TrashCollectorService {
     Files.walkFileTree(thumbLocation, new SimpleFileVisitor<>() {
       @Override
       public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) throws IOException {
-        logger.info("Checking for thumbnail: {} in database...", file);
+        logger.trace("Checking for thumbnail: {} in database...", file);
 
         Optional<Image> thumbnailOpt = thumbnailService.getThumbnailAt(file);
         if (thumbnailOpt.isEmpty()) {
-          logger.info("Thumbnail at: {} not found in database; deleting...", file);
+          logger.warn("Thumbnail at: {} not found in database; deleting...", file);
           boolean deleted = file.toFile().delete();
           if (!deleted) throw new IOException("Could not delete stray thumbnail at: " + file);
           delCount.incrementAndGet();
-        } else {
-          logger.info("Thumbnail was found");
         }
 
         return FileVisitResult.CONTINUE;
@@ -105,11 +104,11 @@ public class TrashCollectorService {
     List<Picture> all = pictureService.getAllPictures();
 
     for (Picture picture : all) {
-      logger.info("Checking Picture: {}", picture);
+      logger.trace("Checking Picture: {}", picture);
       File picFile = Path.of(picture.getUri()).toFile();
 
       if (!picFile.exists()) {
-        logger.info("Could not find picture at: {}; deleting...", picFile);
+        logger.warn("Could not find picture at: {}; deleting...", picFile);
         pictureService.deletePicture(picture.getId());
         deleted++;
       }
@@ -120,35 +119,70 @@ public class TrashCollectorService {
 
   @Transactional
   public void cleanComicsTrash() throws IOException {
-    int deleted = 0;
+    // clean pages first
+    cleanBrokenComicPages();
+
+    int deleted = 0, missingPages = 0;
     List<ComicBook> comics = comicService.getAllComics();
 
     for (ComicBook comic : comics) {
-      logger.info("Checking Comic Book: {}", comic);
+      logger.trace("Checking Comic Book: {}", comic);
 
       // check missing pages
-      int missing = 0;
-      List<Image> pages = new ArrayList<>(comic.getImages());
-
-      for (int i = 0; i < pages.size(); i++) {
-        Image page = pages.get(i);
-        Path path = Path.of(page.getUri());
-        if (!path.toFile().exists()) {
-          logger.info("Image not found at: {}; deleting page #{} from Comic...", i + 1, page);
-          pictureService.deletePicture(page.getId());
-          missing++;
-        }
+      int missing = checkForMissingPages(comic);
+      if (missing > 0) {
+        missingPages += missing;
+        logger.warn("Comic {} had {} missing pages", comic.getId(), missing);
       }
 
-      // check CB in DB -> nothing
+      // check for empty Comics, broken references
       File location = comic.getLocation().toFile();
-      if (!location.exists() || pages.size() - missing <= 0) {
-        logger.info("Comic: {} is empty; deleting...", comic);
+      if (!location.exists() || comic.isEmpty()) {
+        logger.warn("Comic: {} is empty; deleting...", comic);
         comicService.deleteComic(comic.getId());
         deleted++;
       }
-
-      logger.info("Finished cleaning up Comic Books; deleted {} broken entries", deleted);
     }
+
+    logger.info("Finished cleaning up Comic Books; cleaned up {} missing pages, " +
+            "deleted {} broken entries", missingPages, deleted);
+  }
+
+  private int checkForMissingPages(@NonNull ComicBook comic) {
+    int missing = 0;
+    List<Image> pages = new ArrayList<>(comic.getImages());
+
+    for (int i = 0; i < pages.size(); i++) {
+      ComicPage page = (ComicPage) pages.get(i);
+      logger.trace("Checking page {}", page);
+      Path path = Path.of(page.getUri());
+
+      if (!path.toFile().exists()) {
+        logger.warn("Image not found at: {}; deleting page #{} from Comic...", path, i + 1);
+        comic.removeImage(page);
+        comicService.deletePage(page);
+        missing++;
+      }
+    }
+
+    return missing;
+  }
+
+  private void cleanBrokenComicPages() {
+    int deleted = 0;
+    List<ComicPage> allPages = comicPageRepo.findAll();
+
+    for (ComicPage page : allPages) {
+      logger.trace("Checking page: {}", page);
+
+      File pageFile = Path.of(page.getUri()).toFile();
+      if (!pageFile.exists()) {
+        logger.warn("Page file not found at: {}; deleting page...", pageFile);
+        comicPageRepo.delete(page);
+        deleted++;
+      }
+    }
+
+    logger.info("Finished cleaning up Comic Book Pages; deleted {} broken entries", deleted);
   }
 }

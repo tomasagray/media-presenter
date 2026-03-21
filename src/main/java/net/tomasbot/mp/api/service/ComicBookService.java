@@ -146,10 +146,6 @@ public class ComicBookService {
     return comicBookRepo.saveAndFlush(comicBook);
   }
 
-  public void delete(@NotNull ComicBook comicBook) {
-    comicBookRepo.delete(comicBook);
-  }
-
   public ComicBook updateComic(@NotNull ComicBook update) {
     logger.info("Updating Comic Book: {}", update);
 
@@ -164,13 +160,23 @@ public class ComicBookService {
                         "Cannot update non-existent Comic Book: " + comicId));
   }
 
-  public void deleteComic(@NotNull UUID comicId) {
-    logger.info("Deleting Comic Book: {}", comicId);
-    comicBookRepo.deleteById(comicId);
-  }
-
   public void recycleComic(@NotNull ComicBook comic) throws IOException {
     logger.info("Recycling Comic Book: {}", comic.getId());
     recyclingService.recycle(comic);
+  }
+
+  public void deleteComic(@NotNull UUID comicId) {
+    logger.info("Deleting Comic Book with ID: {}", comicId);
+    comicBookRepo.deleteById(comicId);
+  }
+
+  public void delete(@NotNull ComicBook comicBook) {
+    logger.info("Deleting Comic Book: {}", comicBook);
+    comicBookRepo.delete(comicBook);
+  }
+
+  public void deletePage(@NotNull ComicPage page) {
+    logger.info("Deleting Comic Book Page: {}", page);
+    pageRepository.deleteById(page.getId());
   }
 }

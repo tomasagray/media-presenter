@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.tomasbot.mp.api.service.ComicBookService;
 import net.tomasbot.mp.api.service.RandomComicService;
 import net.tomasbot.mp.model.ComicBook;
+import net.tomasbot.mp.model.ComicPage;
 import net.tomasbot.mp.model.Favorite;
 import net.tomasbot.mp.user.UserComicBookView;
 import net.tomasbot.mp.user.UserComicBookView.UserComicModeller;
@@ -132,5 +133,9 @@ public class UserComicService {
       randomComicService.deleteContaining(comicId);
       comicService.delete(comic);
     }
+  }
+
+  public void deletePage(@NotNull ComicPage page) {
+    comicService.deletePage(page);
   }
 }

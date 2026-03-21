@@ -78,6 +78,7 @@ public class TagCreationService {
   public synchronized void updateTagRefCounts() {
     logger.info("Updating tag reference counts...");
     tagRepository.findAll().forEach(this::updateTagRefCount);
+    logger.info("Finished updating tag reference counts.");
   }
 
   public void updateTagRefCount(@NotNull Tag tag) {
@@ -88,7 +89,7 @@ public class TagCreationService {
     tag.setReferenceCount(total);
     tagRepository.save(tag);
 
-    logger.info("Tag: [{}] is used {} times", name, total);
+    logger.debug("Tag: [{}] is used {} times", name, total);
     if (refCount != total)
       logger.warn(
           "Tag: [{}] reference count mismatch: was {}, should be {}; corrected",
