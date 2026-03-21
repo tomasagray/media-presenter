@@ -50,7 +50,7 @@ dependencies {
     implementation 'org.aspectj:aspectjweaver:1.9.19'
 
     // Database
-    runtimeOnly 'com.mysql:mysql-connector-j:9.0.0'
+    runtimeOnly 'com.mysql:mysql-connector-j:9.3.0'
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
     runtimeOnly 'com.h2database:h2'
