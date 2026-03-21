@@ -39,4 +39,9 @@ public class RandomVideoCollection extends RandomEntityCollection<Video> {
   public void remove(Video entity) {
     super.remove(entity, this.videos);
   }
+
+  @Override
+  public int size() {
+    return this.videos.size();
+  }
 }

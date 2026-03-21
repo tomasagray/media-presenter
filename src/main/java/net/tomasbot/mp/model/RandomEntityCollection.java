@@ -7,7 +7,6 @@ import org.jspecify.annotations.NonNull;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.UUID;
 
 @Getter
 public abstract class RandomEntityCollection<T> {
@@ -44,4 +43,6 @@ public abstract class RandomEntityCollection<T> {
   private void failFull() {
     throw new IllegalStateException(String.format("Cannot add to collection: at capacity (%d)", COLLECTION_SIZE));
   }
+
+  public abstract int size();
 }

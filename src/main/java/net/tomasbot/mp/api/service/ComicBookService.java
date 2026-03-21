@@ -20,7 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -72,10 +75,6 @@ public class ComicBookService {
 
   public List<ComicPage> getAllPages() {
     return pageRepository.findAll();
-  }
-
-  public Collection<ComicPage> getLoosePages() {
-    return pageRepository.findLoosePages();
   }
 
   public Optional<ComicBook> getComicBookAt(Path path) {
@@ -163,11 +162,6 @@ public class ComicBookService {
   public void recycleComic(@NotNull ComicBook comic) throws IOException {
     logger.info("Recycling Comic Book: {}", comic.getId());
     recyclingService.recycle(comic);
-  }
-
-  public void deleteComic(@NotNull UUID comicId) {
-    logger.info("Deleting Comic Book with ID: {}", comicId);
-    comicBookRepo.deleteById(comicId);
   }
 
   public void delete(@NotNull ComicBook comicBook) {

@@ -39,4 +39,9 @@ public class RandomComicBookCollection extends RandomEntityCollection<ComicBook>
   public void remove(ComicBook entity) {
     super.remove(entity, this.comics);
   }
+
+  @Override
+  public int size() {
+    return this.comics.size();
+  }
 }

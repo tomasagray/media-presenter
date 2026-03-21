@@ -39,4 +39,9 @@ public class RandomPictureCollection extends RandomEntityCollection<Picture> {
   public void remove(Picture entity) {
     super.remove(entity, this.pictures);
   }
+
+  @Override
+  public int size() {
+    return this.pictures.size();
+  }
 }
