@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -99,6 +100,37 @@ public class TrashCollectorService {
   }
 
   @Transactional
+  public void deleteBrokenThumbnails() {
+    logger.info("Beginning purge of broken thumbnails...");
+    videoService.getAllVideos()
+            .stream().map(Video::getThumbnails)
+            .forEach(this::fixBrokenThumbs);
+    logger.info("Finished cleaning broken thumbnails.");
+  }
+
+  private void fixBrokenThumbs(@NonNull ImageSet thumbs) {
+    List<Image> broken = new ArrayList<>();
+
+    thumbs.getImages().forEach(thumb -> {
+      File file = Path.of(thumb.getUri()).toFile();
+      if (!file.exists()) broken.add(thumb);
+    });
+
+    broken.forEach(thumb -> deleteThumb(thumbs, thumb));
+  }
+
+  private void deleteThumb(@NotNull ImageSet thumbs, @NotNull Image thumb) {
+    URI uri = thumb.getUri();
+    try {
+      logger.warn("Thumbnail at: {} does not exist; deleting...", uri);
+      thumbnailService.deleteThumbnail(thumb);
+      thumbs.removeImage(thumb);
+    } catch (IOException e) {
+      logger.error("Could not delete broken thumbnail at: {}", uri, e);
+    }
+  }
+
+  @Transactional
   public void cleanPictureTrash() {
     int deleted = 0;
     List<Picture> all = pictureService.getAllPictures();
@@ -118,7 +150,7 @@ public class TrashCollectorService {
   }
 
   @Transactional
-  public void cleanComicsTrash() throws IOException {
+  public void cleanComicsTrash() {
     // clean pages first
     cleanBrokenComicPages();
 

@@ -53,10 +53,6 @@ public class UserComicService {
         : modeller.toView(comic);
   }
 
-  public Collection<UserComicBookView> getUserComicViews(@NotNull Collection<ComicBook> comics) {
-    return comics.stream().map(this::getUserComicBookView).toList();
-  }
-
   public List<UserComicBookView> getRandomUserComics() {
     List<ComicBook> randomCollection = randomComicService.getRandomCollection();
     if (randomCollection.isEmpty())
@@ -125,7 +121,7 @@ public class UserComicService {
     }
   }
 
-  public void deleteComic(@NotNull UUID comicId) throws IOException {
+  public void deleteComic(@NotNull UUID comicId) {
     Optional<ComicBook> comicOpt = comicService.getComicBook(comicId);
     if (comicOpt.isPresent()) {
       ComicBook comic = comicOpt.get();

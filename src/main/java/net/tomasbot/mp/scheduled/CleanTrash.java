@@ -17,6 +17,7 @@ public class CleanTrash {
   public void scheduledCleanup() throws Exception {
     trashCollectorService.cleanVideoTrash();
     trashCollectorService.deleteStrayThumbnails();
+    trashCollectorService.deleteBrokenThumbnails();
 
     trashCollectorService.cleanPictureTrash();
     trashCollectorService.cleanComicsTrash();
