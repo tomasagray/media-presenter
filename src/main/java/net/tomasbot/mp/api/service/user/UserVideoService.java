@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.*;
 
@@ -101,6 +102,10 @@ public class UserVideoService {
   }
 
   // === Passthru methods ===
+  public List<Video> getAllVideos() {
+    return videoService.getAll();
+  }
+
   public UrlResource getVideoData(@NotNull UUID videoId) throws MalformedURLException {
     return videoService.getVideoData(videoId);
   }
@@ -113,5 +118,25 @@ public class UserVideoService {
     Video video = videoModeller.fromView(videoView);
     Video updated = videoService.updateVideo(video);
     return videoModeller.toView(updated);
+  }
+
+  public void recycleVideo(@NotNull UUID videoId) throws IOException {
+    Optional<Video> videoOpt = videoService.getVideo(videoId);
+    if (videoOpt.isPresent()) {
+      Video video = videoOpt.get();
+      this.unfavoriteForAllUsers(video);
+      randomVideoService.deleteContaining(videoId);
+      videoService.recycleVideo(video);
+    } else throw new IllegalArgumentException("Could not find video to recycle: " + videoId);
+  }
+
+  public void deleteVideo(@NotNull UUID videoId) throws IOException {
+    Optional<Video> videoOpt = videoService.getVideo(videoId);
+    if (videoOpt.isPresent()) {
+      Video video = videoOpt.get();
+      randomVideoService.deleteContaining(videoId);
+      this.unfavoriteForAllUsers(video);
+      videoService.deleteVideo(video);
+    } else throw new IllegalArgumentException("Could not find video to delete: " + videoId);
   }
 }

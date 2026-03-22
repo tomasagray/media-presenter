@@ -96,8 +96,12 @@
   width: 150px;
   height: 45px;
   margin: .5rem;
-  border: 1px solid #888;
+  border: 1px solid #242134;
   border-radius: 5px;
   font-size: medium;
   color: white;
+
+  &:disabled, &[disabled] {
+    cursor: wait;
+  }
 }

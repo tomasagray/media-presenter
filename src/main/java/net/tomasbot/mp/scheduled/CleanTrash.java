@@ -1,14 +1,11 @@
-package net.tomasbot.mp.init;
+package net.tomasbot.mp.scheduled;
 
 import net.tomasbot.mp.util.TrashCollectorService;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-@Order
-public class CleanTrash implements CommandLineRunner {
+public class CleanTrash {
 
   private final TrashCollectorService trashCollectorService;
 
@@ -16,15 +13,11 @@ public class CleanTrash implements CommandLineRunner {
     this.trashCollectorService = trashCollectorService;
   }
 
-  @Override
-  public void run(String... args) throws Exception {
-    scheduledCleanup();
-  }
-
-  @Scheduled(cron = "${application.config.trash-cleanup}")
+  @Scheduled(cron = "${application.config.trash-cleanup-schedule}")
   public void scheduledCleanup() throws Exception {
     trashCollectorService.cleanVideoTrash();
     trashCollectorService.deleteStrayThumbnails();
+    trashCollectorService.deleteBrokenThumbnails();
 
     trashCollectorService.cleanPictureTrash();
     trashCollectorService.cleanComicsTrash();

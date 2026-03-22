@@ -6,7 +6,54 @@
 </head>
 <body>
 <span data-th-fragment="loading-spinner" class="Loading-spinner">
-   <img alt="Loading..." src="/img/loading.gif"/>
+<svg id="Loading-spinner" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+     viewBox="0 0 64 64" style="width: 100%; height: 100%" xml:space="preserve">
+    <style type="text/css">
+        .st0 {
+            opacity: 1;
+            fill: none;
+            stroke: ghostwhite;
+            stroke-width: 2;
+        }
+
+        .st1 {
+            opacity: 1;
+            fill: none;
+            stroke: ghostwhite;
+            stroke-width: 2;
+        }
+    </style>
+    <g>
+        <circle class="st0" cx="32" cy="32" r="64" opacity=".9">
+            <animate attributeName="r"
+                     from="8" to="64"
+                     begin="0s"
+                     dur="2.5s"
+                     calcMode="spline"
+                     repeatCount="indefinite"/>
+               <animate attributeName="opacity"
+                        from=".9" to="0"
+                        begin="0s"
+                        dur="2.5s"
+                        calcMode="spline"
+                        repeatCount="indefinite"/>
+        </circle>
+        <circle class="st1" cx="32" cy="32" r="32">
+                    <animate attributeName="r"
+                             from="8" to="64"
+                             begin="0.75s"
+                             dur="1.8s"
+                             calcMode="spline"
+                             repeatCount="indefinite"/>
+               <animate attributeName="opacity"
+                        from=".9" to="0"
+                        begin="0.75s"
+                        dur="1.8s"
+                        calcMode="spline"
+                        repeatCount="indefinite"/>
+        </circle>
+    </g>
+</svg>
 </span>
 </body>
 </html>

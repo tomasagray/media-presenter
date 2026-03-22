@@ -1,16 +1,17 @@
 package net.tomasbot.mp.init;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @Order(2)
@@ -20,7 +21,8 @@ public class CreateRequiredDirs implements CommandLineRunner {
 
   @Value(
       "#{'${pictures.location}, ${comics.location}, ${videos.add-location}, ${videos.storage-location},"
-          + " ${videos.convert-location}, ${video.thumbnails.location}'.split(', ')}")
+              + " ${videos.convert-location}, ${video.thumbnails.location}, ${application.config.recycle-bin-location}'"
+              + ".split(', ')}")
   private final List<Path> required = new ArrayList<>();
 
   @Override
@@ -32,9 +34,8 @@ public class CreateRequiredDirs implements CommandLineRunner {
       if (!directoryFile.exists()) {
         logger.info("Required directory: {} does not exist; creating...", directory);
         boolean created = directoryFile.mkdirs();
-        if (!created && !directoryFile.exists()) {
+        if (!created && !directoryFile.exists())
           throw new IOException("Could not create required directory: " + directory);
-        }
         logger.info("Directory: {} was created.", directory);
       } else {
         logger.info("Required directory: {} was found", directory);

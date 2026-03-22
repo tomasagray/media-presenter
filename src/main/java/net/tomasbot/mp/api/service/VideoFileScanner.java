@@ -45,7 +45,7 @@ public class VideoFileScanner implements FileMetadataScanner<Video> {
   @Override
   @Async("fileScanner")
   public void scanFileMetadata(@NotNull Video video) {
-    final Path file = video.getFile();
+    final Path file = video.getLocation();
 
     try {
 
@@ -77,7 +77,7 @@ public class VideoFileScanner implements FileMetadataScanner<Video> {
   }
 
   private synchronized void setVideoTags(@NotNull Video video) {
-    Path tagPath = videoStorageLocation.relativize(video.getFile());
+    Path tagPath = videoStorageLocation.relativize(video.getLocation());
     final List<Tag> tags = pathTagService.getTagsFrom(tagPath);
     video.getTags().addAll(tags);
   }

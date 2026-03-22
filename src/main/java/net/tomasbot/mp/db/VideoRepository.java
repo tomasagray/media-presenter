@@ -21,6 +21,6 @@ public interface VideoRepository extends JpaRepository<Video, UUID> {
   @Query("SELECT v FROM Video v WHERE v.title IS NULL")
   List<Video> findUnprocessedVideos();
 
-  @Query("SELECT v FROM Video v WHERE v.file = :file")
+  @Query("SELECT v FROM Video v WHERE v.location = :file")
   List<Video> findAllByFile(Path file);
 }

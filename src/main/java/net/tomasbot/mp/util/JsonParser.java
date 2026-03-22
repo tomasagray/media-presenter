@@ -1,8 +1,9 @@
 package net.tomasbot.mp.util;
 
 import com.google.gson.*;
-import java.nio.file.Path;
 import org.jetbrains.annotations.NotNull;
+
+import java.nio.file.Path;
 
 /** JSON parsing wrapper */
 public final class JsonParser {
@@ -25,6 +26,7 @@ public final class JsonParser {
                     }
                     return new JsonPrimitive(path.toString());
                   })
+          .setPrettyPrinting()
           .create();
 
   public static <T> T fromJson(@NotNull String json, @NotNull Class<T> clazz) {

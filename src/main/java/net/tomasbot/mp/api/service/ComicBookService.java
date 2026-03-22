@@ -18,8 +18,12 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -31,19 +35,22 @@ public class ComicBookService {
   private final ComicPageRepository pageRepository;
   private final TagManagementService tagService;
   private final PathTagService pathTagService;
+  private final RecyclingService recyclingService;
 
   @Value("${comics.location}")
   private Path comicsLocation;
 
   public ComicBookService(
-      ComicBookRepository comicBookRepo,
-      ComicPageRepository pageRepository,
-      TagManagementService tagService,
-      PathTagService pathTagService) {
+          ComicBookRepository comicBookRepo,
+          ComicPageRepository pageRepository,
+          TagManagementService tagService,
+          PathTagService pathTagService,
+          RecyclingService recyclingService) {
     this.comicBookRepo = comicBookRepo;
     this.pageRepository = pageRepository;
     this.tagService = tagService;
     this.pathTagService = pathTagService;
+    this.recyclingService = recyclingService;
   }
 
   public List<ComicBook> getAllComics() {
@@ -68,10 +75,6 @@ public class ComicBookService {
 
   public List<ComicPage> getAllPages() {
     return pageRepository.findAll();
-  }
-
-  public Collection<ComicPage> getLoosePages() {
-    return pageRepository.findLoosePages();
   }
 
   public Optional<ComicBook> getComicBookAt(Path path) {
@@ -142,10 +145,6 @@ public class ComicBookService {
     return comicBookRepo.saveAndFlush(comicBook);
   }
 
-  public void delete(@NotNull ComicBook comicBook) {
-    comicBookRepo.delete(comicBook);
-  }
-
   public ComicBook updateComic(@NotNull ComicBook update) {
     logger.info("Updating Comic Book: {}", update);
 
@@ -158,5 +157,20 @@ public class ComicBookService {
                 () ->
                     new IllegalArgumentException(
                         "Cannot update non-existent Comic Book: " + comicId));
+  }
+
+  public void recycleComic(@NotNull ComicBook comic) throws IOException {
+    logger.info("Recycling Comic Book: {}", comic.getId());
+    recyclingService.recycle(comic);
+  }
+
+  public void delete(@NotNull ComicBook comicBook) {
+    logger.info("Deleting Comic Book: {}", comicBook);
+    comicBookRepo.delete(comicBook);
+  }
+
+  public void deletePage(@NotNull ComicPage page) {
+    logger.info("Deleting Comic Book Page: {}", page);
+    pageRepository.deleteById(page.getId());
   }
 }

@@ -9,8 +9,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 
@@ -33,17 +31,15 @@ public class InitializeRandomCollections implements CommandLineRunner {
   }
 
   @Override
-//  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void run(String... args) throws Exception {
-    logger.info("Creating random Video collections...");
+    logger.info("Initializing random collections...");
+
     Collection<RandomEntityCollection<?>> randomVideos = videoService.addRandomCollections(STARTUP_CREATE_COUNT);
     logger.info("Created {} random Video collections.", randomVideos.size());
 
-    logger.info("Creating random Picture collections...");
     Collection<RandomEntityCollection<?>> randomPix = pictureService.addRandomCollections(STARTUP_CREATE_COUNT);
     logger.info("Created {} random Picture collections.", randomPix.size());
 
-    logger.info("Creating random Comic Book collections...");
     Collection<RandomEntityCollection<?>> randomComics = comicService.addRandomCollections(STARTUP_CREATE_COUNT);
     logger.info("Created {} random Comic Book collections.", randomComics.size());
   }

@@ -15,6 +15,7 @@ public abstract class EntityResource<T> extends RepresentationModel<EntityResour
   static final String THUMBNAIL_REL = "thumbnail";
   static final String FAVORITE_REL = "favorite";
   static final String UPDATE_REL = "update";
+  static final String DELETE_REL = "delete";
 
   private UUID id;
   private String title;

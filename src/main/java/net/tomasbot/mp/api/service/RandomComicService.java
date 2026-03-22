@@ -4,20 +4,22 @@ import net.tomasbot.mp.db.RandomComicCollectionRepo;
 import net.tomasbot.mp.model.ComicBook;
 import net.tomasbot.mp.model.RandomComicBookCollection;
 import net.tomasbot.mp.model.RandomEntityCollection;
-import org.jspecify.annotations.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 
 @Service
 public class RandomComicService implements RandomEntityService<ComicBook> {
+
+  private static final Logger logger = LogManager.getLogger(RandomComicService.class);
 
   private final RandomComicCollectionRepo repository;
   private final ComicBookService comicBookService;
@@ -30,30 +32,23 @@ public class RandomComicService implements RandomEntityService<ComicBook> {
     this.comicBookService = comicBookService;
   }
 
-  private @Nullable RandomComicBookCollection createRandomComics() {
+  @Override
+  @Transactional
+  public RandomComicBookCollection addRandomCollection() {
+    logger.info("Creating random Comic Book collections...");
     List<ComicBook> comics = comicBookService.getRandomComics(RandomEntityCollection.COLLECTION_SIZE);
 
     if (comics.size() < RandomEntityCollection.COLLECTION_SIZE) return null;
 
-    RandomComicBookCollection collection = new RandomComicBookCollection(comics);
-    return repository.save(collection);
+    RandomComicBookCollection collection = repository.saveAndFlush(new RandomComicBookCollection(comics));
+    logger.info("Created random Comic Book collection with {} comics.", collection.size());
+    return collection;
   }
 
   @Override
   @Transactional
-  @Scheduled(fixedRate = 1, timeUnit = TimeUnit.MINUTES)
-  public RandomComicBookCollection addRandomCollection() {
-    List<RandomComicBookCollection> all = repository.findAll();
-    all.sort(Comparator.comparing(RandomEntityCollection::getCreated));
-
-    if (all.size() >= randomCollectionMax) {
-      // remove oldest
-      RandomComicBookCollection remove = all.remove(0);
-      repository.delete(remove);
-    }
-
-    // add new
-    return createRandomComics();
+  public void limitCollection() {
+    this.limitCollections(repository, randomCollectionMax);
   }
 
   @Override
@@ -63,5 +58,15 @@ public class RandomComicService implements RandomEntityService<ComicBook> {
             .map(RandomComicBookCollection::getComics)
             .flatMap(Set::stream)
             .toList();
+  }
+
+  @Override
+  public void deleteContaining(@NotNull UUID entityId) {
+    repository.findAll()
+            .stream()
+            .filter(collection ->
+                    collection.getComics().stream().anyMatch(comic -> comic.getId().equals(entityId)))
+            .map(RandomEntityCollection::getId)
+            .forEach(repository::deleteById);
   }
 }

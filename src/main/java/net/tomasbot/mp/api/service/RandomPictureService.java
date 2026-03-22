@@ -4,22 +4,24 @@ import net.tomasbot.mp.db.RandomPictureCollectionRepo;
 import net.tomasbot.mp.model.Picture;
 import net.tomasbot.mp.model.RandomEntityCollection;
 import net.tomasbot.mp.model.RandomPictureCollection;
-import org.jspecify.annotations.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 
 import static net.tomasbot.mp.model.RandomEntityCollection.COLLECTION_SIZE;
 
 @Service
 public class RandomPictureService implements RandomEntityService<Picture> {
+
+  private static final Logger logger = LogManager.getLogger(RandomPictureService.class);
 
   private final RandomPictureCollectionRepo repository;
   private final PictureService pictureService;
@@ -32,30 +34,23 @@ public class RandomPictureService implements RandomEntityService<Picture> {
     this.pictureService = pictureService;
   }
 
-  private @Nullable RandomPictureCollection createRandomPictures() {
+  @Override
+  @Transactional
+  public RandomPictureCollection addRandomCollection() {
+    logger.info("Creating random Picture collections...");
     List<Picture> pictures = pictureService.getRandomPictures(COLLECTION_SIZE);
 
     if (pictures.size() < COLLECTION_SIZE) return null;
 
-    RandomPictureCollection collection = new RandomPictureCollection(pictures);
-    return repository.saveAndFlush(collection);
+    RandomPictureCollection collection = repository.saveAndFlush(new RandomPictureCollection(pictures));
+    logger.info("Created random Picture collection with {} pictures.", collection.size());
+    return collection;
   }
 
   @Override
   @Transactional
-  @Scheduled(fixedRate = 1, timeUnit = TimeUnit.MINUTES)
-  public RandomPictureCollection addRandomCollection() {
-    List<RandomPictureCollection> all = repository.findAll();
-    all.sort(Comparator.comparing(RandomEntityCollection::getCreated));
-
-    if (all.size() >= randomCollectionMax) {
-      // remove oldest
-      RandomPictureCollection remove = all.remove(0);
-      repository.delete(remove);
-    }
-
-    // add new
-    return createRandomPictures();
+  public void limitCollection() {
+    this.limitCollections(repository, randomCollectionMax);
   }
 
   @Override
@@ -65,5 +60,15 @@ public class RandomPictureService implements RandomEntityService<Picture> {
             .map(RandomPictureCollection::getPictures)
             .flatMap(Set::stream)
             .toList();
+  }
+
+  @Override
+  public void deleteContaining(@NotNull UUID entityId) {
+    repository.findAll()
+            .stream()
+            .filter(collection ->
+                    collection.getPictures().stream().anyMatch(pic -> pic.getId().equals(entityId)))
+            .map(RandomEntityCollection::getId)
+            .forEach(repository::deleteById);
   }
 }

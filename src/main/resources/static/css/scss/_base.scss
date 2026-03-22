@@ -1,5 +1,8 @@
 @import "variables";
 
+* {
+  font-family: $default_font;
+}
 
 body {
   background-color: $bg_color;

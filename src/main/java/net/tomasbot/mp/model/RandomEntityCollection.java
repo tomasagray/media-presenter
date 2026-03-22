@@ -15,6 +15,8 @@ public abstract class RandomEntityCollection<T> {
 
   private final Timestamp created = Timestamp.from(Instant.now());
 
+  public abstract Long getId();
+
   public abstract void add(@NotNull T entity);
 
   protected void add(@NotNull T entity, @NotNull Collection<T> entities) {
@@ -41,4 +43,6 @@ public abstract class RandomEntityCollection<T> {
   private void failFull() {
     throw new IllegalStateException(String.format("Cannot add to collection: at capacity (%d)", COLLECTION_SIZE));
   }
+
+  public abstract int size();
 }

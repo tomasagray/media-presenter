@@ -56,6 +56,11 @@ public class PictureResource extends ImageResource<PictureResource> {
               .withRel(FAVORITE_REL));
       model.add(linkTo(methodOn(PictureController.class).getPictureData(id)).withRel(DATA_REL));
       model.add(linkTo(methodOn(PictureController.class).updatePicture(model)).withRel(UPDATE_REL));
+      model.add(linkTo(PictureController.class)
+              .slash("picture")
+              .slash(id)
+              .slash("delete")
+              .withRel(DELETE_REL));
       return model;
     }
 

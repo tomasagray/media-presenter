@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -22,10 +23,12 @@ public class PictureService {
 
   private final PictureRepository pictureRepo;
   private final TagManagementService tagService;
+  private final RecyclingService recyclingService;
 
-  public PictureService(PictureRepository pictureRepo, TagManagementService tagService) {
+  public PictureService(PictureRepository pictureRepo, TagManagementService tagService, RecyclingService recyclingService) {
     this.pictureRepo = pictureRepo;
     this.tagService = tagService;
+    this.recyclingService = recyclingService;
   }
 
   public void save(@NotNull Picture picture) {
@@ -85,5 +88,10 @@ public class PictureService {
   public void deletePicture(@NotNull UUID picId) {
     logger.info("Deleting Picture: {}", picId);
     pictureRepo.deleteById(picId);
+  }
+
+  public void recyclePicture(@NotNull Picture picture) throws IOException {
+    logger.info("Recycling Picture: {}", picture.getId());
+    recyclingService.recycle(picture);
   }
 }

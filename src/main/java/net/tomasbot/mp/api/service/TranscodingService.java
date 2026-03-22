@@ -36,13 +36,13 @@ public class TranscodingService {
   @Value("${videos.convert-location}")
   private Path convertLocation;
 
-  public TranscodingService(FFmpegPlugin fFmpegPlugin) {
-    this.ffmpegPlugin = fFmpegPlugin;
+  public TranscodingService(FFmpegPlugin ffmpegPlugin) {
+    this.ffmpegPlugin = ffmpegPlugin;
   }
 
   @NotNull
   private static String getVideoTitleFromFilename(@NotNull Video video) {
-    Path file = video.getFile();
+    Path file = video.getLocation();
     if (file != null) {
       String fileName = file.getFileName().toString();
       if (fileName.contains(".")) {
@@ -80,7 +80,7 @@ public class TranscodingService {
 
     final SimpleTranscodeRequest request =
         SimpleTranscodeRequest.builder()
-            .from(video.getFile().toUri())
+            .from(video.getLocation().toUri())
             .to(convertPath)
             .videoCodec(videoCodec)
             .audioCodec(audioCodec)
@@ -107,7 +107,7 @@ public class TranscodingService {
     if (title != null) {
       filename = String.format("%s.%s", title, SUPPORTED_CONTAINERS.get(0));
     } else {
-      String baseName = FilenameUtils.getBaseName(video.getFile().toString());
+      String baseName = FilenameUtils.getBaseName(video.getLocation().toString());
       filename = String.format("%s.%s", baseName, SUPPORTED_CONTAINERS.get(0));
     }
     return Path.of(filename);
@@ -174,7 +174,7 @@ public class TranscodingService {
   }
 
   public FFmpegMetadata getVideoMetadata(@NotNull Video video) throws IOException {
-    final URI videoUri = video.getFile().toUri();
+    final URI videoUri = video.getLocation().toUri();
     return ffmpegPlugin.readFileMetadata(videoUri);
   }
 }

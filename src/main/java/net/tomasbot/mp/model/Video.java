@@ -33,7 +33,7 @@ public class Video implements Editable {
   private final Timestamp added = Timestamp.from(Instant.now());
 
   @Convert(converter = PathConverter.class)
-  private final Path file;
+  private final Path location;
 
   @OneToOne(cascade = CascadeType.ALL)
   private final ImageSet thumbnails = new ImageSet();
@@ -57,7 +57,7 @@ public class Video implements Editable {
 
   public Video() {
     this.title = null;
-    this.file = null;
+    this.location = null;
   }
 
   public void addThumbnail(Image thumbnail) {
@@ -66,7 +66,7 @@ public class Video implements Editable {
 
   public String toString() {
     return String.format(
-        "[ID=%s, title=%s, file=%s, added=%s]", getId(), getTitle(), getFile(), getAdded());
+        "[ID=%s, title=%s, file=%s, added=%s]", getId(), getTitle(), getLocation(), getAdded());
   }
 
   @Override
@@ -77,7 +77,7 @@ public class Video implements Editable {
         && Objects.equals(getTitle(), video.getTitle())
         && Objects.equals(getAdded(), video.getAdded())
         && Objects.equals(getTags(), video.getTags())
-        && Objects.equals(getFile(), video.getFile())
+        && Objects.equals(getLocation(), video.getLocation())
         && Objects.equals(getThumbnails(), video.getThumbnails())
         && Objects.equals(getMetadata(), video.getMetadata());
   }
@@ -85,6 +85,6 @@ public class Video implements Editable {
   @Override
   public int hashCode() {
     return Objects.hash(
-        getId(), getTitle(), getAdded(), getTags(), getFile(), getThumbnails(), getMetadata());
+        getId(), getTitle(), getAdded(), getTags(), getLocation(), getThumbnails(), getMetadata());
   }
 }

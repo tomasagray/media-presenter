@@ -31,12 +31,17 @@ public class VideoService {
   private final VideoRepository videoRepository;
   private final TagManagementService tagService;
   private final ThumbnailService thumbnailService;
+  private final RecyclingService recyclingService;
 
   public VideoService(
-          VideoRepository videoRepository, TagManagementService tagService, ThumbnailService thumbnailService) {
+          VideoRepository videoRepository,
+          TagManagementService tagService,
+          ThumbnailService thumbnailService,
+          RecyclingService recyclingService) {
     this.videoRepository = videoRepository;
     this.tagService = tagService;
     this.thumbnailService = thumbnailService;
+    this.recyclingService = recyclingService;
   }
 
   @NotNull
@@ -85,19 +90,13 @@ public class VideoService {
     Optional<Video> videoOptional = getVideo(videoId);
     if (videoOptional.isPresent()) {
       Video video = videoOptional.get();
-      return new UrlResource(video.getFile().toUri());
+      return new UrlResource(video.getLocation().toUri());
     }
     throw new IllegalArgumentException("Video not found: " + videoId);
   }
 
   public List<Video> getVideoByPath(@NotNull Path path) {
     return videoRepository.findAllByFile(path);
-  }
-
-  public void deleteVideo(@NotNull Video video) throws IOException {
-    logger.info("Deleting Video: {}", video);
-    thumbnailService.deleteThumbs(video);
-    videoRepository.delete(video);
   }
 
   public UrlResource getVideoThumb(@NotNull UUID videoId, @NotNull UUID thumbId) {
@@ -126,5 +125,22 @@ public class VideoService {
             .map(existing -> tagService.update(existing, update))
             .orElseThrow(
                 () -> new IllegalArgumentException("Cannot update non-existent video: " + videoId));
+  }
+
+  public void deleteVideo(@NotNull UUID videoId) throws IOException {
+    Optional<Video> videoOpt = this.getVideo(videoId);
+    if (videoOpt.isPresent()) deleteVideo(videoOpt.get());
+    else throw new IllegalArgumentException("Could not find video to delete: " + videoId);
+  }
+
+  public void deleteVideo(@NotNull Video video) throws IOException {
+    logger.info("Deleting Video: {}", video);
+    thumbnailService.deleteThumbs(video);
+    videoRepository.delete(video);
+  }
+
+  public void recycleVideo(@NotNull Video video) throws IOException {
+    logger.info("Recycling Video: {}", video.getId());
+    recyclingService.recycle(video);
   }
 }

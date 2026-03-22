@@ -73,17 +73,22 @@
   }
 }
 
+// TODO: extract colors
 .Modal-container {
   @include modal-container;
 
   .Dialog-body {
-    width: 65vw;
-    background-color: #333;
+    position: relative;
+    width: 40rem;
+    height: 20rem;
+    overflow: hidden;
+
+    background-color: #0d0d14;
     padding: 2rem;
-    border: 1px solid #666;
-    border-right-color: #656565;
+    border: 1px solid #242134;
+    border-right-color: #211e2f;
     border-radius: 10px;
-    box-shadow: 3px 6px 10px rgba(0, 0, 0, .6);
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, .6);
 
     .Dialog-section {
       margin-bottom: 1rem;
@@ -91,7 +96,6 @@
 
     label {
       font-size: large;
-      font-weight: bolder;
     }
 
     input[type=text] {
@@ -105,7 +109,8 @@
 
     #Modal-controls {
       display: flex;
-      justify-content: right;
+      flex-direction: column;
+      justify-content: flex-end;
     }
   }
 }
@@ -295,7 +300,6 @@
     width: 100px;
     border-radius: 5px;
     background-color: rgba(180, 180, 180, .4);
-    font-weight: bold;
     margin-right: 2rem;
     padding: 4px;
     text-decoration: none;

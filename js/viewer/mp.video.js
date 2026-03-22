@@ -97,6 +97,7 @@ const showVideoPlayer = (id) => {
         title: video.title,
         tags: video.tags,
         updateUrl: getLinkUrl(video, 'update'),
+        deleteUrl: getLinkUrl(video, 'delete'),
         updateSuccess: onUpdateVideo,
     })
 

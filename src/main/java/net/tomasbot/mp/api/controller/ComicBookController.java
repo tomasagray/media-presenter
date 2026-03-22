@@ -7,11 +7,13 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -29,9 +31,9 @@ public class ComicBookController {
   private final NavigationLinkModeller navigationLinkModeller;
 
   public ComicBookController(
-      UserComicService comicBookService,
-      ComicBookModeller modeller,
-      NavigationLinkModeller navigationLinkModeller) {
+          UserComicService comicBookService,
+          ComicBookModeller modeller,
+          NavigationLinkModeller navigationLinkModeller) {
     this.comicBookService = comicBookService;
     this.modeller = modeller;
     this.navigationLinkModeller = navigationLinkModeller;
@@ -39,9 +41,9 @@ public class ComicBookController {
 
   @GetMapping({"", "/", "/latest"})
   public String getLatestComics(
-      @RequestParam(name = "page", defaultValue = "0") int page,
-      @RequestParam(name = "size", defaultValue = "15") int size,
-      @NotNull Model model) {
+          @RequestParam(name = "page", defaultValue = "0") int page,
+          @RequestParam(name = "size", defaultValue = "15") int size,
+          @NotNull Model model) {
     Page<UserComicBookView> comics = comicBookService.getLatestUserComics(page, size);
     List<ComicBookResource> resources = comics.get().map(modeller::toModel).toList();
 
@@ -52,18 +54,18 @@ public class ComicBookController {
 
     return "image/comic_list";
   }
-  
+
   @GetMapping(value = "/all/paged", produces = MediaType.APPLICATION_JSON_VALUE)
   public CollectionModel<ComicBookResource> getAllComicsPaged(
-      @RequestParam(name = "page", defaultValue = "0") int page,
-      @RequestParam(name = "size", defaultValue = "15") int size) {
+          @RequestParam(name = "page", defaultValue = "0") int page,
+          @RequestParam(name = "size", defaultValue = "15") int size) {
     Page<UserComicBookView> comics = comicBookService.getAllUserComics(page, size);
     return modeller.toCollectionModel(comics);
   }
 
   @GetMapping(value = "/random", produces = MediaType.APPLICATION_JSON_VALUE)
   public String getRandomComics(
-      @RequestParam(name = "count", defaultValue = "15") int count, @NotNull Model model) {
+          @RequestParam(name = "count", defaultValue = "15") int count, @NotNull Model model) {
     List<UserComicBookView> comics = comicBookService.getRandomUserComics().stream().limit(count).toList();
     CollectionModel<ComicBookResource> resources = modeller.toCollectionModel(comics);
 
@@ -90,19 +92,19 @@ public class ComicBookController {
   @GetMapping(value = "/comic/{comicId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ComicBookResource getComic(@PathVariable UUID comicId) {
     return comicBookService
-        .getUserComicBook(comicId)
-        .map(modeller::toModel)
-        .orElseThrow(() -> new IllegalArgumentException("No Comic Book with ID: " + comicId));
+            .getUserComicBook(comicId)
+            .map(modeller::toModel)
+            .orElseThrow(() -> new IllegalArgumentException("No Comic Book with ID: " + comicId));
   }
 
   @GetMapping(
-      value = "/comic/page/{pageId}/data",
-      produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
+          value = "/comic/page/{pageId}/data",
+          produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
   @ResponseBody
   public UrlResource getPageData(@PathVariable UUID pageId) {
     return comicBookService
-        .getPageData(pageId)
-        .orElseThrow(() -> new IllegalArgumentException("Comic page not found: " + pageId));
+            .getPageData(pageId)
+            .orElseThrow(() -> new IllegalArgumentException("Comic page not found: " + pageId));
   }
 
   @PatchMapping(value = "/comic/{comicId}/favorite", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -114,9 +116,15 @@ public class ComicBookController {
 
   @PatchMapping("/comic/update")
   @ResponseBody
-  public ComicBookResource updateComicBook(@RequestBody ComicBookResource comicResource){
+  public ComicBookResource updateComicBook(@RequestBody ComicBookResource comicResource) {
     UserComicBookView comicView = modeller.fromModel(comicResource);
     UserComicBookView updated = comicBookService.updateComic(comicView);
     return modeller.toModel(updated);
+  }
+
+  @DeleteMapping("/comic/{comicId}/delete")
+  @ResponseStatus(HttpStatus.OK)
+  public void recycleComic(@PathVariable UUID comicId) throws IOException {
+    comicBookService.recycleComic(comicId);
   }
 }

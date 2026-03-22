@@ -4,6 +4,7 @@ import net.tomasbot.mp.api.service.PictureService;
 import net.tomasbot.mp.api.service.RandomPictureService;
 import net.tomasbot.mp.model.Favorite;
 import net.tomasbot.mp.model.Picture;
+import net.tomasbot.mp.model.UserPreferences;
 import net.tomasbot.mp.user.UserImageView;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.UrlResource;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.*;
 
 import static net.tomasbot.mp.user.UserImageView.UserImageModeller;
@@ -75,24 +77,56 @@ public class UserPictureService {
     }
   }
 
+  public Collection<UserImageView> getFavoritePictures() {
+    return userPreferenceService.getCurrentUserPreferences().getFavoritePictures().stream()
+            .sorted(Comparator.comparing(Favorite::getTimestamp).reversed())
+            .map(Favorite::getEntityId)
+            .map(pictureService::getPicture)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .map(this::getUserImageView)
+            .toList();
+  }
+
+  public void unfavoriteForAllUsers(Picture picture) {
+    List<UserPreferences> allPreferences = userPreferenceService.getAllUserPreferences();
+    for (UserPreferences preferences : allPreferences) {
+      userPreferenceService.removeFavorite(preferences, picture);
+    }
+  }
+
+  // === Passthru methods ===
+  public List<Picture> getAllPictures() {
+    return pictureService.getAll();
+  }
+
+  public Optional<UrlResource> getPictureData(UUID picId) {
+    return pictureService.getPictureData(picId);
+  }
+
   public UserImageView updatePicture(@NotNull UserImageView imageView) {
     Picture picture = (Picture) modeller.fromView(imageView);
     Picture updated = pictureService.updatePicture(picture);
     return modeller.toView(updated);
   }
 
-  public Collection<UserImageView> getFavoritePictures() {
-    return userPreferenceService.getCurrentUserPreferences().getFavoritePictures().stream()
-        .sorted(Comparator.comparing(Favorite::getTimestamp).reversed())
-        .map(Favorite::getEntityId)
-        .map(pictureService::getPicture)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .map(this::getUserImageView)
-        .toList();
+  public void recyclePicture(@NotNull UUID picId) throws IOException {
+    Optional<Picture> picOpt = pictureService.getPicture(picId);
+    if (picOpt.isPresent()) {
+      Picture picture = picOpt.get();
+      this.unfavoriteForAllUsers(picture);
+      randomPictureService.deleteContaining(picId);
+      pictureService.recyclePicture(picture);
+    }
   }
 
-  public Optional<UrlResource> getPictureData(UUID picId) {
-    return pictureService.getPictureData(picId);
+  public void deletePicture(UUID picId) {
+    Optional<Picture> pictureOpt = pictureService.getPicture(picId);
+    if (pictureOpt.isPresent()) {
+      Picture picture = pictureOpt.get();
+      this.unfavoriteForAllUsers(picture);
+      randomPictureService.deleteContaining(picId);
+      pictureService.deletePicture(picId);
+    } else throw new IllegalArgumentException("Could not find picture to delete: " + picId);
   }
 }

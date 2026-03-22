@@ -23,7 +23,7 @@ public class RandomEntityTimer {
         final Instant end = Instant.now();
         final long duration = end.toEpochMilli() - start.toEpochMilli();
 
-        logger.info("Random Comic Book took: {}ms", duration);
+        logger.trace("Random Comic Book took: {}ms", duration);
         return result;
     }
 
@@ -34,7 +34,7 @@ public class RandomEntityTimer {
         final Instant end = Instant.now();
         final long duration = end.toEpochMilli() - start.toEpochMilli();
 
-        logger.info("Random Picture took: {}ms", duration);
+        logger.trace("Random Picture took: {}ms", duration);
         return result;
     }
 
@@ -45,7 +45,7 @@ public class RandomEntityTimer {
         final Instant end = Instant.now();
         final long duration = end.toEpochMilli() - start.toEpochMilli();
 
-        logger.info("Random Video took: {}ms", duration);
+        logger.trace("Random Video took: {}ms", duration);
         return result;
     }
 }
