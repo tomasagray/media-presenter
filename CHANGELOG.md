@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upcoming changes will appear here
 
+## [0.3.5] - 2026-03-21
+
+### Security
+
+- Fixed vulnerable dependency: MySQL Connector upgraded v9.0.0 -> 9.3.0
+
+### Fixed
+
+- Startup validation performance
+- TrashCollectorService: improved performance, fixed foreign key constraint violation
+- Fixed bug in RandomCollection generation: transaction conflict
+
+### Added
+
+- Recycling feature to mark files for deletion
+- Added broken video thumbnail reference cleanup
+
 ## [0.3.4] - 2026-02-10
 
 ### Fixed
