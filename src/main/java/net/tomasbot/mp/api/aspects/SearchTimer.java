@@ -14,7 +14,7 @@ public class SearchTimer {
 
     private static final Logger logger = LogManager.getLogger(SearchTimer.class);
 
-    @Around("execution(* net.tomasbot.mp.api.service.SearchService.search*(..))")
+    @Around("execution(* net.tomasbot.mp.api.service.search.SearchService.search*(..))")
     public Object logSearchAll(@NotNull ProceedingJoinPoint jp) throws  Throwable {
         final long start = System.currentTimeMillis();
         final Object result = jp.proceed();

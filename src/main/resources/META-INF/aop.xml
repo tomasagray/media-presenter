@@ -5,7 +5,7 @@
         <!-- only weave classes in our application-specific packages and sub-packages -->
         <include within="net.tomasbot.mp.api.service.ComicBookService"/>
         <include within="net.tomasbot.mp.api.service.PictureService"/>
-        <include within="net.tomasbot.mp.api.service.SearchService"/>
+        <include within="net.tomasbot.mp.api.service.search.SearchService"/>
         <include within="net.tomasbot.mp.api.service.VideoService"/>
     </weaver>
 

@@ -7,7 +7,7 @@ import net.tomasbot.mp.api.resource.ComicBookResource;
 import net.tomasbot.mp.api.resource.ComicBookResource.ComicBookModeller;
 import net.tomasbot.mp.api.resource.PictureResource;
 import net.tomasbot.mp.api.resource.VideoResource;
-import net.tomasbot.mp.api.service.SearchService;
+import net.tomasbot.mp.api.service.search.SearchService;
 import net.tomasbot.mp.model.SearchAllResult;
 import net.tomasbot.mp.model.SearchResults;
 import net.tomasbot.mp.user.UserComicBookView;

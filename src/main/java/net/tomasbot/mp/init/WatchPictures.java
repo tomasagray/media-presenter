@@ -76,5 +76,6 @@ public class WatchPictures implements CommandLineRunner {
   private void finishPictureScan(@NotNull Instant jobStart) {
     Duration jobDuration = Duration.between(jobStart, Instant.now());
     logger.info("Initial scan of Pictures finished in {}ms", jobDuration.toMillis());
+    scanningService.finishScan();
   }
 }

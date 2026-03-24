@@ -1,12 +1,6 @@
 package net.tomasbot.mp.api.service;
 
-import static java.nio.file.StandardWatchEventKinds.*;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.WatchEvent;
-import java.util.*;
+import net.tomasbot.mp.api.service.search.SearchIndexService;
 import net.tomasbot.mp.db.ImageRepository;
 import net.tomasbot.mp.model.ComicBook;
 import net.tomasbot.mp.model.ComicPage;
@@ -17,6 +11,17 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.WatchEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import static java.nio.file.StandardWatchEventKinds.*;
 
 @Service
 public class ComicScanningService implements FileScanningService {
@@ -29,25 +34,28 @@ public class ComicScanningService implements FileScanningService {
   private final RecursiveWatcherService watcherService;
   private final FileTransferWatcher transferWatcher;
   private final FileUtilitiesService fileUtilitiesService;
+  private final SearchIndexService searchIndexService;
   private final InvalidFilesService invalidFilesService;
 
   @Value("${comics.location}")
   private Path comicsLocation;
 
   public ComicScanningService(
-      ImageRepository imageRepository,
-      ComicBookService comicService,
-      ComicFileScanner comicFileScanner,
-      RecursiveWatcherService watcherService,
-      FileTransferWatcher transferWatcher,
-      FileUtilitiesService fileUtilitiesService,
-      InvalidFilesService invalidFilesService) {
+          ImageRepository imageRepository,
+          ComicBookService comicService,
+          ComicFileScanner comicFileScanner,
+          RecursiveWatcherService watcherService,
+          FileTransferWatcher transferWatcher,
+          FileUtilitiesService fileUtilitiesService,
+          SearchIndexService searchIndexService,
+          InvalidFilesService invalidFilesService) {
     this.imageRepository = imageRepository;
     this.comicService = comicService;
     this.comicFileScanner = comicFileScanner;
     this.watcherService = watcherService;
     this.transferWatcher = transferWatcher;
     this.fileUtilitiesService = fileUtilitiesService;
+    this.searchIndexService = searchIndexService;
     this.invalidFilesService = invalidFilesService;
   }
 
@@ -102,7 +110,7 @@ public class ComicScanningService implements FileScanningService {
       if (Files.isDirectory(file)) {
         logger.info("Detected new Comic Book: {}", file);
         watcherService.walkTreeAndSetWatches(
-            file, page -> this.scanFile(page, new ArrayList<>()), this::handleFileEvent, null);
+            file, page -> this.scanFile(page, new ArrayList<>()), this::handleFileEvent, this::finishScan);
       } else {
         logger.info("Found new Comic Book page: {}", file);
         transferWatcher.watchFileTransfer(file, this::createComicPage);
@@ -153,5 +161,10 @@ public class ComicScanningService implements FileScanningService {
     } else {
       logger.warn("Image deleted was not part of a Comic Book: {}", image);
     }
+  }
+
+  public void finishScan() {
+    logger.info("Finished scanning Comic Book files; reindexing search data...");
+    searchIndexService.index(ComicPage.class);
   }
 }

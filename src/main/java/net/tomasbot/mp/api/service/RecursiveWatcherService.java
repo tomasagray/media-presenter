@@ -1,6 +1,14 @@
 package net.tomasbot.mp.api.service;
 
-import static java.nio.file.StandardWatchEventKinds.*;
+import lombok.Getter;
+import net.tomasbot.mp.Procedure;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,14 +17,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import lombok.Getter;
-import net.tomasbot.mp.Procedure;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+
+import static java.nio.file.StandardWatchEventKinds.*;
 
 @Service
 public class RecursiveWatcherService {
@@ -104,9 +106,7 @@ public class RecursiveWatcherService {
     } catch (IOException e) {
       logger.error("Error walking directory: {}; {}", path, e.getMessage(), e);
     } finally {
-      if (onFinish != null) {
-        onFinish.run();
-      }
+      if (onFinish != null) onFinish.run();
     }
   }
 
@@ -122,7 +122,7 @@ public class RecursiveWatcherService {
           new SimpleFileVisitor<>() {
             @Override
             public @NotNull FileVisitResult preVisitDirectory(
-                Path path, @NotNull BasicFileAttributes attr) {
+                    @NonNull Path path, @NotNull BasicFileAttributes attr) {
               unregisterWatch(path);
               return FileVisitResult.CONTINUE;
             }

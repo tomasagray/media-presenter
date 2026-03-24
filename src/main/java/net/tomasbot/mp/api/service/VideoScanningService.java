@@ -1,5 +1,6 @@
 package net.tomasbot.mp.api.service;
 
+import net.tomasbot.mp.api.service.search.SearchIndexService;
 import net.tomasbot.mp.api.service.user.UserVideoService;
 import net.tomasbot.mp.model.Tag;
 import net.tomasbot.mp.model.Video;
@@ -34,6 +35,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
   private final FileUtilitiesService fileUtilitiesService;
   private final FileTransferWatcher transferWatcher;
   private final InvalidFilesService invalidFilesService;
+  private final SearchIndexService searchIndexService;
   private final PathTagService pathTagService;
 
   private final Map<Path, Set<Tag>> transferTags = new ConcurrentHashMap<>();
@@ -53,6 +55,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
           FileUtilitiesService fileUtilitiesService,
           FileTransferWatcher transferWatcher,
           InvalidFilesService invalidFilesService,
+          SearchIndexService searchIndexService,
           PathTagService pathTagService) {
     this.videoService = videoService;
     this.userVideoService = userVideoService;
@@ -62,6 +65,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     this.fileUtilitiesService = fileUtilitiesService;
     this.transferWatcher = transferWatcher;
     this.invalidFilesService = invalidFilesService;
+    this.searchIndexService = searchIndexService;
     this.pathTagService = pathTagService;
   }
 
@@ -212,7 +216,7 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
     if (ENTRY_CREATE.equals(kind)) {
       if (Files.isDirectory(path)) {
         watcherService.walkTreeAndSetWatches(
-            path, dir -> this.scanFile(dir, new ArrayList<>()), this::handleFileEvent, null);
+            path, dir -> this.scanFile(dir, new ArrayList<>()), this::handleFileEvent, this::finishScan);
       } else {
         logger.info("Adding new video: {}", path);
         transferWatcher.watchFileTransfer(path, this::createVideo);
@@ -234,5 +238,10 @@ public class VideoScanningService implements ConvertFileScanningService<Video> {
       logger.error("Could not delete {}: {}", video, e.getMessage());
       logger.debug(e);
     }
+  }
+
+  public void finishScan() {
+    logger.info("Finished scanning video files; reindexing search data...");
+    searchIndexService.index(Video.class);
   }
 }

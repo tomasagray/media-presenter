@@ -1,5 +1,6 @@
 package net.tomasbot.mp.api.service;
 
+import net.tomasbot.mp.api.service.search.SearchIndexService;
 import net.tomasbot.mp.model.Picture;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
@@ -26,20 +27,23 @@ public class PictureScanningService implements FileScanningService {
   private final RecursiveWatcherService watcherService;
   private final FileTransferWatcher transferWatcher;
   private final PictureFileScanner pictureFileScanner;
+  private final SearchIndexService searchIndexService;
   private final InvalidFilesService invalidFilesService;
 
   public PictureScanningService(
-      PictureService pictureService,
-      PictureFileScanner pictureFileScanner,
-      FileUtilitiesService fileUtilitiesService,
-      RecursiveWatcherService watcherService,
-      FileTransferWatcher transferWatcher,
-      InvalidFilesService invalidFilesService) {
+          PictureService pictureService,
+          PictureFileScanner pictureFileScanner,
+          FileUtilitiesService fileUtilitiesService,
+          RecursiveWatcherService watcherService,
+          FileTransferWatcher transferWatcher,
+          SearchIndexService searchIndexService,
+          InvalidFilesService invalidFilesService) {
     this.pictureService = pictureService;
     this.pictureFileScanner = pictureFileScanner;
     this.fileUtilitiesService = fileUtilitiesService;
     this.watcherService = watcherService;
     this.transferWatcher = transferWatcher;
+    this.searchIndexService = searchIndexService;
     this.invalidFilesService = invalidFilesService;
   }
 
@@ -96,5 +100,10 @@ public class PictureScanningService implements FileScanningService {
           .getPictureByPath(file)
           .forEach(pic -> pictureService.deletePicture(pic.getId()));
     }
+  }
+
+  public void finishScan() {
+    logger.info("Finished scanning picture files; reindexing search data...");
+    searchIndexService.index(Picture.class);
   }
 }
