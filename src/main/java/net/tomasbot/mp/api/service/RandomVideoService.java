@@ -1,5 +1,6 @@
 package net.tomasbot.mp.api.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import net.tomasbot.mp.db.RandomVideoCollectionRepo;
 import net.tomasbot.mp.model.RandomEntityCollection;
 import net.tomasbot.mp.model.RandomVideoCollection;
@@ -63,11 +64,12 @@ public class RandomVideoService implements RandomEntityService<Video> {
   @Override
   @Transactional
   public void deleteContaining(@NotNull UUID entityId) {
-    repository.findAll()
-            .stream()
-            .filter(collection ->
-                    collection.getVideos().stream().anyMatch(video -> video.getId().equals(entityId)))
-            .map(RandomEntityCollection::getId)
-            .forEach(repository::deleteById);
+    videoService.getVideo(entityId).ifPresentOrElse(video -> {
+      List<RandomVideoCollection> collections = repository.findByVideo(video);
+      repository.deleteAll(collections);
+    }, () -> {
+      String msg = String.format("Video with id %s not found", entityId);
+      throw new EntityNotFoundException(msg);
+    });
   }
 }

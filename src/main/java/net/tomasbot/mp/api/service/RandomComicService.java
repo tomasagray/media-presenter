@@ -1,5 +1,6 @@
 package net.tomasbot.mp.api.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import net.tomasbot.mp.db.RandomComicCollectionRepo;
 import net.tomasbot.mp.model.ComicBook;
 import net.tomasbot.mp.model.RandomComicBookCollection;
@@ -62,11 +63,13 @@ public class RandomComicService implements RandomEntityService<ComicBook> {
 
   @Override
   public void deleteContaining(@NotNull UUID entityId) {
-    repository.findAll()
-            .stream()
-            .filter(collection ->
-                    collection.getComics().stream().anyMatch(comic -> comic.getId().equals(entityId)))
-            .map(RandomEntityCollection::getId)
-            .forEach(repository::deleteById);
+    comicBookService.getComicBook(entityId)
+            .ifPresentOrElse(comic -> {
+              List<RandomComicBookCollection> collections = repository.findAllByComic(comic);
+              repository.deleteAll(collections);
+            }, () -> {
+              String msg = String.format("Comic Book with id %s not found", entityId);
+              throw new EntityNotFoundException(msg);
+            });
   }
 }

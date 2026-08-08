@@ -48,7 +48,7 @@ public class UserVideoMetrics {
     Instant end = Instant.now();
 
     long duration = Duration.between(start, end).toMillis();
-    logger.info("Time to remove video {} from random collection: {}ms", jp.getArgs(), duration);
+    logger.info("Time to remove Video {} from random collections: {}ms", jp.getArgs(), duration);
     return result;
   }
 }
