@@ -1,4 +1,4 @@
-package net.tomasbot.mp.api.aspects;
+package net.tomasbot.mp.api.metrics;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
