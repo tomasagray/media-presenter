@@ -1,20 +1,25 @@
-import {toggleFavorite} from "../mp.endpoints.js";
-import {fetchImageAt, fetchImageAtPosition, fetchImageById, fetchPictureCount, loadImage} from "../data/mp.image_repo.js";
-import {fetchComic, fetchComicForPage, getComicPageLinks, isComic, loadComic} from "../data/mp.comic_repo.js";
-import {getState, setState} from "../data/mp.state.js";
-import {getLinksArray, getLinkUrl, getViewportDimensions, onEndSwipe, onStartSwipe} from "../mp.util";
+import {toggleFavorite} from "../mp.endpoints";
+import {fetchImageAt, fetchImageAtPosition, fetchImageById, fetchPictureCount, loadImage} from "../data/mp.image_repo";
+import {fetchComic, fetchComicForPage, getComicPageLinks, isComic, loadComic} from "../data/mp.comic_repo";
+import {getState, setState} from "../data/mp.state";
+import {getLinksArray, getLinkUrl, onEndSwipe, onStartSwipe} from "../mp.util";
+import {
+    adjustViewerOrientation,
+    resetIdleTimer,
+    setCloseButtonHandler,
+    setFavButtonHandler
+} from "./mp.viewer-controls";
 
 
 console.debug('mp.image.js was picked up')
 
 // UI components
 const viewerContainer = $('#Viewer-container')
-const closeButton = $('#Close-viewer-button')
-const favButton = $('#Toggle-favorite-button')
-const pageCounter = $('#Page-counter')
 const imageViewerContainer = $('#image-viewer-container')
 const imageViewer = $('#image-viewer')
 const viewerDisplay = $('#image-viewer-display')
+const favButton = $('#Toggle-favorite-button')
+const pageCounter = $('#Page-counter')
 const footerMenu = $('#Footer-menu-container')
 
 const setFavoriteButtonState = (isFav) => {
@@ -62,35 +67,6 @@ $(window).resize(() => {
     if (display === 'block') updateViewerState()
 })
 
-const adjustViewerOrientation = (url) => {
-    let img = new Image()
-    img.onload = () => {
-        let {width: vw, height: vh} = getViewportDimensions()
-
-        if (vw > vh && img.height > img.width) {    // landscape mode
-            viewerDisplay.removeClass('CW')
-            viewerDisplay.addClass('rotate CCW')
-
-            // TODO: move this to @media rule?
-            // fix for iPads
-            if (navigator.platform.includes('Mac')) {
-                $('#image-viewer-display').css('transform', 'translate(15vw, -15%) rotate(-90deg)')
-            }
-        } else if (vh > vw && img.width > img.height) {    // portrait mode
-            viewerDisplay.removeClass('CCW')
-            viewerDisplay.addClass('rotate CW')
-        } else {    // reset to default
-            viewerDisplay.removeClass('rotate CW CCW')
-
-            // undo fix for iPads
-            if (navigator.platform.includes('Mac')) {
-                $('#image-viewer-display').css('transform', '')
-            }
-        }
-    }
-    img.src = url
-}
-
 const updateViewerState = () => {
     let {
         url,
@@ -105,6 +81,7 @@ const updateViewerState = () => {
     viewerDisplay.css('background-image', `url(${url})`)
     setFavoriteButtonState(isFav, favUrl)
     updatePageCounter(pages)
+    resetIdleTimer()
 }
 
 const cycleImage = (nextComic, nextPicture) => {
@@ -204,8 +181,8 @@ const onShowImageViewer = (id, isComic) => {
     $('body').css('overflow', 'hidden')
 
     // menu handlers
-    closeButton.on('click', () => onHideImageViewer())
-    favButton.on('click', () => onFavoriteImage())
+    setCloseButtonHandler(onHideImageViewer)
+    setFavButtonHandler(onFavoriteImage)
 
     // display viewer
     viewerContainer.css('display', 'block')
@@ -219,10 +196,14 @@ const onShowImageViewer = (id, isComic) => {
 
 const onHideImageViewer = () => {
     $('body').css('overflow', 'revert')
+    footerMenu.css('display', 'flex')
+
     viewerContainer.css('display', 'none')
     imageViewerContainer.css('display', 'none')
-    footerMenu.css('display', 'flex')
     imageViewer.css('display', 'none')
+
+    // reset page counter visibility
+    pageCounter.css('visibility', 'hidden')
 }
 
 const normalizeResponse = (response) => {
@@ -265,6 +246,8 @@ export const attachImageViewerHandlers = () => {
             if (e.key === 'ArrowRight') showNextImage()
         }
     })
+
+    container.on('mousemove', () => resetIdleTimer())
 }
 
 export const attachImageCycleSwipe = (element) => {
