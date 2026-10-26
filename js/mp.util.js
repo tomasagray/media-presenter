@@ -31,6 +31,22 @@ export const fetchFromRepoAt = (repo, pos) => {
     return requested
 }
 
+export const scrollChildIntoView = ($container, $child) => {
+    const containerTop = $container.offset().top
+    const childTop = $child.offset().top
+    const childBottom = childTop + $child.outerHeight()
+
+    const visibleTop = containerTop
+    const visibleBottom = containerTop + $container.innerHeight()
+
+    let newScrollTop = $container.scrollTop()
+
+    if (childTop < visibleTop) newScrollTop -= visibleTop - childTop
+    else if (childBottom > visibleBottom) newScrollTop += childBottom - visibleBottom
+
+    $container.stop().animate({scrollTop: newScrollTop}, 300)
+}
+
 // input handlers
 // ===================================
 let touchStart = 0, touchEnd = 0

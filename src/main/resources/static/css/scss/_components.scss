@@ -278,10 +278,10 @@ $tagSizeLimit: 200px;
     padding: 0;
     width: 100%;
 
-    li {
+    .Tag-suggestion {
       padding: 1rem;
 
-      &:hover {
+      &:hover, &.selected {
         cursor: pointer;
         background-color: rgba(120, 120, 120, .2);
       }
