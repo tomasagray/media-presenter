@@ -41,7 +41,7 @@ public class UserDataService {
   private static <T> @NotNull Collection<T> lookupFavorite(
       @NotNull Function<UUID, Optional<? extends T>> idLookup,
       @NotNull Function<Path, Collection<T>> pathLookup,
-      @NotNull UserData.Favorite fav) {
+      @NotNull UserData.UserFavorite fav) {
     Optional<? extends T> optional = idLookup.apply(fav.getId());
     if (optional.isPresent()) {
       return List.of(optional.get());
@@ -62,8 +62,8 @@ public class UserDataService {
               Optional<Video> videoOptional = videoService.getVideo(videoId);
               if (videoOptional.isPresent()) {
                 Video video = videoOptional.get();
-                UserData.Favorite favorite =
-                    new UserData.Favorite(videoId, video.getTitle(), video.getLocation());
+                UserData.UserFavorite favorite =
+                    new UserData.UserFavorite(videoId, video.getTitle(), video.getLocation());
                 userData.getFavoriteVideos().add(favorite);
               } else
                 throw new IllegalArgumentException(
@@ -79,8 +79,8 @@ public class UserDataService {
               if (pictureOptional.isPresent()) {
                 Picture picture = pictureOptional.get();
                 Path path = Path.of(picture.getUri());
-                UserData.Favorite favorite =
-                    new UserData.Favorite(pictureId, picture.getTitle(), path);
+                UserData.UserFavorite favorite =
+                    new UserData.UserFavorite(pictureId, picture.getTitle(), path);
                 userData.getFavoritePictures().add(favorite);
               } else
                 throw new IllegalArgumentException(
@@ -95,8 +95,8 @@ public class UserDataService {
               Optional<ComicBook> comicOptional = comicService.getComicBook(comicId);
               if (comicOptional.isPresent()) {
                 ComicBook comic = comicOptional.get();
-                UserData.Favorite favorite =
-                    new UserData.Favorite(comicId, comic.getTitle(), comic.getLocation());
+                UserData.UserFavorite favorite =
+                    new UserData.UserFavorite(comicId, comic.getTitle(), comic.getLocation());
                 userData.getFavoriteComics().add(favorite);
               } else
                 throw new IllegalArgumentException(
@@ -125,7 +125,7 @@ public class UserDataService {
   }
 
   private <T> void setFavorites(
-      @NotNull Collection<UserData.Favorite> favorites,
+      @NotNull Collection<UserData.UserFavorite> favorites,
       @NotNull Function<UUID, Optional<? extends T>> idLookup,
       @NotNull Function<Path, Collection<T>> pathLookup) {
     favorites.stream()

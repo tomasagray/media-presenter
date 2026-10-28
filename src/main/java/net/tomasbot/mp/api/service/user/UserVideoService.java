@@ -14,13 +14,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static net.tomasbot.mp.user.UserVideoView.UserVideoModeller;
 
 @Service
 @Transactional
 public class UserVideoService {
+
+  private static final int MAX_PAGE_SIZE = 25;
 
   private final VideoService videoService;
   private final UserPreferenceService userPreferenceService;
@@ -38,6 +42,10 @@ public class UserVideoService {
     this.randomVideoService = randomVideoService;
   }
 
+  private static int getLimitedCount(int count) {
+    return Math.min(count, MAX_PAGE_SIZE);
+  }
+
   public Page<UserVideoView> getAllUserVideos(int page, int size) {
     return videoService.getAll(page, size).map(this::getUserVideoView);
   }
@@ -50,21 +58,20 @@ public class UserVideoService {
     return videoService.getVideo(videoId).map(this::getUserVideoView);
   }
 
-  public List<UserVideoView> getRandomUserVideos() {
+  public List<UserVideoView> getRandomUserVideos(int count) {
+    int limitedCount = getLimitedCount(count);
+
     List<Video> randomVideos = randomVideoService.getRandomCollection();
     if (randomVideos.isEmpty())
-      randomVideos = videoService.getRandom(18);
-    return randomVideos.stream().map(this::getUserVideoView).toList();
+      randomVideos = videoService.getRandom(limitedCount);
+
+    return randomVideos.stream().limit(count).map(this::getUserVideoView).toList();
   }
 
   public UserVideoView getUserVideoView(@NotNull Video video) {
     return userPreferenceService.isFavorite(video)
         ? videoModeller.toFavorite(video)
         : videoModeller.toView(video);
-  }
-
-  public Collection<UserVideoView> getUserVideoViews(@NotNull Collection<Video> videos) {
-    return videos.stream().map(this::getUserVideoView).toList();
   }
 
   public UserVideoView toggleVideoFavorite(@NotNull UUID videoId) {
@@ -83,15 +90,14 @@ public class UserVideoService {
     }
   }
 
-  public Collection<UserVideoView> getVideoFavorites() {
-    return userPreferenceService.getCurrentUserPreferences().getFavoriteVideos().stream()
-        .sorted(Comparator.comparing(Favorite::getTimestamp).reversed())
-        .map(Favorite::getEntityId)
-        .map(videoService::getVideo)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .map(this::getUserVideoView)
-        .toList();
+  public Page<UserVideoView> getVideoFavorites(int page, int size) {
+    int limitedCount = getLimitedCount(size);
+
+    return userPreferenceService.getUserVideoFavorites(page, limitedCount)
+            .map(Favorite::getEntityId)
+            .map(videoService::getVideo)
+            .map(Optional::get)
+            .map(this::getUserVideoView);
   }
 
   public void unfavoriteForAllUsers(Video video) {

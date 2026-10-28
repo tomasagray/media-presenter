@@ -22,7 +22,8 @@
             </div>
             <div th:if="comics != null" data-th-each="image : ${comics}">
                 <div data-th-replace="~{image/image_card::imageCard(extraText = null)}"></div>
-            </div></div>
+            </div>
+        </div>
     </div>
     <div data-th-insert="~{components/page_navigation::page-navigation}"></div>
 </div>

@@ -1,7 +1,7 @@
 package net.tomasbot.mp.api.service;
 
 import lombok.Getter;
-import net.tomasbot.mp.Procedure;
+import net.tomasbot.mp.model.Procedure;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
