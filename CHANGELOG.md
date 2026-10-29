@@ -5,17 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - (upcoming changes)
+## [Unreleased] – (upcoming changes)
 
 - Upcoming changes will appear here
+
+## [0.3.7] - 2026-10-29
+
+### Added
+
+- Limit items on the main favorites page, add pagination to favorites
+
+### Fixed
+
+- Improved tagging interface
+- Fixed picture viewer controls
+- Limited number of concurrent video transcode tasks
 
 ## [0.3.6] - 2026-08-21
 
 ### Fixed
 
 - Fixed the interminable delay when deleting entities
-- Improved search indexing performance
-- Improved video tracking: now you can swipe to move time, use arrow keys to skip; also removed skip buttons from UI
+- Improved the performance of search indexing
+- Improved video tracking: now you can swipe to move time and use arrow keys to skip; also removed skip buttons from UI
 
 ## [0.3.5] - 2026-03-21
 
