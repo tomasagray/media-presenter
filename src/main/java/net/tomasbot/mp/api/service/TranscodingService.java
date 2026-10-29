@@ -4,6 +4,7 @@ import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegFormat;
 import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegMetadata;
 import net.tomasbot.ffmpeg_wrapper.metadata.FFmpegStream;
 import net.tomasbot.ffmpeg_wrapper.request.SimpleTranscodeRequest;
+import net.tomasbot.ffmpeg_wrapper.task.LoggableThread;
 import net.tomasbot.mp.model.Video;
 import net.tomasbot.mp.plugin.ffmpeg.FFmpegPlugin;
 import org.apache.commons.io.FilenameUtils;
@@ -69,7 +70,7 @@ public class TranscodingService {
   public void transcodeVideo(
       @NotNull Video video,
       @NotNull Consumer<? super Path> onSucceed,
-      @NotNull Consumer<? super Path> onFail) {
+      @NotNull Consumer<? super Path> onFail) throws InterruptedException {
     // prepare arguments
     final FFmpegMetadata metadata = video.getMetadata();
     final String videoCodec = getTranscodeVideoCodec(metadata);
@@ -96,8 +97,11 @@ public class TranscodingService {
             .additionalArgs(Map.of("-metadata", "title=" + title))
             .build();
 
-    // perform transcode
-    ffmpegPlugin.transcode(request).start();
+    // perform video transcode
+    LoggableThread transcodeTask = ffmpegPlugin.transcode(request);
+    transcodeTask.start();
+    // wait until task finishes
+    transcodeTask.join();
   }
 
   @NotNull
