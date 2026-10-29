@@ -1,22 +1,32 @@
 package net.tomasbot.mp.config;
 
-import java.util.concurrent.Executor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.concurrent.Executor;
+
 @Configuration
 @EnableAsync(proxyTargetClass = true)
 public class AsyncConfig {
 
-  private static final int STARTUP_TASKS = 5;
+  // file watchers
   private static final int WATCH_THREADS = 5;
   private static final int WATCH_QUEUE_CAPACITY = 1_000;
+
+  // file scanning
   private static final int SCAN_TASKS = 50;
   private static final int MAX_SCAN_TASKS = 125;
+
+  // transcoding
   private static final int TRANSCODE_TASKS = 4;
-  private static final int TRANSCODE_QUEUE_SIZE = 1_000;
+  private static final int TRANSCODE_POOL_SIZE = 4;
+  private static final int TRANSCODE_QUEUE_SIZE = 100;
+  private static final String TRANSCODE_PREFIX = "transcoder-";
+
+  // startup
+  private static final int STARTUP_TASKS = 5;
 
   @Bean(name = "watcher")
   public Executor threadPoolTaskExecutor() {
@@ -39,9 +49,13 @@ public class AsyncConfig {
   @Bean(name = "transcoder")
   public Executor getVideoTranscodeExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+    // configure thread pool
+    executor.setThreadNamePrefix(TRANSCODE_PREFIX);
     executor.setCorePoolSize(TRANSCODE_TASKS);
-    executor.setMaxPoolSize(TRANSCODE_QUEUE_SIZE);
-    executor.setQueueCapacity(Integer.MAX_VALUE);
+    executor.setMaxPoolSize(TRANSCODE_POOL_SIZE);
+    executor.setQueueCapacity(TRANSCODE_QUEUE_SIZE);
+
     return executor;
   }
 
