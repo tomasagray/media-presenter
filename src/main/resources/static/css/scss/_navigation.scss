@@ -9,7 +9,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 6rem;
+    padding-top: 3rem;
+    padding-bottom: 6rem;
 
     .Page-navigation-button {
       padding: 1rem;
@@ -78,9 +79,12 @@
   @include modal-container;
 
   .Dialog-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     position: relative;
     width: 40rem;
-    height: 20rem;
+    height: 25rem;
     overflow: hidden;
 
     background-color: #0d0d14;
@@ -109,8 +113,22 @@
 
     #Modal-controls {
       display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
+      justify-content: space-between;
+    }
+  }
+
+  #Delete-confirm-body {
+    display: none;
+
+    .Delete-confirm-warning {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 3rem;
+
+      #Delete-confirm-title {
+        color: #ff9a00;
+      }
     }
   }
 }

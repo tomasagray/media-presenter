@@ -57,6 +57,7 @@ public class WatchComicBooks implements CommandLineRunner {
   private void finishComicBookScan(Instant jobStart) {
     Duration jobDuration = Duration.between(jobStart, Instant.now());
     logger.info("Initial scan of Comic Book files finished in {}ms", jobDuration.toMillis());
+    scanningService.finishScan();
   }
 
   @Override

@@ -13,13 +13,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static net.tomasbot.mp.user.UserImageView.UserImageModeller;
 
 @Service
 @Transactional
 public class UserPictureService {
+
+  private static final int MAX_PAGE_SIZE = 25;
 
   private final UserPreferenceService userPreferenceService;
   private final PictureService pictureService;
@@ -37,15 +41,23 @@ public class UserPictureService {
     this.modeller = modeller;
   }
 
+
+  private static int getLimitedCount(int count) {
+    return Math.min(count, MAX_PAGE_SIZE);
+  }
+
   public Page<UserImageView> getLatestUserPictures(int page, int size) {
     return pictureService.getLatestPictures(page, size).map(this::getUserImageView);
   }
 
-  public List<UserImageView> getRandomUserPictures() {
+  public List<UserImageView> getRandomUserPictures(int count) {
+    int limitedCount = getLimitedCount(count);
+
     List<Picture> randomCollection = randomPictureService.getRandomCollection();
     if (randomCollection.isEmpty())
-      randomCollection = pictureService.getRandomPictures(18);
-    return randomCollection.stream().map(this::getUserImageView).toList();
+      randomCollection = pictureService.getRandomPictures(limitedCount);
+
+    return randomCollection.stream().limit(limitedCount).map(this::getUserImageView).toList();
   }
 
   public Optional<UserImageView> getUserPicture(@NotNull UUID picId) {
@@ -56,10 +68,6 @@ public class UserPictureService {
     return userPreferenceService.isFavorite(picture)
         ? modeller.toFavorite(picture)
         : modeller.toView(picture);
-  }
-
-  public Collection<UserImageView> getUserImageViews(@NotNull Collection<Picture> pictures) {
-    return pictures.stream().map(this::getUserImageView).toList();
   }
 
   public UserImageView toggleIsPictureFavorite(@NotNull UUID picId) {
@@ -77,15 +85,14 @@ public class UserPictureService {
     }
   }
 
-  public Collection<UserImageView> getFavoritePictures() {
-    return userPreferenceService.getCurrentUserPreferences().getFavoritePictures().stream()
-            .sorted(Comparator.comparing(Favorite::getTimestamp).reversed())
+  public Page<UserImageView> getFavoritePictures(int page, int size) {
+    int limitedCount = getLimitedCount(size);
+
+    return userPreferenceService.getUserPictureFavorites(page, limitedCount)
             .map(Favorite::getEntityId)
             .map(pictureService::getPicture)
-            .filter(Optional::isPresent)
             .map(Optional::get)
-            .map(this::getUserImageView)
-            .toList();
+            .map(this::getUserImageView);
   }
 
   public void unfavoriteForAllUsers(Picture picture) {

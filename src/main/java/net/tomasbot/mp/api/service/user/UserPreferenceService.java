@@ -1,7 +1,5 @@
 package net.tomasbot.mp.api.service.user;
 
-import java.util.*;
-import java.util.stream.Collectors;
 import net.tomasbot.mp.db.FavoriteRepository;
 import net.tomasbot.mp.db.UserPreferencesRepository;
 import net.tomasbot.mp.model.*;
@@ -9,6 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserPreferenceService {
@@ -77,8 +83,19 @@ public class UserPreferenceService {
     return optional.get();
   }
 
-  public void deleteUserPreferences(@NotNull UUID prefId) {
-    repository.deleteById(prefId);
+  public Page<Favorite> getUserVideoFavorites(int page, int size) {
+    UserPreferences userPreferences = getCurrentUserPreferences();
+    return repository.getUserVideoFavorites(userPreferences.getUsername(), PageRequest.of(page, size));
+  }
+
+  public Page<Favorite> getUserPictureFavorites(int page, int size) {
+    UserPreferences userPreferences = getCurrentUserPreferences();
+    return repository.getUserPictureFavorites(userPreferences.getUsername(), PageRequest.of(page, size));
+  }
+
+  public Page<Favorite> getUserComicFavorites(int page, int size) {
+    UserPreferences userPreferences = getCurrentUserPreferences();
+    return repository.getUserComicFavorites(userPreferences.getUsername(), PageRequest.of(page, size));
   }
 
   public boolean isFavorite(Video video) {

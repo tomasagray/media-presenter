@@ -1,4 +1,4 @@
-package net.tomasbot.mp.api.aspects;
+package net.tomasbot.mp.api.metrics;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 
-@Component
 @Aspect
+@Component
 public class RandomEntityTimer {
 
     private final static Logger logger = LogManager.getLogger(RandomEntityTimer.class);

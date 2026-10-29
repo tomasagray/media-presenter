@@ -15,12 +15,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
 @Transactional
 public class UserComicService {
+
+  private static final int MAX_PAGE_SIZE = 25;
 
   private final UserPreferenceService userPreferenceService;
   private final ComicBookService comicService;
@@ -38,6 +42,10 @@ public class UserComicService {
     this.modeller = modeller;
   }
 
+  private static int getLimitedCount(int count) {
+    return Math.min(count, MAX_PAGE_SIZE);
+  }
+
   public Page<UserComicBookView> getAllUserComics(int page, int size) {
     return comicService.getAllComics(page, size).map(this::getUserComicBookView);
   }
@@ -53,11 +61,14 @@ public class UserComicService {
         : modeller.toView(comic);
   }
 
-  public List<UserComicBookView> getRandomUserComics() {
+  public List<UserComicBookView> getRandomUserComics(int count) {
+    int limitedCount = getLimitedCount(count);
+
     List<ComicBook> randomCollection = randomComicService.getRandomCollection();
     if (randomCollection.isEmpty())
-      randomCollection = comicService.getRandomComics(18);
-    return randomCollection.stream().map(this::getUserComicBookView).toList();
+      randomCollection = comicService.getRandomComics(limitedCount);
+
+    return randomCollection.stream().limit(limitedCount).map(this::getUserComicBookView).toList();
   }
 
   public Optional<UserComicBookView> getUserComicBook(UUID comicId) {
@@ -79,15 +90,14 @@ public class UserComicService {
     }
   }
 
-  public Collection<UserComicBookView> getFavoriteComics() {
-    return userPreferenceService.getCurrentUserPreferences().getFavoriteComics().stream()
-        .sorted(Comparator.comparing(Favorite::getTimestamp).reversed())
-        .map(Favorite::getEntityId)
-        .map(comicService::getComicBook)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .map(this::getUserComicBookView)
-        .toList();
+  public Page<UserComicBookView> getFavoriteComics(int page, int size) {
+    int limitedSize = getLimitedCount(size);
+
+    return userPreferenceService.getUserComicFavorites(page, limitedSize)
+            .map(Favorite::getEntityId)
+            .map(comicService::getComicBook)
+            .map(Optional::get)
+            .map(this::getUserComicBookView);
   }
 
   public void unfavoriteForAllUsers(ComicBook comic) {

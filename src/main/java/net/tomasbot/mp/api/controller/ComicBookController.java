@@ -14,7 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,7 +65,7 @@ public class ComicBookController {
   @GetMapping(value = "/random", produces = MediaType.APPLICATION_JSON_VALUE)
   public String getRandomComics(
           @RequestParam(name = "count", defaultValue = "15") int count, @NotNull Model model) {
-    List<UserComicBookView> comics = comicBookService.getRandomUserComics().stream().limit(count).toList();
+    List<UserComicBookView> comics = comicBookService.getRandomUserComics(count);
     CollectionModel<ComicBookResource> resources = modeller.toCollectionModel(comics);
 
     model.addAttribute("page_title", "Comic Books");
@@ -78,12 +77,17 @@ public class ComicBookController {
   }
 
   @GetMapping("/favorites")
-  public String getFavoriteComics(@NotNull Model model) {
-    Collection<UserComicBookView> favorites = comicBookService.getFavoriteComics();
+  public String getFavoriteComics(
+          @RequestParam(name = "page", defaultValue = "0") int page,
+          @RequestParam(name = "size", defaultValue = "15") int size,
+          @NotNull Model model) {
+    Page<UserComicBookView> favorites = comicBookService.getFavoriteComics(page, size);
     CollectionModel<ComicBookResource> resources = modeller.toCollectionModel(favorites);
 
     model.addAttribute("page_title", "Favorite Comic Books");
     model.addAttribute("comics", resources.getContent());
+
+    navigationLinkModeller.addPagingAttributes(model, favorites);
     navigationLinkModeller.addSortNavLinks(model, LINK_PREFIX);
 
     return "image/comic_list";

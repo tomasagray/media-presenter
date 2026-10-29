@@ -5,9 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - (upcoming changes)
+## [Unreleased] – (upcoming changes)
 
 - Upcoming changes will appear here
+
+## [0.3.7] - 2026-10-29
+
+### Added
+
+- Limit items on the main favorites page, add pagination to favorites
+
+### Fixed
+
+- Improved tagging interface
+- Fixed picture viewer controls
+- Limited number of concurrent video transcode tasks
+
+## [0.3.6] - 2026-08-21
+
+### Fixed
+
+- Fixed the interminable delay when deleting entities
+- Improved the performance of search indexing
+- Improved video tracking: now you can swipe to move time and use arrow keys to skip; also removed skip buttons from UI
 
 ## [0.3.5] - 2026-03-21
 
@@ -19,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Startup validation performance
 - TrashCollectorService: improved performance, fixed foreign key constraint violation
-- Fixed bug in RandomCollection generation: transaction conflict
+- Fixed a bug in RandomCollection generation: transaction conflict
 
 ### Added
 
@@ -37,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added top navigation links to type-specific search pages
-- TrashCollectorService to cleanup stray thumbnails, etc.
+- The TrashCollectorService to clean up stray thumbnails, etc.
 
 ## [0.3.3] - 2025-05-15
 
@@ -54,14 +74,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Invalid files not tracked
+- Invalid files were not tracked
 - Random entity (Video, Picture, etc.) retrieval performance
 
 ## [0.3.1] - 2025-05-03
 
 ### Changed
 
-- Switch to external FFmpeg wrapper library
+- Switch to an external FFmpeg wrapper library
 
 ### Fixed
 
@@ -69,7 +89,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comic duplicates
 - Video player rotated orientation
 - Search results: images and comics now display properly, video pagination works, all entity types are represented on
-  global search page
+  the global search page
 - Bug: could not upload user data
 
 ## [0.3.0] - 2025-04-27
@@ -83,7 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Race condition when adding new Tags during file scan
-- Fix image display alignment in viewer modal
+- Fix image display alignment in the viewer modal
 
 ## [0.2.9] - 2024-10-26
 
@@ -93,7 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Unhandled error when scanning comics & pictures
+- Unhandled error when scanning comics and pictures
 - Crash when performing initial search indexing
 
 ## [0.2.8] - 2024-10-03
@@ -107,7 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - All search results are now accessible
 - Error when deleting a favorited file
-- Picture favorites not correctly displayed
+- Picture favorites were not correctly displayed
 
 ## [0.2.7] - 2024-07-21
 
@@ -122,7 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Incorrect (always first) image displayed when viewing Pictures
-- Nav menu not showing selected (filled-in) icon
+- Nav menu not showing the selected (filled-in) icon
 
 ## [0.2.6] - 2024-07-06
 
@@ -156,7 +176,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `Performer` tag subtype
-- File not found handler
+- "File not found" error handler
 
 ### Fixed
 
@@ -171,7 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Broken card display for long file & tag names
+- Broken card display for long file and tag names
 
 ## [0.2.2] - 2024-02-09
 

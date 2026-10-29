@@ -1,5 +1,6 @@
 package net.tomasbot.mp.db;
 
+import net.tomasbot.mp.model.ComicBook;
 import net.tomasbot.mp.model.RandomComicBookCollection;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,7 @@ public interface RandomComicCollectionRepo extends JpaRepository<RandomComicBook
 
   @Query("SELECT rc FROM RandomComicBookCollection rc ORDER BY rand()")
   List<RandomComicBookCollection> findRandom(PageRequest request);
+
+  @Query("SELECT rc FROM RandomComicBookCollection rc WHERE :comic IN elements(rc.comics)")
+  List<RandomComicBookCollection> findAllByComic(ComicBook comic);
 }

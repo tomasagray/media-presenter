@@ -15,7 +15,7 @@ public class UserData {
 
   @Data
   @AllArgsConstructor
-  public static class Favorite {
+  public static class UserFavorite {
     private UUID id;
     private String title;
     private Path path;
@@ -23,9 +23,9 @@ public class UserData {
 
   private String username;
 
-  private final Set<Favorite> favoriteVideos = new HashSet<>();
-  private final Set<Favorite> favoritePictures = new HashSet<>();
-  private final Set<Favorite> favoriteComics = new HashSet<>();
+  private final Set<UserFavorite> favoriteVideos = new HashSet<>();
+  private final Set<UserFavorite> favoritePictures = new HashSet<>();
+  private final Set<UserFavorite> favoriteComics = new HashSet<>();
 
   public UserData(String username) {
     this.username = username;

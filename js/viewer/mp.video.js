@@ -2,15 +2,16 @@ import {setState} from "../data/mp.state.js";
 import {fetchVideoById, loadVideo} from "../data/mp.video_repo.js";
 import {formatSeconds, getLinkUrl, getViewportDimensions, onEndSwipe, onStartSwipe} from "../mp.util";
 import {toggleFavorite} from "../mp.endpoints";
+import {resetIdleTimer, setCloseButtonHandler, setFavButtonHandler} from "./mp.viewer-controls";
 
 
 console.debug('mp.video.js was picked up')
 
-const idleSeconds = 5
-const viewerControls = $('.Viewer-controls-container')
+const SKIP_TIME = 10
 
 const playIconSrc = '/img/icon/play/play_32.png'
 const pauseIconSrc = '/img/icon/pause/pause_32.png'
+
 // UI components
 const footerMenu = $('#Footer-menu-container')
 const playerContainer = $('#Video-player-container')
@@ -89,8 +90,8 @@ const showVideoPlayer = (id) => {
     let video = fetchVideoById(id).data
     $('body').css('overflow', 'hidden')
 
-    closeViewerButton.on('click', hideVideoPlayer)
-    attachFavoriteButtonBehavior(video)
+    setCloseButtonHandler(hideVideoPlayer)
+    setFavButtonHandler(() => onToggleFavorite(video))
 
     setState({
         id: video.id,
@@ -101,21 +102,26 @@ const showVideoPlayer = (id) => {
         updateSuccess: onUpdateVideo,
     })
 
+    // setup viewer UI state
     footerMenu.css('display', 'none')
     viewerContainer.css('display', 'block')
     playerContainer.css('display', 'block')
+    if (video.favorite) favoriteButton.addClass('favorite')
+    else favoriteButton.removeClass('favorite')
 
     player.on('loadedmetadata', (e) => {
         videoWidth = e.target.videoWidth
         videoHeight = e.target.videoHeight
         adjustVideoPlayerOrientation()
     })
+
+    // load video data
     let url = getVideoLink(video.links)
     player.attr('src', url)
     player[0].load()
 }
 
-const attachFavoriteButtonBehavior = (entity) => {
+const onToggleFavorite = (entity) => {
     let {favorite} = entity
     let link = getLinkUrl(entity, 'favorite')
 
@@ -152,8 +158,48 @@ export const pauseUnpauseVideo = (player) => {
         pauseVideo(player)
 }
 
+let touchStart = 0
+let swipeStartTime = 0
+
+const updateSliderDisplay = (currentTime) => {
+    // update text display
+    let timestamp = Math.round(currentTime)
+    currentTimeDisplay.text(formatSeconds(timestamp))
+
+    // update slider position
+    let progress = (currentTime / player[0].duration) * 100
+    slider.slider('value', progress)
+}
+
+const handleTouchStart = (e) => {
+    resetIdleTimer()
+    touchStart = e.touches[0].pageX
+    swipeStartTime = player[0].currentTime
+}
+
+const handleSwipe = (e) => {
+    // current player data
+    let playerWidth = player[0].offsetWidth
+    let duration = player[0].duration
+
+    // analyze swipe action
+    let swiped = e.touches[0].pageX - touchStart
+    let swipedPct = swiped / playerWidth
+    let targetTimeChange = duration * swipedPct;
+
+    // compute target time and apply
+    let targetTime = Math.max(0, Math.min(swipeStartTime + targetTimeChange, duration))
+    updateSliderDisplay(targetTime)
+
+    // video time will update when slide is released
+    player[0].currentTime = targetTime
+}
+
 export const setupVideoPlayer = () => {
-    // setup tracking bar
+    // show interface
+    resetIdleTimer()
+
+    // set up tracking bar
     slider.slider({
         range: 'min',
         min: 0,
@@ -175,18 +221,34 @@ export const setupVideoPlayer = () => {
         let duration = Math.round(player[0].duration)
         durationDisplay.text(formatSeconds(duration))
     })
-    player.on('timeupdate', () => {
-        const currentTime = player[0].currentTime
-        const progress = (currentTime / player[0].duration) * 100
+    player.on('timeupdate', () => updateSliderDisplay(player[0].currentTime))
 
-        let timestamp = Math.round(currentTime)
-        currentTimeDisplay.text(formatSeconds(timestamp))
-        slider.slider('value', progress)
-    })
+    // mouse events
     player.on('click', () => pauseUnpauseVideo(player))
+    player.on('mousemove', () => resetIdleTimer())
+
+    // touch events
+    player.on('touchstart', (e) => handleTouchStart(e))
+    player.on('touchmove', (e) => handleSwipe(e))
+    player.on('touchend', () => touchStart = 0)
+
+    // keyboard events
     $(document).on('keyup', (e) => {
-        if (e.keyCode === 32) pauseUnpauseVideo(player)
+        resetIdleTimer()
+        switch (e.code) {
+            case 'Space':
+                pauseUnpauseVideo(player)
+                break
+            case 'ArrowRight':
+                skipVideoTime(SKIP_TIME)
+                break
+            case 'ArrowLeft':
+                skipVideoTime(-SKIP_TIME)
+                break
+        }
     })
+
+    // UI controls
     playIndicatorButton.on('click', () => pauseUnpauseVideo(player))
 }
 
@@ -210,19 +272,4 @@ export const skipVideoTime = (skip) => {
 
     console.log('skipping video to ', targetTime)
     player[0].currentTime = targetTime
-}
-
-let idleTimer, displayStyle
-const hideViewerControls = () => {
-    displayStyle = viewerControls.css('display')
-    viewerControls.fadeOut('fast')
-}
-
-export const resetIdleTimer = () => {
-    clearTimeout(idleTimer)
-    idleTimer = setTimeout(hideViewerControls, idleSeconds * 1_000)
-    viewerControls.stop().css({
-        'opacity': 1,
-        'display': displayStyle ?? 'flex',
-    })
 }

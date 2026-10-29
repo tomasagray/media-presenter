@@ -6,32 +6,11 @@
 </head>
 <body>
 <div data-th-fragment="edit-dialog">
-    <script data-th-inline="javascript">
-        // TODO: handle ESC key
-        $(() => {
-            const input = $('#Tag-input')
-
-            // setup input handlers
-            input.on('input', (e) => {
-                e.preventDefault()
-                const value = e.target.value
-                mp.editModal.onSearchValueChange(value)
-                mp.state.setState({
-                    editedTag: value
-                })
-            })
-            $('#Tag-container').on('click', () => input.focus())
-            $('#Tag-editor').on('submit', (e) => {
-                e.preventDefault()
-                mp.editModal.addTag()
-            })
-            $('#Save-button').on('click', mp.editModal.onSaveEditDialog)
-            $('#Delete-button').on('click', mp.editModal.onDeleteEntity)
-            $('#Cancel-button').on('click', mp.editModal.clearEditDialog)
-        })
+    <script>
+        $(() => mp.editModal.setupEditModal())
     </script>
     <div class="Modal-container" id="Edit-dialog">
-        <div class="Dialog-body" style="display: flex; justify-content: space-between;">
+        <div class="Dialog-body" id="Edit-dialog-body">
             <div class="Dialog-section" style="margin-bottom: 1rem; margin-right: 2rem;">
                 <label for="Entity-title" style="display: none;">Title</label>
                 <input type="text" id="Entity-title" name="title" placeholder="Enter a title..." disabled>
@@ -50,7 +29,6 @@
             <div class="Dialog-section" id="Modal-controls">
                 <button class="Delete-button" id="Delete-button">
                     <span>Delete</span>
-                    <span data-th-replace="~{components/loading_spinner::loading-spinner}"></span>
                 </button>
                 <button class="Save-button" id="Save-button">
                     <span class="Save-button-label">Save</span>
@@ -60,6 +38,27 @@
             <button class="Cancel-button" id="Cancel-button">
                 <img alt="Cancel" src="/img/icon/close_button/close_button_64.png">
             </button>
+        </div>
+        <div class="Dialog-body" id="Delete-confirm-body">
+            <h1>Confirm delete</h1>
+            <div class="Delete-confirm-warning">
+                <img src="/img/icon/warning/warning_128.png" alt="Warning" width="128" height="128"/>
+                <div style="margin: 2rem">
+                    <p>
+                        You are about to <b>permanently delete</b> <span id="Delete-confirm-title"></span>.
+                    </p>
+                    <p>This cannot be undone!</p>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between">
+                <button class="Save-button" id="Cancel-delete-button">
+                    <span>Cancel</span>
+                </button>
+                <button class="Delete-button" id="Confirm-delete-button">
+                    <span id="Delete-confirm-label">Delete</span>
+                    <span id="Delete-confirm-spinner" data-th-insert="~{components/loading_spinner::loading-spinner}"></span>
+                </button>
+            </div>
         </div>
     </div>
 </div>

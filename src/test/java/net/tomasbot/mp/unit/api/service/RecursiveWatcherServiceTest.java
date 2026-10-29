@@ -1,7 +1,13 @@
 package net.tomasbot.mp.unit.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import net.tomasbot.mp.api.service.RecursiveWatcherService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -11,35 +17,21 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import net.tomasbot.mp.api.service.RecursiveWatcherService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@SpringBootTest
-@ExtendWith(SpringExtension.class)
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @DisplayName("RecursiveWatcherService testing & validation")
 class RecursiveWatcherServiceTest {
 
   private static final Logger logger = LogManager.getLogger(RecursiveWatcherServiceTest.class);
   private static final List<Path> cleanupFiles = new ArrayList<>();
+  private static final Path watchDir = Path.of(System.getProperty("java.io.tmpdir"), "mp-watcher-test");
+
   private final RecursiveWatcherService watcherService;
 
-  @Value("#{environment.DATA_ROOT}")
-  private Path watchDir;
-
-  @Autowired
-  RecursiveWatcherServiceTest(RecursiveWatcherService watcherService) {
-    this.watcherService = watcherService;
+  RecursiveWatcherServiceTest() throws IOException {
+    this.watcherService = new RecursiveWatcherService();
   }
 
   @AfterAll
@@ -104,7 +96,6 @@ class RecursiveWatcherServiceTest {
   @DisplayName("Ensure ignored paths are actually ignored")
   void ignore() throws IOException {
     // given
-    assert watchDir != null;
     File[] subDirs = watchDir.toFile().listFiles();
     assert subDirs != null && subDirs.length >= 1;
     Path ignoreDir = subDirs[0].toPath();

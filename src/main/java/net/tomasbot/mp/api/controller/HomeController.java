@@ -13,18 +13,19 @@ import net.tomasbot.mp.user.UserComicBookView;
 import net.tomasbot.mp.user.UserImageView;
 import net.tomasbot.mp.user.UserVideoView;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.Collection;
 import java.util.List;
 
 @Controller
 public class HomeController {
 
   private static final int DEFAULT_ITEM_COUNT = 6;
+  private static final int FAVORITE_COUNT = 12;
 
   private final UserVideoService videoService;
   private final VideoResourceModeller videoModeller;
@@ -56,11 +57,11 @@ public class HomeController {
 
   @GetMapping({"/", "/home"})
   public String getHomePage(@NotNull Model model) {
-    List<UserVideoView> videos = videoService.getRandomUserVideos().stream().limit(DEFAULT_ITEM_COUNT).toList();
+    List<UserVideoView> videos = videoService.getRandomUserVideos(DEFAULT_ITEM_COUNT);
     CollectionModel<VideoResource> videoResources = videoModeller.toCollectionModel(videos);
-    List<UserImageView> pictures = pictureService.getRandomUserPictures().stream().limit(DEFAULT_ITEM_COUNT).toList();
+    List<UserImageView> pictures = pictureService.getRandomUserPictures(DEFAULT_ITEM_COUNT);
     CollectionModel<PictureResource> pictureResources = pictureModeller.toCollectionModel(pictures);
-    List<UserComicBookView> comics = comicBookService.getRandomUserComics().stream().limit(DEFAULT_ITEM_COUNT).toList();
+    List<UserComicBookView> comics = comicBookService.getRandomUserComics(DEFAULT_ITEM_COUNT);
     CollectionModel<ComicBookResource> comicResources = comicModeller.toCollectionModel(comics);
 
     model.addAttribute("page_title", "Home");
@@ -74,11 +75,11 @@ public class HomeController {
 
   @GetMapping("/favorites")
   public String getFavorites(@NotNull Model model) {
-    Collection<UserVideoView> videos = videoService.getVideoFavorites();
+    Page<UserVideoView> videos = videoService.getVideoFavorites(0, FAVORITE_COUNT);
     CollectionModel<VideoResource> videoResources = videoModeller.toCollectionModel(videos);
-    Collection<UserImageView> pictures = pictureService.getFavoritePictures();
+    Page<UserImageView> pictures = pictureService.getFavoritePictures(0, FAVORITE_COUNT);
     CollectionModel<PictureResource> pictureResources = pictureModeller.toCollectionModel(pictures);
-    Collection<UserComicBookView> comics = comicBookService.getFavoriteComics();
+    Page<UserComicBookView> comics = comicBookService.getFavoriteComics(0, FAVORITE_COUNT);
     CollectionModel<ComicBookResource> comicResources = comicModeller.toCollectionModel(comics);
 
     model.addAttribute("page_title", "Favorites");

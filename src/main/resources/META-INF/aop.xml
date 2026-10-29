@@ -5,14 +5,16 @@
         <!-- only weave classes in our application-specific packages and sub-packages -->
         <include within="net.tomasbot.mp.api.service.ComicBookService"/>
         <include within="net.tomasbot.mp.api.service.PictureService"/>
-        <include within="net.tomasbot.mp.api.service.SearchService"/>
+        <include within="net.tomasbot.mp.api.service.search.SearchService"/>
         <include within="net.tomasbot.mp.api.service.VideoService"/>
+        <include within="net.tomasbot.mp.api.service.user.UserVideoService"/>
     </weaver>
 
     <aspects>
         <!-- weave in just this aspect -->
-        <aspect name="net.tomasbot.mp.api.aspects.RandomEntityTimer"/>
-        <aspect name="net.tomasbot.mp.api.aspects.SearchTimer"/>
+        <aspect name="net.tomasbot.mp.api.metrics.RandomEntityTimer"/>
+        <aspect name="net.tomasbot.mp.api.metrics.SearchTimer"/>
+        <aspect name="net.tomasbot.mp.api.metrics.UserVideoMetrics"/>
     </aspects>
 
 </aspectj>

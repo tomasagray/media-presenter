@@ -1,4 +1,4 @@
-package net.tomasbot.mp.api.service;
+package net.tomasbot.mp.api.service.search;
 
 import jakarta.persistence.EntityManager;
 import net.tomasbot.mp.api.service.user.UserComicService;

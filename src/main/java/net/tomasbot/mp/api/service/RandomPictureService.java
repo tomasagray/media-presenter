@@ -1,8 +1,8 @@
 package net.tomasbot.mp.api.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import net.tomasbot.mp.db.RandomPictureCollectionRepo;
 import net.tomasbot.mp.model.Picture;
-import net.tomasbot.mp.model.RandomEntityCollection;
 import net.tomasbot.mp.model.RandomPictureCollection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,11 +64,12 @@ public class RandomPictureService implements RandomEntityService<Picture> {
 
   @Override
   public void deleteContaining(@NotNull UUID entityId) {
-    repository.findAll()
-            .stream()
-            .filter(collection ->
-                    collection.getPictures().stream().anyMatch(pic -> pic.getId().equals(entityId)))
-            .map(RandomEntityCollection::getId)
-            .forEach(repository::deleteById);
+    pictureService.getPicture(entityId).ifPresentOrElse(picture -> {
+      List<RandomPictureCollection> collections = repository.findAllByPicture(picture);
+      repository.deleteAll(collections);
+    }, () -> {
+      String msg = String.format("Picture with id %s not found", entityId);
+      throw new EntityNotFoundException(msg);
+    });
   }
 }

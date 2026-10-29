@@ -15,7 +15,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,7 +65,7 @@ public class VideoController {
   @GetMapping(value = "/random")
   public String getRandomVideos(
       @RequestParam(name = "count", defaultValue = "15") int count, @NotNull Model model) {
-    List<UserVideoView> videos = videoService.getRandomUserVideos();
+    List<UserVideoView> videos = videoService.getRandomUserVideos(count);
     CollectionModel<VideoResource> resources = modeller.toCollectionModel(videos);
 
     model.addAttribute("page_title", "Videos");
@@ -78,12 +77,17 @@ public class VideoController {
   }
 
   @GetMapping(value = "/favorites")
-  public String getFavoriteVideos(@NotNull Model model) {
-    Collection<UserVideoView> favorites = videoService.getVideoFavorites();
+  public String getFavoriteVideos(
+          @RequestParam(name = "page", defaultValue = "0") int page,
+          @RequestParam(name = "size", defaultValue = "15") int size,
+          @NotNull Model model) {
+    Page<UserVideoView> favorites = videoService.getVideoFavorites(page, size);
     CollectionModel<VideoResource> resources = modeller.toCollectionModel(favorites);
 
     model.addAttribute("page_title", "Favorite Videos");
     model.addAttribute("videos", resources);
+
+    navigationLinkModeller.addPagingAttributes(model, favorites);
     navigationLinkModeller.addSortNavLinks(model, LINK_PREFIX);
 
     return "video/video_list";

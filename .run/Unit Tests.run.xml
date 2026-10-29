@@ -1,0 +1,21 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Unit Tests" type="JUnit" factoryName="JUnit">
+    <module name="media-presenter.test" />
+    <option name="PACKAGE_NAME" value="net.tomasbot.mp.unit" />
+    <option name="MAIN_CLASS_NAME" value="" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="package" />
+    <option name="VM_PARAMETERS" value="-ea -javaagent:./lib/spring-instrument-6.2.6.jar" />
+    <envs>
+      <env name="CONFIG_ROOT" value="/projectdata/mp/test/unit/config/" />
+      <env name="DATA_ROOT" value="/projectdata/mp/test/unit/data" />
+      <env name="DB_PASSWORD" value="media" />
+      <env name="DB_URL" value="jdbc:h2:mem:mp_dev" />
+      <env name="DB_USER" value="mp" />
+      <env name="REMEMBER_ME_KEY" value="remember_me_unit_test" />
+    </envs>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -1,28 +1,39 @@
-import {getState, setState} from "./data/mp.state";
 import md5 from "md5";
+import {getState, setState} from "./data/mp.state";
+import {scrollChildIntoView} from "./mp.util";
 
 
 console.debug('mp.edit-modal.js was picked up')
 
-// html elements
+// HTML elements
 // ===================================
 const titleEditor = $('#Entity-title')
+const tagEditor = $('#Tag-editor')
 const tagInput = $('#Tag-input')
 const tagList = $('#Tag-list')
 const editDialog = $('#Edit-dialog')
+const editBody = $('#Edit-dialog-body')
+const deleteConfirm = $('#Delete-confirm-body')
+const cancelButton = $('#Cancel-button')
 
 // save button
 const saveButton = $('#Save-button')
 const saveButtonLabel = $('#Save-button span')
 const saveSpinner = $('#Save-button .Loading-spinner')
+
 // delete button
 const deleteButton = $('#Delete-button')
-const deleteButtonLabel = $('#Delete-button span')
-const deleteSpinner = $('#Delete-button .Loading-spinner')
+const cancelDeleteButton = $('#Cancel-delete-button')
+
+// delete confirm button
+const confirmDeleteButton = $('#Confirm-delete-button')
+const deleteConfirmTitle = $('#Delete-confirm-title')
+const deleteButtonLabel = $('#Delete-confirm-label')
+const deleteSpinner = $('#Delete-confirm-spinner .Loading-spinner:first-of-type')
+
 // tag suggestions
 const suggestionContainer = $('#Tag-suggestion-container')
 const tagSuggestions = $('#Tag-suggestions')
-
 
 // edit modal
 // ===================================
@@ -38,6 +49,7 @@ const loadInterfaceState = () => {
     const {title: editedTitle, tags} = editedEntity
 
     titleEditor.val(editedTitle)
+    deleteConfirmTitle.text(editedTitle)
     tags?.forEach(tag => {
         let {tagId, name} = tag
         const element = $(document.createElement('button'))
@@ -49,26 +61,13 @@ const loadInterfaceState = () => {
     })
 }
 
-export const showEditDialog = () => {
-    // make edit copy
-    const state = getState()
-    setState({
-        editedEntity: {
-            id: state.id,
-            title: state.title,
-            tags: state.tags,
-        }
-    })
-
-    loadInterfaceState()
-    editDialog.css('display', 'flex')
-}
-
 const hideEditDialog = () => {
     editDialog.css('display', 'none')
 }
 
-export const addTag = () => {
+const addTag = (e) => {
+    e && e.preventDefault()
+
     const {editedEntity} = getState()
     const {tags: editedTags} = editedEntity
     let name = tagInput.val()
@@ -97,6 +96,8 @@ export const addTag = () => {
 
     // reset form
     tagInput.val('')
+    tagInput.focus()
+    resetSuggestions()
     resetTagEditor()
 }
 
@@ -119,7 +120,7 @@ const onSelectTagSuggestion = (value) => {
     addTag()
 }
 
-export const onSearchValueChange = (value) => {
+const onSearchValueChange = (value) => {
     if (value === '') {
         suggestionContainer.addClass('hidden')
         return
@@ -142,19 +143,6 @@ export const onSearchValueChange = (value) => {
             })
         }
     })
-}
-
-export const clearEditDialog = () => {
-    hideEditDialog()
-    setState({
-        editedEntity: {
-            title: null,
-            tags: [],
-        },
-        editedTag: '',
-    })
-    resetTagEditor()
-    unlockEditModal()
 }
 
 const lockEditModal = (purpose) => {
@@ -198,7 +186,7 @@ const updateEntity = (link, entity, done) => {
         })
 }
 
-export const onSaveEditDialog = () => {
+const onSaveEditDialog = () => {
     const {editedEntity, updateUrl, updateSuccess} = getState()
     lockEditModal('save')
     updateEntity(updateUrl, editedEntity, response => {
@@ -207,9 +195,17 @@ export const onSaveEditDialog = () => {
     })
 }
 
-export const onDeleteEntity = () => {
-    console.log('state', getState())
+const onDeleteEntity = () => {
+    deleteConfirm.css('display', 'block')
+    editBody.css('display', 'none')
+}
 
+const onCancelDelete = () => {
+    deleteConfirm.css('display', 'none')
+    editBody.css('display', 'flex')
+}
+
+const onConfirmDelete = () => {
     const {editedEntity, deleteUrl} = getState()
     console.log('deleting entity', editedEntity, deleteUrl)
     lockEditModal('delete')
@@ -229,4 +225,97 @@ export const onDeleteEntity = () => {
             console.error('failed deleting!', err.statusText)
             unlockEditModal()
         })
+}
+
+export const clearEditDialog = () => {
+    hideEditDialog()
+    setState({
+        editedEntity: {
+            title: null,
+            tags: [],
+        },
+        editedTag: '',
+    })
+    resetTagEditor()
+    unlockEditModal()
+}
+
+let selectedIdx = -1
+
+const setSelectedIndex = (selectedIdx) => {
+    // reset unselected options
+    tagSuggestions.children().removeClass('selected')
+
+    for (let i = 0; i < tagSuggestions.children().length; i++) {
+        if (i === selectedIdx) {
+            // update interface
+            let suggestion = tagSuggestions.children().eq(i)
+            suggestion.addClass('selected')
+            tagInput.val(suggestion.text())
+            scrollChildIntoView(suggestionContainer, suggestion)
+        }
+    }
+}
+
+const resetSuggestions = () => {
+    // reset suggestions
+    selectedIdx = -1
+    suggestionContainer.addClass('hidden')
+}
+
+const handleTagSearchInput = (e) => {
+    if (e.key === 'Escape') {
+        resetTagEditor()
+        resetSuggestions()
+    }
+
+    if (!suggestionContainer.hasClass('hidden')) {
+        if (e.key === 'ArrowDown' && selectedIdx < tagSuggestions.children().length - 1)
+            selectedIdx++
+        else if (e.key === 'ArrowUp') {
+            if (selectedIdx > 0) selectedIdx--
+            else if (selectedIdx === 0) {
+                resetSuggestions()
+                return
+            }
+        }
+
+        setSelectedIndex(selectedIdx)
+    }
+}
+
+export const setupEditModal = () => {
+    tagEditor.on('submit', (e) => addTag(e))
+    saveButton.on('click', onSaveEditDialog)
+    deleteButton.on('click', onDeleteEntity)
+    cancelButton.on('click', clearEditDialog)
+    cancelDeleteButton.on('click', onCancelDelete)
+    confirmDeleteButton.on('click', onConfirmDelete)
+
+    // handle tag editor
+    tagInput.on('input', (e) => {
+        e.preventDefault()
+        const value = e.target.value
+        onSearchValueChange(value)
+        setState({editedTag: value})
+    })
+    $(document).on('keydown', e => {
+        if (tagInput.is(':focus')) handleTagSearchInput(e)
+    })
+}
+
+export const showEditDialog = () => {
+    // make edit copy
+    const state = getState()
+    setState({
+        editedEntity: {
+            id: state.id,
+            title: state.title,
+            tags: state.tags,
+        }
+    })
+
+    loadInterfaceState()
+    editDialog.css('display', 'flex')
+    tagInput.focus()
 }

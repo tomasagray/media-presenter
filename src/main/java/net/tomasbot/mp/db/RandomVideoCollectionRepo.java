@@ -1,10 +1,10 @@
 package net.tomasbot.mp.db;
 
 import net.tomasbot.mp.model.RandomVideoCollection;
+import net.tomasbot.mp.model.Video;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -16,4 +16,7 @@ public interface RandomVideoCollectionRepo extends JpaRepository<RandomVideoColl
 
   @Query("SELECT rv FROM RandomVideoCollection rv ORDER BY rand()")
   List<RandomVideoCollection> findRandom(PageRequest request);
+
+  @Query("SELECT rv FROM RandomVideoCollection rv WHERE :video IN elements(rv.videos)")
+  List<RandomVideoCollection> findByVideo(@NotNull Video video);
 }

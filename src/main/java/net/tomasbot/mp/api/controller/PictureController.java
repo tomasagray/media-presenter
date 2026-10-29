@@ -14,7 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,7 +57,7 @@ public class PictureController {
   @GetMapping(value = "/random")
   public String getRandomPictures(
       @RequestParam(name = "size", defaultValue = "15") int size, @NotNull Model model) {
-    List<UserImageView> pictures = pictureService.getRandomUserPictures().stream().limit(size).toList();
+    List<UserImageView> pictures = pictureService.getRandomUserPictures(size);
     CollectionModel<PictureResource> resources = modeller.toCollectionModel(pictures);
 
     model.addAttribute("page_title", "Pictures");
@@ -70,12 +69,17 @@ public class PictureController {
   }
 
   @GetMapping("/favorites")
-  public String getFavoritePictures(@NotNull Model model) {
-    Collection<UserImageView> favorites = pictureService.getFavoritePictures();
+  public String getFavoritePictures(
+          @RequestParam(name = "page", defaultValue = "0") int page,
+          @RequestParam(name = "size", defaultValue = "15") int size,
+          @NotNull Model model) {
+    Page<UserImageView> favorites = pictureService.getFavoritePictures(page, size);
     CollectionModel<PictureResource> resources = modeller.toCollectionModel(favorites);
 
     model.addAttribute("page_title", "Favorite Pictures");
     model.addAttribute("images", resources.getContent());
+
+    navigationLinkModeller.addPagingAttributes(model, favorites);
     navigationLinkModeller.addSortNavLinks(model, LINK_PREFIX);
 
     return "image/image_list";

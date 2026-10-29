@@ -1,4 +1,4 @@
-package net.tomasbot.mp;
+package net.tomasbot.mp.model;
 
 @FunctionalInterface
 public interface Procedure {
